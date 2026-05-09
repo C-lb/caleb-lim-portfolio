@@ -106,17 +106,48 @@
 
 ## Traceability
 
-Populated by `gsd-roadmapper` during ROADMAP.md generation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| _populated by roadmapper_ | | |
+| SPLASH-01 | Phase 3 | Pending |
+| SPLASH-02 | Phase 3 | Pending |
+| SPLASH-03 | Phase 3 | Pending |
+| SPLASH-04 | Phase 3 | Pending |
+| SPLASH-05 | Phase 3 | Pending |
+| PIECE-01 | Phase 1 | Pending |
+| PIECE-02 | Phase 1 | Pending |
+| PIECE-03 | Phase 2 | Pending |
+| PIECE-04 | Phase 2 | Pending |
+| PIECE-05 | Phase 4 | Pending |
+| PIECE-06 | Phase 2 | Pending |
+| ABOUT-01 | Phase 2 | Pending |
+| CONTACT-01 | Phase 2 | Pending |
+| CONTACT-02 | Phase 2 | Pending |
+| CONTACT-03 | Phase 4 | Pending |
+| CONTACT-04 | Phase 4 | Pending |
+| CONTACT-05 | Phase 4 | Pending |
+| VISUAL-01 | Phase 3 | Pending |
+| VISUAL-02 | Phase 3 | Pending |
+| VISUAL-03 | Phase 3 | Pending |
+| VISUAL-04 | Phase 3 | Pending |
+| FOUND-01 | Phase 5 | Pending |
+| FOUND-02 | Phase 5 | Pending |
+| FOUND-03 | Phase 5 | Pending |
+| FOUND-04 | Phase 6 | Pending |
+| FOUND-05 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 26 total (5 SPLASH + 6 PIECE + 6 ABOUT/CONTACT + 4 VISUAL + 5 FOUND)
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 26 ⚠️
+- Mapped to phases: 26 ✓
+- Unmapped: 0
+
+**Per-phase distribution:**
+- Phase 1 (Walking Skeleton): 2 requirements — PIECE-01, PIECE-02
+- Phase 2 (Asset Pipeline + Real Content): 7 requirements — PIECE-03, PIECE-04, PIECE-06, ABOUT-01, CONTACT-01, CONTACT-02, FOUND-05
+- Phase 3 (Visual Design System): 9 requirements — SPLASH-01 through SPLASH-05, VISUAL-01 through VISUAL-04
+- Phase 4 (Navigation & Secondary Surfaces): 4 requirements — PIECE-05, CONTACT-03, CONTACT-04, CONTACT-05
+- Phase 5 (Mobile, Performance, Accessibility): 3 requirements — FOUND-01, FOUND-02, FOUND-03
+- Phase 6 (Deploy & Maintenance Handoff): 1 requirement — FOUND-04
 
 ---
 *Requirements defined: 2026-05-09*
-*Last updated: 2026-05-09 after initial definition*
+*Last updated: 2026-05-09 — traceability populated by gsd-roadmapper*
