@@ -44,7 +44,9 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 - **Background:** Caleb has materials across four disciplines because his work history spans analyst and brand management. The portfolio is being built ahead of future job applications, not in response to a specific opening — so it needs to hold up across a range of recruiter types rather than be tuned to one role.
 - **Content shape:** Materials are mostly static deliverables — slide decks for the financial models, PDFs and posters for graphic design, campaign artifacts for marketing. Personal projects content is undefined for v1 and will be filled in later. This means the site is a gallery of finished assets, not a showcase of running apps or live tools.
 - **Recruiter behavior:** Hiring managers and recruiters typically spend ~30 seconds skimming a portfolio before deciding whether to dig in. The splash → category → gallery flow has to make the first relevant piece reachable in two clicks.
-- **No existing domain or hosting account.** Build will include a domain recommendation and a free/cheap host pick.
+- **No existing domain or hosting account.** Target domain is `caleblim.com` (subject to availability check at deploy time via Cloudflare Registrar). Hosting on Cloudflare Pages.
+- **Content shareability:** All planned pieces are public / Caleb's to share — no NDA redaction needed.
+- **Per-category content asymmetry:** Strong on Graphic Design + Marketing, thinner on Financial Models, Personal Projects undefined. All four splash cards still appear, but the gallery layout for Finance / Personal must hold up with as few as 1–3 pieces (no "thin gallery looks like a placeholder" failure mode).
 
 ## Constraints
 
