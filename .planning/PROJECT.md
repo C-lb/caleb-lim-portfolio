@@ -24,6 +24,7 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 - [ ] Contact mechanism (email link or simple form)
 - [ ] Links out to LinkedIn and other relevant socials
 - [ ] Bold / expressive visual identity — oversized type, strong color, playful layout (the brand-creative-with-finance-chops energy)
+- [ ] **Design must NOT read as AI-generated.** No generic shadcn-card / purple-gradient / centered-hero template look. Distinctive, opinionated layouts in the Readymag and Framer reference vein — magazine-grade typography, asymmetric / non-grid composition, motion as a first-class element. Use the `frontend-design` skill's principles when implementing.
 - [ ] Mobile-responsive — recruiters skim on phones
 - [ ] Custom domain (TBD — to be recommended) deployed on a free or cheap host
 - [ ] Initial content uploaded: 5–15 pieces total spread across the four categories
@@ -47,7 +48,7 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 
 ## Constraints
 
-- **Tech stack**: Must support static-file-heavy content (PDF previews, image galleries) — points toward a static-site approach. Specific framework TBD in research.
+- **Tech stack**: Must support static-file-heavy content (PDF previews, image galleries) AND high-fidelity custom layouts with motion — pure-Markdown SSGs (Hugo / Eleventy with default templates) are likely too constrained. Specific framework TBD in research; likely candidates are Next.js / Astro with Framer Motion / GSAP, or a no-code platform (Framer, Readymag, Webflow). Research should compare both paths.
 - **Budget**: Hosting should be free or near-free. Domain is the only required ongoing cost.
 - **Content volume**: 5–15 pieces at launch — architecture should stay light (no CMS, no DB needed).
 - **Maintenance**: Caleb is not a developer — updates need to be either (a) low-friction enough for him to do himself, or (b) not needed often.
@@ -62,6 +63,7 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 | Bold / expressive aesthetic over editorial-minimal | Site itself acts as a brand-portfolio piece; signals creative credibility for the brand-management half of the pitch | — Pending |
 | Cross-functional positioning over single-track | Caleb has genuine range across analyst / brand / design / marketing — leaning into the generalist pitch rather than narrowing | — Pending |
 | Static site, no CMS | At 5–15 pieces with infrequent updates, a CMS is overhead with no payoff | — Pending |
+| Reject generic AI-template aesthetic; reference Readymag + Framer | Caleb is pitching brand-management roles — a generic centered-hero / shadcn-card site would actively *undermine* the pitch. Reference sites have magazine-grade typography, asymmetric layouts, and scroll-driven motion. UI implementation must use the `frontend-design` skill's principles (no purple gradients, no generic AI tropes). | — Pending |
 
 ## Evolution
 
