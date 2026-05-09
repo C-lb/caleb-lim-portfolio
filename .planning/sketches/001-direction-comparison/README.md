@@ -2,9 +2,13 @@
 sketch: 001
 name: direction-comparison
 question: "Editorial brutalist or magazine maximalist — which visual direction owns the brand pitch?"
-winner: null
+winner: "B"
 tags: [direction, splash, category, typography, color]
 ---
+
+> **Winner: Variant B — Magazine maximalist.** Locked as the design anchor for the project.
+> Splash refined per feedback: portrait placeholder + bio block added, hero compressed
+> so the four discipline cards are visible above the fold without scrolling.
 
 # Sketch 001: Direction Comparison
 

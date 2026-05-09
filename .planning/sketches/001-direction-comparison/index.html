@@ -277,18 +277,22 @@
       min-height: 100vh;
     }
 
-    /* ── B : SPLASH ── */
+    /* ── B : SPLASH ──
+       Compact viewport-fit layout: topbar / hero band (photo + name + bio)
+       / question bar / 4 cards / footer — cards visible above the fold. */
     .b-splash {
       min-height: 100vh;
-      padding: 32px;
+      padding: 22px 28px 22px;
       position: relative;
       overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto auto 1fr auto;
+      gap: 14px;
     }
     .b-topbar {
       display: flex; justify-content: space-between; align-items: center;
       font-family: var(--mono);
       font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
-      padding-bottom: 24px;
     }
     .b-topbar .pill {
       background: var(--ink); color: var(--paper);
@@ -303,139 +307,221 @@
     .b-topbar nav a { padding: 6px 0; }
     .b-topbar nav a:hover { color: var(--terracotta); }
 
+    /* HERO BAND — 3 columns: portrait, name+roles, description */
     .b-hero {
-      position: relative;
-      padding: 24px 0 32px;
+      display: grid;
+      grid-template-columns: 220px 1.4fr 1.2fr;
+      gap: 14px;
+      align-items: stretch;
+      min-height: 280px;
     }
-    .b-hero h1 {
+    .b-portrait {
+      position: relative;
+      background: var(--ink);
+      border-radius: 10px;
+      overflow: hidden;
+      transform: rotate(-1.2deg);
+      /* placeholder texture: grain + duotone-style band */
+      background-image:
+        linear-gradient(180deg, transparent 0%, transparent 65%, rgba(212,255,58,0.18) 65%, rgba(212,255,58,0.18) 100%),
+        radial-gradient(circle at 50% 38%, rgba(232,93,42,0.65) 0%, rgba(232,93,42,0) 60%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 5px);
+    }
+    .b-portrait::before {
+      content: ""; position: absolute; left: 22%; right: 22%; top: 18%; bottom: 32%;
+      border: 2px dashed rgba(244,235,217,0.45);
+      border-radius: 50% 50% 48% 52% / 60% 58% 42% 40%;
+    }
+    .b-portrait::after {
+      content: "PHOTO\AReplace with portrait";
+      white-space: pre;
+      position: absolute; left: 0; right: 0; bottom: 14px; text-align: center;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; line-height: 1.4;
+      color: var(--paper); opacity: 0.75; text-transform: uppercase;
+    }
+    .b-portrait .corner {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--acid); color: var(--ink);
+      font-family: var(--mono); font-size: 9px; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      padding: 4px 7px; border-radius: 3px;
+    }
+
+    .b-name {
+      position: relative;
+      display: flex; flex-direction: column; justify-content: space-between;
+      gap: 10px;
+    }
+    .b-name h1 {
       font-family: var(--sans);
-      font-size: clamp(96px, 19vw, 320px);
+      font-size: clamp(56px, 9vw, 128px);
       font-weight: 800;
       font-variation-settings: "wdth" 100, "opsz" 96;
-      line-height: 0.78;
-      letter-spacing: -0.05em;
+      line-height: 0.82;
+      letter-spacing: -0.045em;
       text-transform: uppercase;
     }
-    .b-hero h1 .lim { color: var(--terracotta); display: inline-block; }
-    .b-hero h1 .stop {
-      color: var(--cobalt);
-      display: inline-block;
-      transform: translateY(-0.05em);
-    }
-    .b-hero .stamp {
-      position: absolute;
-      top: 28px; right: 16px;
-      font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    .b-name h1 .lim { color: var(--terracotta); display: inline-block; }
+    .b-name h1 .stop { color: var(--cobalt); display: inline-block; transform: translateY(-0.04em); }
+    .b-name .stamp {
+      position: absolute; top: -4px; right: 0;
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
       text-transform: uppercase;
       background: var(--ink); color: var(--paper);
-      padding: 8px 12px; border-radius: 4px;
+      padding: 6px 10px; border-radius: 4px;
       transform: rotate(4deg);
     }
-    .b-hero .roles {
-      display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 18px;
-      font-family: var(--sans); font-weight: 500; font-size: 16px;
+    .b-name .roles {
+      display: flex; flex-wrap: wrap; gap: 4px 10px;
+      font-family: var(--sans); font-weight: 500; font-size: 14px;
     }
-    .b-hero .roles span:nth-child(odd) { color: var(--cobalt); }
-    .b-hero .roles span:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); }
+    .b-name .roles span:nth-child(odd)  { color: var(--cobalt); }
+    .b-name .roles span:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); }
+
+    /* BIO BLOCK — flat color block, sticker-style */
+    .b-bio {
+      position: relative;
+      background: var(--acid);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 18px 20px 56px;
+      transform: rotate(0.6deg);
+      display: flex; flex-direction: column; gap: 8px;
+      overflow: hidden;
+    }
+    .b-bio .b-bio-tag {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+      text-transform: uppercase; font-weight: 600;
+      color: var(--ink);
+    }
+    .b-bio h3 {
+      font-family: var(--sans); font-weight: 700;
+      font-size: 22px; line-height: 1.05; letter-spacing: -0.02em;
+      text-transform: uppercase;
+    }
+    .b-bio p {
+      font-family: var(--serif);
+      font-size: 14.5px; line-height: 1.4;
+      font-weight: 400;
+    }
+    .b-bio p em { font-style: italic; }
+    .b-bio .b-bio-strike {
+      position: absolute; right: -10px; bottom: -12px;
+      font-family: var(--sans); font-weight: 800; font-size: 96px;
+      color: var(--ink); opacity: 0.10; line-height: 0.8;
+      letter-spacing: -0.05em; transform: rotate(-4deg);
+    }
+    .b-bio .b-bio-arrow {
+      position: absolute; right: 14px; bottom: 12px;
+      font-family: var(--sans); font-weight: 700;
+      font-size: 13px; color: var(--ink);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
 
     .b-question {
       display: grid; grid-template-columns: auto 1fr auto;
-      align-items: center; gap: 24px;
-      padding: 22px 0 30px;
+      align-items: center; gap: 18px;
+      padding: 12px 0;
       border-top: 2px solid var(--ink);
       border-bottom: 2px solid var(--ink);
-      margin-top: 36px;
     }
     .b-question .marker {
-      font-family: var(--sans); font-weight: 800; font-size: 14px;
+      font-family: var(--sans); font-weight: 800; font-size: 13px;
       background: var(--acid); padding: 4px 10px;
       transform: rotate(-2deg);
     }
     .b-question .q {
       font-family: var(--sans);
-      font-size: clamp(28px, 4vw, 56px);
-      font-weight: 600; line-height: 0.95;
-      letter-spacing: -0.025em;
+      font-size: clamp(22px, 3vw, 38px);
+      font-weight: 600; line-height: 1;
+      letter-spacing: -0.02em;
     }
     .b-question .q em {
       font-family: var(--serif); font-style: italic;
       font-weight: 300; color: var(--terracotta);
     }
     .b-question .arrow {
-      font-family: var(--sans); font-size: 48px; line-height: 1;
+      font-family: var(--sans); font-size: 32px; line-height: 1;
       color: var(--cobalt);
     }
 
     .b-cards {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr 1fr 1fr;
-      grid-auto-rows: minmax(280px, auto);
-      gap: 14px;
-      margin-top: 32px;
+      grid-template-columns: 1.2fr 0.85fr 1fr 1fr;
+      grid-auto-rows: 1fr;
+      gap: 12px;
+      align-items: stretch;
     }
     .b-card {
       position: relative;
       border-radius: 10px;
-      padding: 24px 22px;
+      padding: 18px 18px 16px;
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease;
-      display: flex; flex-direction: column; justify-content: space-between;
-      min-height: 280px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 6px;
+      min-height: 200px;
     }
-    .b-card:hover { transform: translateY(-4px) rotate(-0.4deg); }
+    .b-card:hover { transform: translateY(-3px) rotate(-0.3deg); }
     .b-card-no {
-      font-family: var(--mono); font-size: 11px;
+      font-family: var(--mono); font-size: 10px;
       letter-spacing: 0.12em; opacity: 0.8;
+      align-self: start;
     }
     .b-card-name {
       font-family: var(--sans); font-weight: 700;
-      font-size: clamp(28px, 3.6vw, 44px); line-height: 0.92;
+      font-size: clamp(22px, 2.8vw, 36px); line-height: 0.92;
       letter-spacing: -0.025em;
       text-transform: uppercase;
+      align-self: start;
+      position: relative; z-index: 2;
     }
     .b-card-tag {
       font-family: var(--serif); font-style: italic;
-      font-size: 14px; opacity: 0.85;
+      font-size: 13px; opacity: 0.85;
+      align-self: end;
+      position: relative; z-index: 2;
     }
     .b-card .deco {
       position: absolute; pointer-events: none;
     }
 
     .b-card.k1 { background: var(--terracotta); color: var(--paper); transform: rotate(-1deg); }
-    .b-card.k1 .deco { right: -30px; top: -30px; width: 140px; height: 140px;
-      border: 14px solid var(--paper); border-radius: 50%; }
+    .b-card.k1 .deco { position: absolute; right: -22px; top: -22px; width: 100px; height: 100px;
+      border: 10px solid var(--paper); border-radius: 50%; pointer-events: none; }
     .b-card.k2 { background: var(--cobalt); color: var(--paper); transform: rotate(1deg); }
     .b-card.k2 .deco {
-      bottom: 18px; right: 18px;
-      font-family: var(--serif); font-style: italic; font-size: 90px; font-weight: 300;
-      color: var(--acid); line-height: 0.8;
+      position: absolute; bottom: 6px; right: 14px;
+      font-family: var(--serif); font-style: italic; font-size: 64px; font-weight: 300;
+      color: var(--acid); line-height: 0.8; pointer-events: none;
     }
     .b-card.k3 { background: var(--acid); color: var(--ink); transform: rotate(-0.5deg); }
     .b-card.k3 .deco {
-      position: absolute; left: 22px; bottom: 22px; right: 22px; height: 60px;
-      background-image: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 2px, transparent 2px, transparent 12px);
-      opacity: 0.7;
+      position: absolute; left: 18px; bottom: 14px; right: 18px; height: 36px;
+      background-image: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 2px, transparent 2px, transparent 10px);
+      opacity: 0.55; pointer-events: none;
     }
     .b-card.k4 { background: var(--plum); color: var(--paper); transform: rotate(0.7deg); }
     .b-card.k4 .deco {
-      bottom: 24px; right: 24px; width: 60px; height: 60px;
+      position: absolute; bottom: 14px; right: 14px; width: 44px; height: 44px;
       background: var(--acid);
       clip-path: polygon(50% 0%, 100% 100%, 0 100%);
+      pointer-events: none;
     }
 
     .b-foot {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: 24px; align-items: center;
-      margin-top: 28px;
-      padding-top: 16px;
+      padding-top: 12px;
       border-top: 1px solid var(--ink);
       font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
       text-transform: uppercase;
     }
     .b-foot .center {
-      font-family: var(--serif); font-style: italic; font-size: 15px;
+      font-family: var(--serif); font-style: italic; font-size: 14px;
       letter-spacing: 0; text-transform: none;
     }
 
@@ -531,6 +617,9 @@
       .b-piece p, .b-piece .ttl, .b-piece .role { position: relative; z-index: 1; }
       .a-prompt, .a-cat-head, .b-cat-head, .b-question { grid-template-columns: 1fr !important; gap: 16px !important; }
       .a-card { padding: 20px !important; }
+      .b-hero { grid-template-columns: 1fr !important; min-height: 0 !important; }
+      .b-portrait { aspect-ratio: 4 / 3; }
+      .b-cards { grid-template-columns: 1fr 1fr !important; }
     }
   </style>
 </head>
@@ -539,14 +628,14 @@
 <!-- ─── Variant nav ─── -->
 <nav class="sketch-nav" aria-label="variant switcher">
   <span class="label">Direction:</span>
-  <button class="active" data-variant="a">A · Editorial brutalist</button>
-  <button data-variant="b">B · Magazine maximalist</button>
+  <button data-variant="a">A · Editorial brutalist</button>
+  <button class="active" data-variant="b">★ B · Magazine maximalist</button>
 </nav>
 
 <!-- ════════════════════════════════════════════════
      VARIANT A — EDITORIAL BRUTALIST
      ════════════════════════════════════════════════ -->
-<section class="variant variant-a active" id="va">
+<section class="variant variant-a" id="va">
 
   <!-- A · SPLASH -->
   <div class="a-splash">
@@ -663,7 +752,7 @@
 <!-- ════════════════════════════════════════════════
      VARIANT B — MAGAZINE MAXIMALIST
      ════════════════════════════════════════════════ -->
-<section class="variant variant-b" id="vb">
+<section class="variant variant-b active" id="vb">
 
   <!-- B · SPLASH -->
   <div class="b-splash">
@@ -677,18 +766,33 @@
       </nav>
     </header>
 
+    <!-- HERO BAND: portrait, name+roles, bio -->
     <div class="b-hero">
-      <h1>CALEB<br><span class="lim">LIM</span><span class="stop">.</span></h1>
-      <span class="stamp">Singapore — Open ☀</span>
-      <div class="roles">
-        <span>Brand strategy</span>
-        <span>·</span>
-        <span>Financial analysis</span>
-        <span>·</span>
-        <span>Visual identity</span>
-        <span>·</span>
-        <span>Campaign design</span>
+      <figure class="b-portrait" aria-label="portrait of Caleb Lim — placeholder">
+        <span class="corner">№ 01 · CL</span>
+      </figure>
+
+      <div class="b-name">
+        <span class="stamp">Singapore — Open ☀</span>
+        <h1>CALEB<br><span class="lim">LIM</span><span class="stop">.</span></h1>
+        <div class="roles">
+          <span>Brand strategy</span>
+          <span>·</span>
+          <span>Financial analysis</span>
+          <span>·</span>
+          <span>Visual identity</span>
+          <span>·</span>
+          <span>Campaign design</span>
+        </div>
       </div>
+
+      <aside class="b-bio">
+        <span class="b-bio-tag">About — 30 sec read</span>
+        <h3>Cross-functional, on purpose.</h3>
+        <p>I work at the seam between brand and analysis. Modelling that respects narrative, design that respects numbers. The deliverables on this site sit on both sides of that line — pick the room that matters to <em>your</em> hire.</p>
+        <span class="b-bio-arrow">[ replace with bio ↘ ]</span>
+        <span class="b-bio-strike">Hello.</span>
+      </aside>
     </div>
 
     <div class="b-question">
@@ -806,8 +910,8 @@
       document.body.style.background = target === 'a' ? '#f3efe7' : '#f4ebd9';
     });
   });
-  // Init body bg
-  document.body.style.background = '#f3efe7';
+  // Init body bg — defaults to winning variant B's paper
+  document.body.style.background = '#f4ebd9';
 </script>
 
 </body>
