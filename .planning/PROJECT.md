@@ -48,7 +48,7 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 
 ## Constraints
 
-- **Tech stack**: Must support static-file-heavy content (PDF previews, image galleries) AND high-fidelity custom layouts with motion — pure-Markdown SSGs (Hugo / Eleventy with default templates) are likely too constrained. Specific framework TBD in research; likely candidates are Next.js / Astro with Framer Motion / GSAP, or a no-code platform (Framer, Readymag, Webflow). Research should compare both paths.
+- **Tech stack**: **Astro** with content collections (markdown + Zod schema), build-time PDF rasterization via `pdfjs-dist` + `@napi-rs/canvas`, motion via `motion` (formerly framer-motion) v12 and selective GSAP. Deployed to **Cloudflare Pages** (free tier, unlimited bandwidth). Domain via **Cloudflare Registrar** (~$10/yr). Decided after research surfaced a Framer-vs-Astro fork; owner is comfortable enough with markdown + git that no-code platform's main value disappeared, and Astro avoids the platform-lock-in pitfall.
 - **Budget**: Hosting should be free or near-free. Domain is the only required ongoing cost.
 - **Content volume**: 5–15 pieces at launch — architecture should stay light (no CMS, no DB needed).
 - **Maintenance**: Caleb is not a developer — updates need to be either (a) low-friction enough for him to do himself, or (b) not needed often.
@@ -64,6 +64,8 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 | Cross-functional positioning over single-track | Caleb has genuine range across analyst / brand / design / marketing — leaning into the generalist pitch rather than narrowing | — Pending |
 | Static site, no CMS | At 5–15 pieces with infrequent updates, a CMS is overhead with no payoff | — Pending |
 | Reject generic AI-template aesthetic; reference Readymag + Framer | Caleb is pitching brand-management roles — a generic centered-hero / shadcn-card site would actively *undermine* the pitch. Reference sites have magazine-grade typography, asymmetric layouts, and scroll-driven motion. UI implementation must use the `frontend-design` skill's principles (no purple gradients, no generic AI tropes). | — Pending |
+| Astro (code) over Framer (no-code) | Caleb is comfortable with markdown + git, removing Framer's main draw (visual editor for non-coders). Astro avoids platform lock-in (no HTML export from Framer), gets $0 hosting on Cloudflare Pages, and has a cleaner build-time PDF rasterization pipeline. Both platforms can hit the same visual ceiling. | — Pending |
+| Pause to sketch visual directions before requirements lock | Caleb wants to see 2–3 throwaway HTML mockups of splash + category page before committing to a roadmap. Visual direction is load-bearing for the brand pitch and shouldn't be deferred entirely to the UI phase. | — Pending |
 
 ## Evolution
 
