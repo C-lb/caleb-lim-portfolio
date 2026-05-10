@@ -58,7 +58,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 02-01-PLAN.md — Productionize PDF rasterization pipeline (prebuild hook + pdf-preprocess.mjs + schema migration + Gate 7)
 - [x] 02-02-PLAN.md — About page + EXIF-stripped resume + Gates 8-9 (bio voice + resume size)
 - [x] 02-03-PLAN.md — Detail template paginated rendering + Open full PDF link + Gates 10-11
-- [ ] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12)
+- [x] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12)
 
 ### Phase 3: Visual Design System
 **Goal**: The locked Magazine-maximalist direction from sketch 001 is fully applied. The site reads as confident hand-crafted brand work, not as a v0/shadcn template. Every AI-tell from VISUAL-04 is verifiably absent.
