@@ -1,20 +1,22 @@
 ---
 phase: 01-walking-skeleton
 verified: 2026-05-10T04:45:00Z
-status: human_needed
+status: passed
 score: 9/9 must-haves verified
 overrides_applied: 0
+human_verified: 2026-05-10 (Caleb approved visual preview check)
 human_verification:
   - test: "Visual preview render check (Phase 1 SC5 — Task 4 Part A, deferred by executor)"
     expected: "Running `npm run build && npx astro preview`, visiting http://localhost:4321/, and clicking through all four discipline cards and one detail page per category produces a correctly rendered HTML page with a visible hero image and the three CRO blurb sections. The Personal, Finance, Marketing, and Design pages all visibly read as PLACEHOLDER stand-ins (the word 'PLACEHOLDER' is prominent in the rendered title/blurbs)."
     why_human: "The executor split Task 4 — ran the schema fault-injections automatically but deferred the manual preview render check, noting 'requires Caleb at the keyboard'. Phase 1 SC5 ('deployable preview URL verified') and the aesthetic-judgment gate ('does the placeholder visibly read as a stand-in?') cannot be asserted by the smoke test alone."
+    result: "passed (Caleb approved 2026-05-10)"
 ---
 
 # Phase 1: Walking Skeleton Verification Report
 
 **Phase Goal:** A deployable Astro site exists where a recruiter can land on the splash, click any of the four discipline cards, see at least one piece in that gallery, and click into a piece-detail page — all routes work, no broken states. Visuals are intentionally placeholder.
 **Verified:** 2026-05-10T04:45:00Z
-**Status:** human_needed
+**Status:** passed (human verification approved 2026-05-10)
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
