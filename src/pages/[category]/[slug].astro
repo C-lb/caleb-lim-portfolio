@@ -2,6 +2,8 @@
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export async function getStaticPaths() {
   const pieces = await getCollection('pieces', ({ data }) => data.draft !== true);
@@ -13,7 +15,23 @@ export async function getStaticPaths() {
 
 interface Props { piece: CollectionEntry<'pieces'>; }
 const { piece } = Astro.props;
-const { title, hero, context, role, outcome, category } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf } = piece.data;
+const slug = piece.id;
+
+// Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
+let thumbCache: { pages: Array<{ n: number; w: number; h: number; bytes?: number; file: string }> } | null = null;
+try {
+  const cachePath = path.join(process.cwd(), 'public', 'generated', 'pdf-thumbs', slug, '.cache.json');
+  thumbCache = JSON.parse(await fs.readFile(cachePath, 'utf8'));
+} catch { /* no thumbs for this piece — skip pagination */ }
+
+// Preserve pdfPaginate array order (D-09: NO re-sort — Caleb may lead with the punchline).
+// Use p.file from the cache (D-05: page 1 → cover.webp, others → page-{N}.webp); never compute the URL from p.n.
+const paginatedPages = pdfPaginate && thumbCache
+  ? (pdfPaginate
+      .map((n) => thumbCache!.pages.find((p) => p.n === n))
+      .filter(Boolean) as Array<{ n: number; w: number; h: number; file: string }>)
+  : [];
 ---
 <!doctype html>
 <html lang="en">
@@ -26,7 +44,7 @@ const { title, hero, context, role, outcome, category } = piece.data;
     <p><a href={`/${category}`}>← back to {category}</a></p>
     <article>
       <h1>{title}</h1>
-      {/* PIECE-01: large hero <Image>, NEVER an iframe-PDF */}
+      {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
       <Image src={hero} alt={title} />
       {/* PIECE-02: three blurb blocks — Context / Role / Outcome */}
       <section>
@@ -41,6 +59,25 @@ const { title, hero, context, role, outcome, category } = piece.data;
         <h2>Outcome</h2>
         <p>{outcome}</p>
       </section>
+      {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
+      {/* Width/height sourced from .cache.json for CLS prevention. Render order = pdfPaginate order (D-09). */}
+      {paginatedPages.length > 0 && (
+        <section class="paginated-pages">
+          {paginatedPages.map((p) => (
+            <img
+              src={`/generated/pdf-thumbs/${slug}/${p.file}`}
+              width={p.w}
+              height={p.h}
+              alt={`${title} — page ${p.n}`}
+              loading="lazy"
+            />
+          ))}
+        </section>
+      )}
+      {/* PIECE-06: optional Open full PDF link — surfaces only on pieces with fullPdf set (D-17). */}
+      {fullPdf && (
+        <p><a href={fullPdf} download>Open full PDF</a></p>
+      )}
     </article>
   </body>
 </html>

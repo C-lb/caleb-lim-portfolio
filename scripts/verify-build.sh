@@ -134,6 +134,93 @@ else
   fi
 fi
 
+# Gate 10: PIECE-04 — every piece with pdfPaginate: [...] in frontmatter has matching <img> tags in its detail HTML.
+# YAML extraction goes through python3 (single-quoted heredoc + argv) so bash never expands the parser body.
+# python3 ships with macOS by default and Ubuntu 22.04 (CF Pages V3 base); confirmed via `command -v python3`.
+while IFS= read -r md_file; do
+  slug=$(basename "$(dirname "$md_file")")
+  pages=$(python3 -c '
+import sys, re
+with open(sys.argv[1]) as f:
+    text = f.read()
+m = re.search(r"^---\s*$(.*?)^---\s*$", text, re.MULTILINE | re.DOTALL)
+if not m: sys.exit(0)
+fm = m.group(1)
+m2 = re.search(r"^pdfPaginate:\s*\[([^\]]+)\]", fm, re.MULTILINE)
+if not m2: sys.exit(0)
+nums = [n.strip() for n in m2.group(1).split(",") if n.strip()]
+print(" ".join(nums))
+' "$md_file" 2>/dev/null)
+  if [[ -z "$pages" ]]; then continue; fi  # piece has no pdfPaginate — skip
+
+  # Locate rendered detail page (any category)
+  detail_html=$(find "$DIST" -mindepth 3 -name index.html -path "*/$slug/*" -type f 2>/dev/null | head -1)
+  if [[ -z "$detail_html" ]]; then
+    echo "  FAIL: $slug has pdfPaginate but no rendered detail page in $DIST"
+    fail=1
+    continue
+  fi
+
+  # For each page number, assert the corresponding <img src=...> exists.
+  # Page 1 → cover.webp (D-05 filename contract); other pages → page-{N}.webp.
+  missing_pages=""
+  for n in $pages; do
+    if [[ "$n" == "1" ]]; then
+      expected="/generated/pdf-thumbs/$slug/cover.webp"
+    else
+      expected="/generated/pdf-thumbs/$slug/page-$n.webp"
+    fi
+    if ! grep -q "<img[^>]*src=\"$expected\"" "$detail_html"; then
+      missing_pages="$missing_pages $n"
+    fi
+  done
+  if [[ -n "$missing_pages" ]]; then
+    echo "  FAIL: PIECE-04 violation in $slug — missing <img> for page(s):$missing_pages"
+    fail=1
+  else
+    echo "  OK: $slug paginated <img>s present for pages: $pages"
+  fi
+done < <(find src/content/pieces -mindepth 2 -maxdepth 2 -name index.md -type f)
+
+# Gate 11: PIECE-06 — every piece with fullPdf: in frontmatter has matching <a href=...> + download in its detail HTML.
+# fullPdf regex needs both " and ' as character-class members; we build them via chr(34)/chr(39) inside python
+# so the bash single-quoted script body never contains a literal apostrophe (which would terminate the bash string).
+while IFS= read -r md_file; do
+  slug=$(basename "$(dirname "$md_file")")
+  full_pdf=$(python3 -c '
+import sys, re
+DQ = chr(34)
+SQ = chr(39)
+with open(sys.argv[1]) as f:
+    text = f.read()
+m = re.search(r"^---\s*$(.*?)^---\s*$", text, re.MULTILINE | re.DOTALL)
+if not m: sys.exit(0)
+fm = m.group(1)
+pat = r"^fullPdf:\s*[" + DQ + SQ + r"]?([^" + DQ + SQ + r"\n]+?)[" + DQ + SQ + r"]?\s*$"
+m2 = re.search(pat, fm, re.MULTILINE)
+if not m2: sys.exit(0)
+print(m2.group(1).strip().strip(DQ).strip(SQ))
+' "$md_file" 2>/dev/null)
+  if [[ -z "$full_pdf" ]]; then continue; fi  # piece has no fullPdf — skip
+
+  detail_html=$(find "$DIST" -mindepth 3 -name index.html -path "*/$slug/*" -type f 2>/dev/null | head -1)
+  if [[ -z "$detail_html" ]]; then
+    echo "  FAIL: $slug has fullPdf but no rendered detail page"
+    fail=1
+    continue
+  fi
+
+  if ! grep -q "<a[^>]*href=\"$full_pdf\"" "$detail_html"; then
+    echo "  FAIL: PIECE-06 violation in $slug — missing <a href=\"$full_pdf\">"
+    fail=1
+  elif ! grep -q "download" "$detail_html"; then
+    echo "  FAIL: PIECE-06 violation in $slug — fullPdf link missing 'download' attribute"
+    fail=1
+  else
+    echo "  OK: $slug fullPdf link present ($full_pdf)"
+  fi
+done < <(find src/content/pieces -mindepth 2 -maxdepth 2 -name index.md -type f)
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
