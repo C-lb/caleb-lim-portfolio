@@ -43,6 +43,15 @@ const RENDER_SCALE = 2.0; // 2x for downsample headroom
 // / RENDER_SCALE without bumping PIPELINE_VERSION is a footgun — keep them aligned.
 const PIPELINE_VERSION = 'v2';
 
+// WR-02 fix: the canonical fullPdf URL is ALWAYS /source-pdfs/<slug>.pdf.
+// Any consumer (template, smoke gate, future refactor) MUST derive the URL
+// from slug at this exact path. The frontmatter fullPdf string is a TOGGLE
+// (presence = render the Open full PDF link; absence = don't), not a free-form
+// path. The schema stays as z.string().optional() for back-compat with any
+// existing frontmatter, but this script enforces the path contract via the
+// assertion in copySourcePdf below — frontmatter drift fails the build loudly.
+const canonicalFullPdfHref = (slug) => `/source-pdfs/${slug}.pdf`;
+
 async function discoverPieces() {
   let slugs;
   try {
@@ -98,7 +107,22 @@ async function hashInputs(pdfPath, pdfPaginate) {
     .digest('hex');
 }
 
-async function copySourcePdf(slug, sourcePdfPath) {
+// WR-02: copySourcePdf is the single source of truth for the public/source-pdfs/<slug>.pdf
+// output path. The fullPdf parameter is the value from frontmatter (string | undefined);
+// when provided it MUST equal canonicalFullPdfHref(slug), otherwise the rendered
+// <a href={fullPdf}> link in the detail template would silently 404. We fail the
+// build loudly here so frontmatter drift is caught at prebuild time, not by a
+// recruiter clicking a dead link.
+async function copySourcePdf(slug, sourcePdfPath, fullPdf) {
+  if (fullPdf !== undefined) {
+    const expected = canonicalFullPdfHref(slug);
+    if (fullPdf !== expected) {
+      throw new Error(
+        `WR-02 contract violation: ${slug} frontmatter fullPdf is "${fullPdf}" but the script writes to "${expected}". ` +
+        `Set frontmatter to fullPdf: "${expected}" or omit the field to suppress the Open full PDF link.`
+      );
+    }
+  }
   await fs.mkdir(SOURCE_PDF_DIR, { recursive: true });
   await fs.copyFile(sourcePdfPath, path.join(SOURCE_PDF_DIR, `${slug}.pdf`));
 }
@@ -115,7 +139,7 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
       console.log(`SKIP ${slug} (cache hit)`);
       // Still re-copy fullPdf — cheap idempotent op; covers the case where someone
       // deleted public/source-pdfs/ but kept the thumbs cache.
-      if (fullPdf) await copySourcePdf(slug, sourcePdfPath);
+      if (fullPdf) await copySourcePdf(slug, sourcePdfPath, fullPdf);
       return cached;
     }
   } catch {
@@ -207,7 +231,7 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
   await pdfDocument.cleanup();
 
   // fullPdf side effect (D-17) — gated by frontmatter flag.
-  if (fullPdf) await copySourcePdf(slug, sourcePdfPath);
+  if (fullPdf) await copySourcePdf(slug, sourcePdfPath, fullPdf);
 
   const cacheData = {
     inputHash,
