@@ -92,6 +92,48 @@ for piece_dir in src/content/pieces/*/; do
   fi
 done
 
+# Gate 8: resume size budget (CONTACT-01 — file at canonical path, ≤1MB)
+RESUME=public/caleb-lim-resume.pdf
+if [[ ! -f "$RESUME" ]]; then
+  echo "  FAIL: $RESUME missing — CONTACT-01 unmet"
+  fail=1
+else
+  size_kb=$(($(wc -c < "$RESUME") / 1024))
+  if (( size_kb > 1024 )); then
+    echo "  FAIL: resume is ${size_kb}KB, exceeds 1024KB (1MB) budget"
+    fail=1
+  else
+    echo "  OK: resume ${size_kb}KB (≤1MB)"
+  fi
+fi
+
+# Gate 9: About page bio word count 80-150 + banned-phrase grep (ABOUT-01 + D-14)
+ABOUT=dist/about/index.html
+if [[ ! -f "$ABOUT" ]]; then
+  echo "  FAIL: About page not built — ABOUT-01 unmet"
+  fail=1
+else
+  # Extract <article> body text, strip tags, count words
+  words=$(sed -n '/<article/,/<\/article/p' "$ABOUT" \
+    | sed -e 's/<[^>]*>//g' \
+    | tr -s '[:space:]' ' ' \
+    | wc -w | tr -d ' ')
+  if (( words < 80 || words > 150 )); then
+    echo "  FAIL: About bio is $words words; expected 80-150 (ABOUT-01)"
+    fail=1
+  else
+    echo "  OK: About bio is $words words"
+  fi
+  # Banned-phrase grep — must NOT match (case-insensitive). Scoped to <article>
+  # body via sed extract so the title / back-link / etc. cannot trip a false positive.
+  if sed -n '/<article/,/<\/article/p' "$ABOUT" | grep -iE 'passionate|multidisciplinary|intersection of' > /dev/null; then
+    echo "  FAIL: About bio contains banned filler phrase ('passionate' / 'multidisciplinary' / 'intersection of')"
+    fail=1
+  else
+    echo "  OK: About bio free of banned filler phrases"
+  fi
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
