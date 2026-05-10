@@ -1,0 +1,20 @@
+---
+import { CATEGORIES } from '../content/categories';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Caleb Lim — Portfolio</title>
+  </head>
+  <body>
+    <h1>Caleb Lim</h1>
+    <p>What do you wish to see?</p>
+    <nav>
+      <ul>
+        {CATEGORIES.map((c) => <li><a href={`/${c}`}>{c}</a></li>)}
+      </ul>
+    </nav>
+  </body>
+</html>
