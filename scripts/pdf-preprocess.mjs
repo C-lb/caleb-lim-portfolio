@@ -43,6 +43,15 @@ const RENDER_SCALE = 2.0; // 2x for downsample headroom
 // / RENDER_SCALE without bumping PIPELINE_VERSION is a footgun — keep them aligned.
 const PIPELINE_VERSION = 'v2';
 
+// WR-02 fix: the canonical fullPdf URL is ALWAYS /source-pdfs/<slug>.pdf.
+// Any consumer (template, smoke gate, future refactor) MUST derive the URL
+// from slug at this exact path. The frontmatter fullPdf string is a TOGGLE
+// (presence = render the Open full PDF link; absence = don't), not a free-form
+// path. The schema stays as z.string().optional() for back-compat with any
+// existing frontmatter, but this script enforces the path contract via the
+// assertion in copySourcePdf below — frontmatter drift fails the build loudly.
+const canonicalFullPdfHref = (slug) => `/source-pdfs/${slug}.pdf`;
+
 async function discoverPieces() {
   let slugs;
   try {
@@ -67,6 +76,16 @@ async function discoverPieces() {
       .then(() => true, () => false);
     if (!hasPdf) continue; // piece has no PDF — skip (no rasterization needed)
     const { data: fm } = matter(md);
+    // CR-01 fix: draft pieces must NOT rasterize or copy. getStaticPaths in
+    // [category]/[slug].astro filters draft !== true; the prebuild must mirror
+    // that filter so public/generated/pdf-thumbs/<slug>/ and
+    // public/source-pdfs/<slug>.pdf are not produced for draft work.
+    // Strict === true so YAML quirks (e.g. draft: "no") cannot accidentally
+    // trigger the skip — only an explicit boolean true counts.
+    if (fm.draft === true) {
+      console.log(`SKIP ${slug} (draft)`);
+      continue;
+    }
     out.push({
       slug,
       sourcePdfPath,
@@ -88,7 +107,22 @@ async function hashInputs(pdfPath, pdfPaginate) {
     .digest('hex');
 }
 
-async function copySourcePdf(slug, sourcePdfPath) {
+// WR-02: copySourcePdf is the single source of truth for the public/source-pdfs/<slug>.pdf
+// output path. The fullPdf parameter is the value from frontmatter (string | undefined);
+// when provided it MUST equal canonicalFullPdfHref(slug), otherwise the rendered
+// <a href={fullPdf}> link in the detail template would silently 404. We fail the
+// build loudly here so frontmatter drift is caught at prebuild time, not by a
+// recruiter clicking a dead link.
+async function copySourcePdf(slug, sourcePdfPath, fullPdf) {
+  if (fullPdf !== undefined) {
+    const expected = canonicalFullPdfHref(slug);
+    if (fullPdf !== expected) {
+      throw new Error(
+        `WR-02 contract violation: ${slug} frontmatter fullPdf is "${fullPdf}" but the script writes to "${expected}". ` +
+        `Set frontmatter to fullPdf: "${expected}" or omit the field to suppress the Open full PDF link.`
+      );
+    }
+  }
   await fs.mkdir(SOURCE_PDF_DIR, { recursive: true });
   await fs.copyFile(sourcePdfPath, path.join(SOURCE_PDF_DIR, `${slug}.pdf`));
 }
@@ -105,7 +139,7 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
       console.log(`SKIP ${slug} (cache hit)`);
       // Still re-copy fullPdf — cheap idempotent op; covers the case where someone
       // deleted public/source-pdfs/ but kept the thumbs cache.
-      if (fullPdf) await copySourcePdf(slug, sourcePdfPath);
+      if (fullPdf) await copySourcePdf(slug, sourcePdfPath, fullPdf);
       return cached;
     }
   } catch {
@@ -126,6 +160,28 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
   // Page 1 always renders (cover.webp). Dedupe page 1 from pdfPaginate so it doesn't
   // double-render — D-05 mandates page 1 maps to cover.webp, not page-1.webp.
   const pagesToRender = [1, ...((pdfPaginate ?? []).filter((n) => n !== 1))];
+
+  // WR-01 fix: prune orphan page-N.webp files for pages no longer in pdfPaginate.
+  // Without this, shrinking pdfPaginate from [1,5,12,23] to [1,5] leaves page-12.webp
+  // and page-23.webp in the thumb directory. They get committed via D-03 and ship
+  // to production as dead bytes (and can leak intent — "page 23 used to be relevant").
+  // Runs only on the cache-miss / regenerate path; cache-hit means nothing changed
+  // and orphans cannot exist.
+  const expectedFiles = new Set([
+    'cover.webp',
+    '.cache.json',
+    ...pagesToRender.filter((n) => n !== 1).map((n) => `page-${n}.webp`),
+  ]);
+  const existingFiles = await fs.readdir(thumbDir).catch((err) => {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  });
+  for (const f of existingFiles) {
+    if (!expectedFiles.has(f)) {
+      await fs.unlink(path.join(thumbDir, f));
+      console.log(`PRUNE ${slug}/${f} (no longer in pdfPaginate)`);
+    }
+  }
   const pageMeta = [];
 
   for (const pageNum of pagesToRender) {
@@ -175,7 +231,7 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
   await pdfDocument.cleanup();
 
   // fullPdf side effect (D-17) — gated by frontmatter flag.
-  if (fullPdf) await copySourcePdf(slug, sourcePdfPath);
+  if (fullPdf) await copySourcePdf(slug, sourcePdfPath, fullPdf);
 
   const cacheData = {
     inputHash,
