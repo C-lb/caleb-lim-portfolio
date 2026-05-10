@@ -37,11 +37,19 @@ for cat in design finance personal marketing; do
 done
 
 # Gate 4: each category has at least one piece detail page
+# Per Phase 2 D-11: 'personal' may be empty at launch — Phase 4 / SPLASH-04 will drop the
+# splash card if the gallery is empty. Personal therefore reports OK even at zero pieces;
+# Gate 12c (added in Plan 04) enforces ≥1 each in the FOUND-05 strong categories
+# (design + marketing).
 for cat in design finance personal marketing; do
   count=$(find "$DIST/$cat" -mindepth 2 -name index.html 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$count" -lt 1 ]]; then
-    echo "  FAIL: $cat has no piece detail pages (expected ≥1)"
-    fail=1
+    if [[ "$cat" == "personal" ]]; then
+      echo "  OK: $cat has 0 pieces (D-11 — empty gallery acceptable; SPLASH-04 drops the card at Phase 4)"
+    else
+      echo "  FAIL: $cat has no piece detail pages (expected ≥1)"
+      fail=1
+    fi
   else
     echo "  OK: $cat has $count piece(s)"
   fi
