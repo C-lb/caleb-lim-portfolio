@@ -5,3 +5,8 @@ dist
 .env.production
 .DS_Store
 pdf-poc-out.png
+
+# Phase 1 POC sample PDFs (user override at 01-03 Task 1 checkpoint — Caleb's
+# real PDFs stay local; only the directory shape ships via .gitkeep).
+samples/*
+!samples/.gitkeep
