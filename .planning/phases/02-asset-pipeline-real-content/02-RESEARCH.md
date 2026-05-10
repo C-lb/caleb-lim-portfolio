@@ -748,29 +748,29 @@ fi
 | A7 | sha256(pdfBytes + pdfPaginateJSON) is sufficient cache key | Pattern 2 | Excludes RENDER_SCALE / RESIZE_LONG_EDGE / WEBP_QUALITY constants. If those change between runs (script edit), cache stays "valid" but outputs are stale. Mitigation: include a pipeline-version constant in the hash: `.update('|v=2')` and bump on script changes. Or hash the script source itself. |
 | A8 | Caleb authors bio + finalizes blurbs during Phase 2 execution (not pre-supplied) | Content Scope D-13/D-14 | Per CONTEXT.md decisions, this is the agreed plan. If Caleb is unavailable, Phase 2 stalls at the human-action checkpoints — same pattern as Phase 1's user-override checkpoints. Plan should structure tasks so non-content tasks (preprocess script, schema migration, About route, smoke gates) can complete independently of content tasks. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **CF Pages Linux verification venue**
+1. **CF Pages Linux verification venue** — **RESOLVED:** Defer venue choice to Plan 04 Task 2 step 6 (Docker simulation OR CF Pages preview branch OR documented A1 risk acceptance in SUMMARY); CONTEXT.md "Claude's Discretion" delegates this. Plan 04 records the chosen path in 02-04-SUMMARY.md.
    - What we know: Phase 1 deferred this (Option C — local macOS only). napi-rs/canvas requires glibc ≥2.18; CF Pages V3 is Ubuntu 22.04 (glibc 2.35) [VERIFIED via napi-rs/canvas docs + CF Pages V3 changelog]. The risk is theoretical-low.
    - What's unclear: Whether Caleb has a Cloudflare account connected to a git remote, or whether this should be Docker-simulated locally instead.
    - Recommendation: First Phase 2 task (or sub-task) — push a branch with the prebuild script + a small test PDF, observe CF Pages preview build logs. If the project's git remote is GitHub-backed but no CF Pages connection exists yet, fall back to `docker run --rm -v $PWD:/app -w /app node:22-bookworm bash -c "npm ci && npm run build"`. Bookworm is glibc 2.36 — close enough to CF Pages V3's 2.35.
 
-2. **Where does the About bio live — markdown collection or `.astro` page?**
+2. **Where does the About bio live — markdown collection or `.astro` page?** — **RESOLVED:** Hard-code in `src/pages/about.astro` (Plan 02 Task 1 implements this). No content collection — single page, no schema reuse value.
    - What we know: ABOUT-01 just specifies the content (80–150-word first-person bio). The structural decision is downstream.
    - What's unclear: Whether to add an `about` content collection (parallel to `pieces`) or hard-code in `src/pages/about.astro`.
    - Recommendation: Hard-code in `src/pages/about.astro`. Single page, no schema reuse value, simpler. The collection pattern's only benefit is bulk content management — there's exactly one bio.
 
-3. **Phase 1's PLACEHOLDER pieces — replace or delete?**
+3. **Phase 1's PLACEHOLDER pieces — replace or delete?** — **RESOLVED:** Plan 04 Task 1 deletes `phase-1-skeleton` per D-11; Plan 04 Task 2 replaces the other three (design / finance / marketing) piece-for-piece via per-piece human-action checkpoints (D-13 collaborative authoring flow).
    - What we know: All four Phase 1 pieces are PLACEHOLDER stand-ins. CONTEXT.md D-11 says delete `phase-1-skeleton` (Personal placeholder). The other three (design/finance/marketing) likely get replaced piece-for-piece.
    - What's unclear: Whether Caleb has 1 real Design + 1 real Finance + 1 real Marketing piece ready, or whether these get replaced wholesale.
    - Recommendation: Plan task structure as "delete `phase-1-skeleton`" + "replace each placeholder piece with real content as Caleb supplies it" — same human-action checkpoint pattern as Phase 1 Task 3.
 
-4. **Should generated outputs be `git add`'d during the Phase 2 work, or is there a separate "first-time generate + commit" step?**
+4. **Should generated outputs be `git add`'d during the Phase 2 work, or is there a separate "first-time generate + commit" step?** — **RESOLVED:** Plan 04 Task 4 owns the dedicated "commit generated outputs" step at the end of the phase per D-03; output-generation does NOT couple to schema migration (Plan 01) or piece authoring (Plan 04 Task 2).
    - What we know: D-03 says outputs ARE committed.
    - What's unclear: When in the Phase 2 task ordering does the first commit of `public/generated/pdf-thumbs/**` happen?
    - Recommendation: Add a dedicated task at the end of Phase 2 — "run `npm run prebuild`, verify outputs, `git add public/generated/`, commit." Avoid coupling output-generation to schema-migration or piece-authoring tasks.
 
-5. **Hero asset transition — keep Phase 1 PNG hero or migrate to generated WebP?**
+5. **Hero asset transition — keep Phase 1 PNG hero or migrate to generated WebP?** — **RESOLVED:** Keep separate `hero.{png,jpg,webp}` per piece (Phase 1 D-10 pattern preserved). Astro `image()` helper can't resolve `public/`-served paths (Pitfall 8). Generated `cover.webp` and the manually-supplied hero are different assets that happen to share a PDF source. Phase 3 owns the magazine-grade hero composition.
    - What we know: Phase 1 D-10 said heroes are plain images. Phase 2 generates WebPs from page 1 of each PDF. A piece's `cover.webp` IS effectively a high-fidelity hero.
    - What's unclear: Whether to (a) keep a separate `hero.png` per piece (Phase 1 pattern, manually-supplied), or (b) point the schema's `hero` field at the generated WebP.
    - Recommendation: **Keep separate hero.** Astro's `image()` schema helper can't resolve `public/`-served paths (Pitfall 8). Mixing two image pipelines is messy. The hero is for galleries (Phase 3 territory), where the magazine-grade composition needs deliberate cropping; the auto-rasterized cover.webp may be too tall/wide. Treat them as different assets that happen to share a source.
