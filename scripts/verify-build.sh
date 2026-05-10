@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/verify-build.sh
-# Phase 1 smoke verification: runs over dist/ after `npm run build`.
+# Phase 1 + 2 smoke verification: runs over dist/ + public/generated/ after `npm run build`.
 # Exit 0 = all gates green. Exit non-zero = at least one gate failed.
 
 set -euo pipefail
@@ -8,8 +8,8 @@ set -euo pipefail
 DIST="dist"
 fail=0
 
-echo "Phase 1 smoke verification"
-echo "=========================="
+echo "Phase 1 + 2 smoke verification"
+echo "=============================="
 
 # Gate 1: dist/ exists and contains splash
 if [[ ! -f "$DIST/index.html" ]]; then
@@ -70,6 +70,27 @@ while IFS= read -r html; do
   fi
 done < <(find "$DIST" -mindepth 3 -name index.html -type f)
 echo "  OK: PIECE-02 — Context/Role/Outcome present in every piece detail page (if no FAIL line above)"
+
+# Gate 7: every piece with source.pdf has a thumb generated + cache sidecar
+echo
+echo "Phase 2 gates"
+echo "============="
+shopt -s nullglob
+for piece_dir in src/content/pieces/*/; do
+  slug=$(basename "$piece_dir")
+  if [[ -f "$piece_dir/source.pdf" ]]; then
+    thumb_dir="public/generated/pdf-thumbs/$slug"
+    if [[ ! -f "$thumb_dir/cover.webp" ]]; then
+      echo "  FAIL: $slug has source.pdf but no $thumb_dir/cover.webp"
+      fail=1
+    elif [[ ! -f "$thumb_dir/.cache.json" ]]; then
+      echo "  FAIL: $slug has cover.webp but no .cache.json sidecar"
+      fail=1
+    else
+      echo "  OK: $slug has cover.webp + cache"
+    fi
+  fi
+done
 
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
