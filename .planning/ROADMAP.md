@@ -38,7 +38,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. At least one real piece per category renders end-to-end: gallery shows it, click navigates to the detail page, detail page shows a hero `<img>` (no iframe) plus three text blocks for Context / Role / Outcome
   4. A 30-minute proof-of-concept confirms `pdfjs-dist` + `@napi-rs/canvas` rasterizes one of Caleb's real PDFs to PNG without crashing in CI (POC only — productionized in Phase 2)
   5. Site builds with `npm run build` and the static output deploys to a preview URL (Cloudflare Pages preview branch or local `astro preview`)
-**Plans**: TBD
+**Plans:** 3 plans
+- [ ] 01-01-PLAN.md — Scaffold Astro project (pinned deps, Node 22.16, schema, shared category enum) + author one real Graphic Design piece end-to-end + wire splash, gallery, and detail routes
+- [ ] 01-02-PLAN.md — Author the remaining three pieces (Finance real, Marketing real, Personal placeholder) + write `scripts/verify-build.sh` smoke verification + manual preview check
+- [ ] 01-03-PLAN.md — Standalone PDF rasterization POC (`scripts/pdf-poc.mjs`) against Caleb's real PDF + verify it runs in the Cloudflare Pages preview build environment (de-risks Phase 2)
 
 ### Phase 2: Asset Pipeline + Real Content
 **Goal**: Every v1 piece has a build-time-rasterized cover image, real Context/Role/Outcome copy, and the About page + downloadable resume are live. The site has all its content load-bearing — the recruiter can read real artifacts on every page, not lorem ipsum.
@@ -126,7 +129,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Walking Skeleton | 0/TBD | Not started | - |
+| 1. Walking Skeleton | 0/3 | Not started | - |
 | 2. Asset Pipeline + Real Content | 0/TBD | Not started | - |
 | 3. Visual Design System | 0/TBD | Not started | - |
 | 4. Navigation & Secondary Surfaces | 0/TBD | Not started | - |
