@@ -55,7 +55,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `caleb-lim-resume.pdf` (under 1MB, EXIF-stripped) lives in `/public/`, downloads directly without an email gate, and is linked from the About page
   5. Multi-page slide decks render their 3–6 representative slides as a vertical sequence below the hero on the detail page; pieces with sharable original PDFs surface an "Open full PDF" link
 **Plans:** 4 plans
-- [ ] 02-01-PLAN.md — Productionize PDF rasterization pipeline (prebuild hook + pdf-preprocess.mjs + schema migration + Gate 7)
+- [x] 02-01-PLAN.md — Productionize PDF rasterization pipeline (prebuild hook + pdf-preprocess.mjs + schema migration + Gate 7)
 - [ ] 02-02-PLAN.md — About page + EXIF-stripped resume + Gates 8-9 (bio voice + resume size)
 - [ ] 02-03-PLAN.md — Detail template paginated rendering + Open full PDF link + Gates 10-11
 - [ ] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12)
