@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-05-10T16:09:38.924Z"
-last_activity: 2026-05-10 -- Phase 02 planning complete
+stopped_at: "Phase 2 gap closure paused mid-Wave-2: design piece (PVL) landed; awaiting marketing piece inputs"
+last_updated: "2026-05-11T00:10:00.000Z"
+last_activity: "2026-05-10 -- Phase 02 gap closure: design piece landed; marketing checkpoint pending"
 progress:
   total_phases: 6
   completed_phases: 1
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 ## Current Position
 
-Phase: 02 (asset-pipeline-real-content) — EXECUTING
-Plan: 1 of 4
-Status: Ready to execute
-Last activity: 2026-05-10 -- Phase 02 planning complete
+Phase: 02 (asset-pipeline-real-content) — EXECUTING (gap closure paused)
+Plan: 02-05 (Wave 2 of gap-closure plans) — paused mid-flight
+Status: Awaiting human-action — marketing piece inputs (hero + optional PDF + CRO seed)
+Last activity: 2026-05-10 -- design piece (PVL Overseas Community Project) landed, build green, Gates 7/10/11 active
 
-Progress: [░░░░░░░░░░] 0%
+Progress: 5/7 plans complete (02-01..02-04 + 02-06; 02-05 partial; 02-07 pending)
 
 ## Performance Metrics
 
@@ -83,6 +83,16 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-10T05:02:56.618Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-asset-pipeline-real-content/02-CONTEXT.md
+Last session: 2026-05-11T00:10:00.000Z
+Stopped at: Phase 2 gap closure — Wave 2 paused after design piece landed; marketing-real-piece checkpoint awaiting Caleb's asset paths + CRO seed
+Resume command: `/gsd-execute-phase 2 --gaps-only` (the executor will skip 02-06 + the design-piece work in 02-05 that already shipped, and re-spawn at the marketing checkpoint)
+Resume file: .planning/phases/02-asset-pipeline-real-content/02-05-SUMMARY.md (paused-state record with full per-piece protocol)
+
+**Inputs needed for marketing-real-piece (next session):**
+1. Hero — absolute path on Mac (image OR a PDF to extract page 1 from)
+2. Source PDF (optional) — absolute path; needed if you want Open full PDF link for marketing too
+3. fullPdf yes/no — only if PDF supplied
+4. CRO seed — 1-3 sentence rough notes on what / your role / outcome
+5. NDA gate — confirm publish-rights if PDF supplied
+
+Candidate folders: `~/Desktop/ARTWORKS`, `~/Desktop/SPARK/SPARK Projects`, `~/Desktop/OBESE`, `~/Desktop/TREBLE`, `~/Desktop/SMU/Internships/Portfolio`. Or finance instead — D-10 says design + marketing is the floor; finance is bonus.
