@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const pieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+  return pieces.map((piece) => ({
+    params: { category: piece.data.category, slug: piece.id },
+    props: { piece },
+  }));
+}
+
+interface Props { piece: CollectionEntry<'pieces'>; }
+const { piece } = Astro.props;
+const { title, hero, context, role, outcome, category } = piece.data;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Caleb Lim</title>
+  </head>
+  <body>
+    <p><a href={`/${category}`}>← back to {category}</a></p>
+    <article>
+      <h1>{title}</h1>
+      {/* PIECE-01: large hero <Image>, NEVER an iframe-PDF */}
+      <Image src={hero} alt={title} />
+      {/* PIECE-02: three blurb blocks — Context / Role / Outcome */}
+      <section>
+        <h2>Context</h2>
+        <p>{context}</p>
+      </section>
+      <section>
+        <h2>Role</h2>
+        <p>{role}</p>
+      </section>
+      <section>
+        <h2>Outcome</h2>
+        <p>{outcome}</p>
+      </section>
+    </article>
+  </body>
+</html>

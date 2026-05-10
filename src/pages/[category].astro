@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import { CATEGORIES, type Category } from '../content/categories';
+
+export async function getStaticPaths() {
+  return CATEGORIES.map((cat) => ({ params: { category: cat } }));
+}
+
+const { category } = Astro.params as { category: Category };
+
+const pieces = (await getCollection('pieces', ({ data }) =>
+  data.category === category && data.draft !== true
+)).sort((a, b) => a.data.order - b.data.order);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{category} — Caleb Lim</title>
+  </head>
+  <body>
+    <p><a href="/">← splash</a></p>
+    <h1>{category}</h1>
+    {pieces.length === 0 ? (
+      <p>(No pieces in this discipline yet.)</p>
+    ) : (
+      <ul>
+        {pieces.map((p) => (
+          <li><a href={`/${category}/${p.id}`}>{p.data.title}</a></li>
+        ))}
+      </ul>
+    )}
+  </body>
+</html>
