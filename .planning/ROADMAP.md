@@ -57,7 +57,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 4 plans
 - [x] 02-01-PLAN.md — Productionize PDF rasterization pipeline (prebuild hook + pdf-preprocess.mjs + schema migration + Gate 7)
 - [x] 02-02-PLAN.md — About page + EXIF-stripped resume + Gates 8-9 (bio voice + resume size)
-- [ ] 02-03-PLAN.md — Detail template paginated rendering + Open full PDF link + Gates 10-11
+- [x] 02-03-PLAN.md — Detail template paginated rendering + Open full PDF link + Gates 10-11
 - [ ] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12)
 
 ### Phase 3: Visual Design System
