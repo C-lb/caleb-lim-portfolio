@@ -87,4 +87,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-09 after initialization*
+*Last updated: 2026-05-10 after Phase 1 (walking-skeleton) completion. Splash + four gallery routes + piece-detail route all resolve end-to-end against placeholder content; PIECE-01 (no iframe) and PIECE-02 (Context/Role/Outcome) contracts hold; PDF rasterization de-risked locally (CF Pages parity owed by Phase 2). All four Active requirements above remain Active — phase 1 validated the route skeleton, not the bold/expressive visual identity.*
