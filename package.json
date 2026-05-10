@@ -1,0 +1,22 @@
+{
+  "name": "caleb-lim-portfolio",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "pdf-poc": "node scripts/pdf-poc.mjs",
+    "test:smoke": "bash scripts/verify-build.sh"
+  },
+  "dependencies": {
+    "astro": "^5.18.1"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^5.7.284",
+    "typescript": "^5.6.3"
+  }
+}
