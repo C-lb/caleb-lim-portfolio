@@ -67,6 +67,16 @@ async function discoverPieces() {
       .then(() => true, () => false);
     if (!hasPdf) continue; // piece has no PDF — skip (no rasterization needed)
     const { data: fm } = matter(md);
+    // CR-01 fix: draft pieces must NOT rasterize or copy. getStaticPaths in
+    // [category]/[slug].astro filters draft !== true; the prebuild must mirror
+    // that filter so public/generated/pdf-thumbs/<slug>/ and
+    // public/source-pdfs/<slug>.pdf are not produced for draft work.
+    // Strict === true so YAML quirks (e.g. draft: "no") cannot accidentally
+    // trigger the skip — only an explicit boolean true counts.
+    if (fm.draft === true) {
+      console.log(`SKIP ${slug} (draft)`);
+      continue;
+    }
     out.push({
       slug,
       sourcePdfPath,
