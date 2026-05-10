@@ -2,8 +2,8 @@
 phase: 02-asset-pipeline-real-content
 plan: 04
 subsystem: real-content-integration
-status: PAUSED — checkpoint:human-action surfaced after Task 1
-tags: [content-authoring, real-pieces, found-05, generated-outputs-commit, integration, checkpoint-paused]
+status: SHIPPED-WITH-PLACEHOLDERS — Task 1 done; real-content tasks deferred to gap closure (Caleb's call, recorded 2026-05-10)
+tags: [content-authoring, real-pieces, found-05, generated-outputs-commit, integration, deferred-real-content]
 
 # Dependency graph
 requires:
@@ -28,9 +28,9 @@ requires:
 provides:
   - "src/content/pieces/phase-1-skeleton/ deleted per D-11 (Task 1)"
   - "scripts/verify-build.sh Gate 4 relaxed: personal=0 pieces is OK per D-11 (Rule 1 deviation; documented)"
-  - "Pending — Task 2 (real piece authoring): paused at checkpoint:human-action, awaiting Caleb-supplied assets + CRO seed"
-  - "Pending — Task 3 (Gate 12 in verify-build.sh)"
-  - "Pending — Task 4 (commit generated outputs + final UAT)"
+  - "DEFERRED — Task 2 (real piece authoring): Caleb opted to ship Phase 2 with the 3 PLACEHOLDER pieces from Phase 1 still in place (design-real-piece / finance-real-piece / marketing-real-piece). SC2 (≥5 real pieces) and FOUND-05 (asymmetric distribution against real content) will fail verification — this is intentional and tracked for gap closure"
+  - "DEFERRED — Task 3 (Gate 12 in verify-build.sh): blocked on real pieces existing"
+  - "DEFERRED — Task 4 (commit generated outputs + final UAT): blocked on real pieces existing"
 
 affects: [02-VERIFY (gsd-verify-work)]
 
@@ -60,9 +60,18 @@ duration: ~10min (Task 1 + Gate 4 fix only; Tasks 2–4 awaiting checkpoint resu
 completed: PAUSED 2026-05-10
 ---
 
-# Phase 02 Plan 04: Real Content Integration — PAUSED at Task 2 Checkpoint
+# Phase 02 Plan 04: Real Content Integration — Shipped with Placeholders, Real Content Deferred
 
-**Status: paused at `checkpoint:human-action` (Task 2). Task 1 (delete `phase-1-skeleton` per D-11) is complete and committed; a Rule 1 deviation also relaxed Gate 4 in `verify-build.sh` to allow `personal=0` pieces per D-11. Tasks 2 (real piece authoring), 3 (Gate 12), and 4 (commit generated outputs + UAT) are blocked on Caleb supplying real piece assets + minimal CRO seed per piece (D-13). The checkpoint message itself is reproduced below for continuity.**
+**Status: shipped with the 3 Phase 1 PLACEHOLDER pieces still in place. Task 1 (delete `phase-1-skeleton` per D-11) is complete and committed; a Rule 1 deviation relaxed Gate 4 in `verify-build.sh` to allow `personal=0` pieces per D-11. Tasks 2 (real piece authoring), 3 (Gate 12 strict checks), and 4 (commit generated outputs + UAT) were checkpointed at `human-action` and Caleb opted to defer real content rather than supply assets in this session. SC2 (≥5 real pieces) and FOUND-05 (asymmetric distribution against real content) will be flagged by the verifier — that is intentional. The deferred work is the real-content authoring loop; the asset pipeline itself is fully wired and exercised against the placeholders end-to-end.**
+
+## Resolution recorded 2026-05-10
+
+Caleb chose "ship phase as-is with placeholders" at the Wave 4 checkpoint. The choice was informed: the AskUserQuestion option that was accepted explicitly noted "Verifier will mark phase as gaps_found and require gap-closure". Two paths from here:
+
+1. **Gap closure (recommended):** `/gsd-plan-phase 2 --gaps` reads VERIFICATION.md → creates gap plans with `gap_closure: true` → `/gsd-execute-phase 2 --gaps-only` resumes per-piece authoring.
+2. **Future phase:** treat real-content authoring as a standalone follow-up phase alongside (or merged with) Phase 5 (content polish).
+
+The placeholder pieces (`design-real-piece` / `finance-real-piece` / `marketing-real-piece`) are wired through the full template + smoke pipeline (Gates 1-11 ALL GREEN), so the asset-pipeline portion of Phase 2 is verifiably end-to-end.
 
 ## Tasks Completed
 
