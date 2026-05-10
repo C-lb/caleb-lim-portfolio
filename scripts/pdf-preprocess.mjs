@@ -136,6 +136,28 @@ async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf }) {
   // Page 1 always renders (cover.webp). Dedupe page 1 from pdfPaginate so it doesn't
   // double-render — D-05 mandates page 1 maps to cover.webp, not page-1.webp.
   const pagesToRender = [1, ...((pdfPaginate ?? []).filter((n) => n !== 1))];
+
+  // WR-01 fix: prune orphan page-N.webp files for pages no longer in pdfPaginate.
+  // Without this, shrinking pdfPaginate from [1,5,12,23] to [1,5] leaves page-12.webp
+  // and page-23.webp in the thumb directory. They get committed via D-03 and ship
+  // to production as dead bytes (and can leak intent — "page 23 used to be relevant").
+  // Runs only on the cache-miss / regenerate path; cache-hit means nothing changed
+  // and orphans cannot exist.
+  const expectedFiles = new Set([
+    'cover.webp',
+    '.cache.json',
+    ...pagesToRender.filter((n) => n !== 1).map((n) => `page-${n}.webp`),
+  ]);
+  const existingFiles = await fs.readdir(thumbDir).catch((err) => {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  });
+  for (const f of existingFiles) {
+    if (!expectedFiles.has(f)) {
+      await fs.unlink(path.join(thumbDir, f));
+      console.log(`PRUNE ${slug}/${f} (no longer in pdfPaginate)`);
+    }
+  }
   const pageMeta = [];
 
   for (const pageNum of pagesToRender) {
