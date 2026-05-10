@@ -54,7 +54,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. About page exists with an 80–150-word first-person bio that takes a stance on the cross-functional analyst+brand pitch (no "passionate / multidisciplinary / intersection of" filler per PITFALLS.md)
   4. `caleb-lim-resume.pdf` (under 1MB, EXIF-stripped) lives in `/public/`, downloads directly without an email gate, and is linked from the About page
   5. Multi-page slide decks render their 3–6 representative slides as a vertical sequence below the hero on the detail page; pieces with sharable original PDFs surface an "Open full PDF" link
-**Plans**: TBD
+**Plans:** 4 plans
+- [ ] 02-01-PLAN.md — Productionize PDF rasterization pipeline (prebuild hook + pdf-preprocess.mjs + schema migration + Gate 7)
+- [ ] 02-02-PLAN.md — About page + EXIF-stripped resume + Gates 8-9 (bio voice + resume size)
+- [ ] 02-03-PLAN.md — Detail template paginated rendering + Open full PDF link + Gates 10-11
+- [ ] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12)
 
 ### Phase 3: Visual Design System
 **Goal**: The locked Magazine-maximalist direction from sketch 001 is fully applied. The site reads as confident hand-crafted brand work, not as a v0/shadcn template. Every AI-tell from VISUAL-04 is verifiably absent.
