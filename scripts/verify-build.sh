@@ -227,6 +227,114 @@ print(m2.group(1).strip().strip(DQ).strip(SQ))
   fi
 done < <(find src/content/pieces -mindepth 2 -maxdepth 2 -name index.md -type f)
 
+# Gate 12: FOUND-05 — content shape (NON-DRAFT piece count + distribution + no PLACEHOLDER + no banned phrases + no phase-1-skeleton)
+# D-10 minimum, softened by Plan 02-07 Wave 3 deviation: 2+ NON-DRAFT pieces (originally 3,
+# loosened because Caleb explicitly deferred finance via draft: true — the in-spirit floor
+# now reflects design + marketing as the two confirmed-shipping pieces), with >=1 each
+# in design + marketing (the FOUND-05 "strong categories" stay strong-floored).
+# Locks the source-tree shape Plan 02-05 established + Wave 3 finalised; any regression
+# (re-introduced PLACEHOLDER in a non-draft piece, deleted strong-category piece, banned
+# phrase slipping in) is caught here before it reaches deploy.
+#
+# Wave 3 deviation: ALL Gate 12 sub-gates EXCLUDE drafts. The deferred finance placeholder
+# (draft: true with PLACEHOLDER body) is intentionally allowed to coexist; only non-draft
+# pieces are policed. Drafts are filtered via grep -L '^draft: true' (returns files NOT
+# matching the pattern — i.e., non-draft pieces).
+
+# Helper: list paths of all NON-DRAFT pieces' index.md files (one per line).
+# Use -L to invert (files NOT matching '^draft: true'); fall back to empty string if none.
+list_non_draft_pieces() {
+  local f
+  for f in src/content/pieces/*/index.md; do
+    [[ -f "$f" ]] || continue
+    grep -q '^draft: true' "$f" 2>/dev/null && continue
+    echo "$f"
+  done
+}
+
+# 12a: phase-1-skeleton deletion lock (D-11 enforcement; Plan 02-04 Task 1 deleted; Gate 12a ensures it stays gone)
+if [[ -d src/content/pieces/phase-1-skeleton ]]; then
+  echo "  FAIL: src/content/pieces/phase-1-skeleton/ still exists — D-11 violation"
+  fail=1
+else
+  echo "  OK: phase-1-skeleton not found in source tree (D-11)"
+fi
+
+# 12b: NON-DRAFT piece count floor (D-10 'in spirit, not numbers' minimum, Wave 3 = 2)
+# Original spec: >=3. Loosened to >=2 because Caleb explicitly deferred finance via
+# draft: true in Wave 3. The "in spirit" floor is now design + marketing (two confirmed
+# shipping pieces). Open Items in 02-07-SUMMARY.md tracks this 2-vs-3 reasoning.
+non_draft_count=$(list_non_draft_pieces | wc -l | tr -d ' ')
+if (( non_draft_count < 2 )); then
+  echo "  FAIL: only $non_draft_count non-draft pieces found, expected >=2 (FOUND-05 minimum per D-10, loosened from 3 by Wave 3 deviation — Caleb deferred finance)"
+  fail=1
+else
+  echo "  OK: non-draft piece count = $non_draft_count (>=2 per Wave 3 deviation; original D-10 spec was >=3)"
+fi
+
+# 12c: distribution — at least 1 design + 1 marketing NON-DRAFT piece (FOUND-05 strong-category floor)
+# NOTE: BSD grep (macOS default) does NOT support \b word boundaries reliably; use -E with
+# an anchored alternation (end-of-line OR whitespace) so the pattern works on both BSD and GNU grep.
+# Pattern '^category: design( |$)' matches 'category: design' or 'category: design ' (trailing space ok)
+# but NOT 'category: designers' (would only match if the next char is space or EOL).
+# Wave 3 deviation: drafts EXCLUDED — finance-as-draft does NOT count toward any floor.
+for required_cat in design marketing; do
+  cat_count=0
+  while IFS= read -r np_file; do
+    [[ -z "$np_file" ]] && continue
+    if grep -qE "^category: ${required_cat}( |$)" "$np_file" 2>/dev/null; then
+      cat_count=$((cat_count + 1))
+    fi
+  done < <(list_non_draft_pieces)
+  if (( cat_count < 1 )); then
+    echo "  FAIL: $required_cat has $cat_count non-draft pieces, expected >=1 (FOUND-05 strong category per D-10)"
+    fail=1
+  else
+    echo "  OK: $required_cat has $cat_count non-draft piece(s)"
+  fi
+done
+
+# 12d: no PLACEHOLDER substring in any NON-DRAFT piece's index.md
+# Phase 1 SUMMARY canonicalized PLACEHOLDER as the stand-in marker; Plan 02-05 was supposed to
+# remove all instances from shipping pieces. This gate ensures none slip back in via a future
+# content edit. Wave 3 deviation: drafts EXCLUDED so the deferred finance placeholder is
+# explicitly tolerated; only non-draft pieces are policed.
+placeholder_hits=""
+while IFS= read -r np_file; do
+  [[ -z "$np_file" ]] && continue
+  if grep -l 'PLACEHOLDER' "$np_file" >/dev/null 2>&1; then
+    placeholder_hits="$placeholder_hits$np_file"$'\n'
+  fi
+done < <(list_non_draft_pieces)
+if [[ -n "$placeholder_hits" ]]; then
+  echo "  FAIL: PLACEHOLDER substring found in non-draft piece(s):"
+  echo "$placeholder_hits" | sed '/^$/d; s/^/    /'
+  fail=1
+else
+  echo "  OK: no non-draft piece left with PLACEHOLDER substring"
+fi
+
+# 12e: no banned filler phrases in NON-DRAFT piece content (D-09 / D-12 voice rule)
+# Gate 9 covers About bio (rendered HTML <article>); Gate 12e covers piece source markdown.
+# Filter YAML comments via 'grep -v ^#' to avoid header-prose self-invalidation
+# (per planner critical-rule: a comment naming a banned phrase would itself trip the gate).
+# Wave 3 deviation: drafts EXCLUDED.
+banned_hits=""
+while IFS= read -r np_file; do
+  [[ -z "$np_file" ]] && continue
+  hit=$(grep -v '^#' "$np_file" 2>/dev/null | grep -iE 'passionate|multidisciplinary|intersection of' || true)
+  if [[ -n "$hit" ]]; then
+    banned_hits="$banned_hits$np_file: $hit"$'\n'
+  fi
+done < <(list_non_draft_pieces)
+if [[ -n "$banned_hits" ]]; then
+  echo "  FAIL: banned filler phrase found in non-draft piece content:"
+  echo "$banned_hits" | sed '/^$/d' | head -5 | sed 's/^/    /'
+  fail=1
+else
+  echo "  OK: no banned filler phrases in non-draft piece content"
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
