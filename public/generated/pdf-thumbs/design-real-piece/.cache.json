@@ -1,0 +1,41 @@
+{
+  "inputHash": "2f0db0d2f584eb0c3d0515dffe49cd049a8389a2fc3671b1fc4920146887ff0f",
+  "generatedAt": "2026-05-10T16:09:27.752Z",
+  "pages": [
+    {
+      "n": 1,
+      "w": 750,
+      "h": 749,
+      "bytes": 8728,
+      "file": "cover.webp"
+    },
+    {
+      "n": 5,
+      "w": 750,
+      "h": 749,
+      "bytes": 7114,
+      "file": "page-5.webp"
+    },
+    {
+      "n": 10,
+      "w": 750,
+      "h": 749,
+      "bytes": 15984,
+      "file": "page-10.webp"
+    },
+    {
+      "n": 11,
+      "w": 750,
+      "h": 749,
+      "bytes": 8216,
+      "file": "page-11.webp"
+    },
+    {
+      "n": 12,
+      "w": 750,
+      "h": 749,
+      "bytes": 7440,
+      "file": "page-12.webp"
+    }
+  ]
+}
