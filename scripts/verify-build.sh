@@ -36,20 +36,18 @@ for cat in design finance personal marketing; do
   fi
 done
 
-# Gate 4: each category has at least one piece detail page
+# Gate 4: report piece count per category (empty galleries acceptable here)
 # Per Phase 2 D-11: 'personal' may be empty at launch — Phase 4 / SPLASH-04 will drop the
-# splash card if the gallery is empty. Personal therefore reports OK even at zero pieces;
-# Gate 12c (added in Plan 04) enforces ≥1 each in the FOUND-05 strong categories
-# (design + marketing).
+# splash card if the gallery is empty. Per Plan 02-07 Wave 3 deviation: 'finance' may also
+# be empty at launch (Caleb chose to defer real Finance content via draft: true).
+# Gate 4 is therefore category-agnostic: any category with ≥0 non-draft pieces is OK at
+# this layer. The FOUND-05 strong-floor (design + marketing must each have ≥1) is
+# enforced separately by Gate 12c so the distinction between "empty by intent" and
+# "missing critical content" stays explicit.
 for cat in design finance personal marketing; do
   count=$(find "$DIST/$cat" -mindepth 2 -name index.html 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$count" -lt 1 ]]; then
-    if [[ "$cat" == "personal" ]]; then
-      echo "  OK: $cat has 0 pieces (D-11 — empty gallery acceptable; SPLASH-04 drops the card at Phase 4)"
-    else
-      echo "  FAIL: $cat has no piece detail pages (expected ≥1)"
-      fail=1
-    fi
+    echo "  OK: $cat has 0 pieces (empty gallery acceptable per D-11 / Wave 3 deviation; Gate 12c enforces strong-floor categories)"
   else
     echo "  OK: $cat has $count piece(s)"
   fi
