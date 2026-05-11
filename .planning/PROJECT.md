@@ -12,22 +12,20 @@ A recruiter from any of the analyst / brand / marketing / design worlds can self
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Splash landing page with the prompt "What do you wish to see?" featuring Caleb's name and four category cards (Design / Finance / Personal / Marketing) — Phase 1
+- [x] Four discipline pages — one per category — each showing every piece in that discipline as a browseable gallery — Phase 1; Personal renders empty-state per D-11
+- [x] Piece detail page: large asset preview (image/PDF) + short context blurb structured as Context / Role / Outcome — Phase 1 + Phase 2 (paginated PDF render + Open full PDF link)
+- [x] About / bio page — short personal intro establishing the cross-functional pitch — Phase 2 (122-word first-person bio)
+- [x] Downloadable resume PDF — Phase 2 (`public/caleb-lim-resume.pdf`, 193 KB, all metadata stripped; header link is Phase 4)
 
 ### Active
-
-- [ ] Splash landing page with the prompt "What do you wish to see?" featuring Caleb's name and four category cards (Design / Finance / Personal / Marketing)
-- [ ] Four discipline pages — one per category — each showing every piece in that discipline as a browseable gallery
-- [ ] Piece detail page: large asset preview (image/PDF) + short context blurb structured as Context / Role / Outcome
-- [ ] About / bio page — short personal intro establishing the cross-functional pitch
-- [ ] Downloadable resume PDF, linked from header / about
 - [ ] Contact mechanism (email link or simple form)
 - [ ] Links out to LinkedIn and other relevant socials
 - [ ] Bold / expressive visual identity — oversized type, strong color, playful layout (the brand-creative-with-finance-chops energy)
 - [ ] **Design must NOT read as AI-generated.** No generic shadcn-card / purple-gradient / centered-hero template look. Distinctive, opinionated layouts in the Readymag and Framer reference vein — magazine-grade typography, asymmetric / non-grid composition, motion as a first-class element. Use the `frontend-design` skill's principles when implementing.
 - [ ] Mobile-responsive — recruiters skim on phones
 - [ ] Custom domain (TBD — to be recommended) deployed on a free or cheap host
-- [ ] Initial content uploaded: 5–15 pieces total spread across the four categories
+- [ ] Initial content uploaded: 5–15 pieces total spread across the four categories — Phase 2 shipped 2 non-draft pieces (PVL design + marketing); finance flipped to `draft: true` per Caleb's call; remaining 3+ pieces backfill via FUTURE-06
 
 ### Out of Scope
 
@@ -87,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-10 after Phase 1 (walking-skeleton) completion. Splash + four gallery routes + piece-detail route all resolve end-to-end against placeholder content; PIECE-01 (no iframe) and PIECE-02 (Context/Role/Outcome) contracts hold; PDF rasterization de-risked locally (CF Pages parity owed by Phase 2). All four Active requirements above remain Active — phase 1 validated the route skeleton, not the bold/expressive visual identity.*
+*Last updated: 2026-05-11 after Phase 2 (asset-pipeline-real-content) completion via gap closure. Pipeline productionized: `scripts/pdf-preprocess.mjs` rasterizes source PDFs at build time → `cover.webp` + paginated `page-N.webp` + `.cache.json`; About page + 193 KB EXIF-stripped resume live; piece detail template renders paginated `<img>` sequence + Open full PDF link. Two real PVL pieces shipped (design with full PDF pipeline exercised; marketing image-only); finance flipped to `draft: true` per scope deferral. 13 smoke gates green. SC2 (5-15 pieces) and the bold/expressive visual identity requirement remain Active — Phase 3 (visual-design-system) carries the latter.*
