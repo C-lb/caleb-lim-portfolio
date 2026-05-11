@@ -36,20 +36,18 @@ for cat in design finance personal marketing; do
   fi
 done
 
-# Gate 4: each category has at least one piece detail page
+# Gate 4: report piece count per category (empty galleries acceptable here)
 # Per Phase 2 D-11: 'personal' may be empty at launch — Phase 4 / SPLASH-04 will drop the
-# splash card if the gallery is empty. Personal therefore reports OK even at zero pieces;
-# Gate 12c (added in Plan 04) enforces ≥1 each in the FOUND-05 strong categories
-# (design + marketing).
+# splash card if the gallery is empty. Per Plan 02-07 Wave 3 deviation: 'finance' may also
+# be empty at launch (Caleb chose to defer real Finance content via draft: true).
+# Gate 4 is therefore category-agnostic: any category with ≥0 non-draft pieces is OK at
+# this layer. The FOUND-05 strong-floor (design + marketing must each have ≥1) is
+# enforced separately by Gate 12c so the distinction between "empty by intent" and
+# "missing critical content" stays explicit.
 for cat in design finance personal marketing; do
   count=$(find "$DIST/$cat" -mindepth 2 -name index.html 2>/dev/null | wc -l | tr -d ' ')
   if [[ "$count" -lt 1 ]]; then
-    if [[ "$cat" == "personal" ]]; then
-      echo "  OK: $cat has 0 pieces (D-11 — empty gallery acceptable; SPLASH-04 drops the card at Phase 4)"
-    else
-      echo "  FAIL: $cat has no piece detail pages (expected ≥1)"
-      fail=1
-    fi
+    echo "  OK: $cat has 0 pieces (empty gallery acceptable per D-11 / Wave 3 deviation; Gate 12c enforces strong-floor categories)"
   else
     echo "  OK: $cat has $count piece(s)"
   fi
@@ -228,6 +226,212 @@ print(m2.group(1).strip().strip(DQ).strip(SQ))
     echo "  OK: $slug fullPdf link present ($full_pdf)"
   fi
 done < <(find src/content/pieces -mindepth 2 -maxdepth 2 -name index.md -type f)
+
+# Gate 12: FOUND-05 — content shape (NON-DRAFT piece count + distribution + no PLACEHOLDER + no banned phrases + no phase-1-skeleton)
+# D-10 minimum, softened by Plan 02-07 Wave 3 deviation: 2+ NON-DRAFT pieces (originally 3,
+# loosened because Caleb explicitly deferred finance via draft: true — the in-spirit floor
+# now reflects design + marketing as the two confirmed-shipping pieces), with >=1 each
+# in design + marketing (the FOUND-05 "strong categories" stay strong-floored).
+# Locks the source-tree shape Plan 02-05 established + Wave 3 finalised; any regression
+# (re-introduced PLACEHOLDER in a non-draft piece, deleted strong-category piece, banned
+# phrase slipping in) is caught here before it reaches deploy.
+#
+# Wave 3 deviation: ALL Gate 12 sub-gates EXCLUDE drafts. The deferred finance placeholder
+# (draft: true with PLACEHOLDER body) is intentionally allowed to coexist; only non-draft
+# pieces are policed. Drafts are filtered via grep -L '^draft: true' (returns files NOT
+# matching the pattern — i.e., non-draft pieces).
+
+# Helper: list paths of all NON-DRAFT pieces' index.md files (one per line).
+# Use -L to invert (files NOT matching '^draft: true'); fall back to empty string if none.
+list_non_draft_pieces() {
+  local f
+  for f in src/content/pieces/*/index.md; do
+    [[ -f "$f" ]] || continue
+    grep -q '^draft: true' "$f" 2>/dev/null && continue
+    echo "$f"
+  done
+}
+
+# 12a: phase-1-skeleton deletion lock (D-11 enforcement; Plan 02-04 Task 1 deleted; Gate 12a ensures it stays gone)
+if [[ -d src/content/pieces/phase-1-skeleton ]]; then
+  echo "  FAIL: src/content/pieces/phase-1-skeleton/ still exists — D-11 violation"
+  fail=1
+else
+  echo "  OK: phase-1-skeleton not found in source tree (D-11)"
+fi
+
+# 12b: NON-DRAFT piece count floor (D-10 'in spirit, not numbers' minimum, Wave 3 = 2)
+# Original spec: >=3. Loosened to >=2 because Caleb explicitly deferred finance via
+# draft: true in Wave 3. The "in spirit" floor is now design + marketing (two confirmed
+# shipping pieces). Open Items in 02-07-SUMMARY.md tracks this 2-vs-3 reasoning.
+non_draft_count=$(list_non_draft_pieces | wc -l | tr -d ' ')
+if (( non_draft_count < 2 )); then
+  echo "  FAIL: only $non_draft_count non-draft pieces found, expected >=2 (FOUND-05 minimum per D-10, loosened from 3 by Wave 3 deviation — Caleb deferred finance)"
+  fail=1
+else
+  echo "  OK: non-draft piece count = $non_draft_count (>=2 per Wave 3 deviation; original D-10 spec was >=3)"
+fi
+
+# 12c: distribution — at least 1 design + 1 marketing NON-DRAFT piece (FOUND-05 strong-category floor)
+# NOTE: BSD grep (macOS default) does NOT support \b word boundaries reliably; use -E with
+# an anchored alternation (end-of-line OR whitespace) so the pattern works on both BSD and GNU grep.
+# Pattern '^category: design( |$)' matches 'category: design' or 'category: design ' (trailing space ok)
+# but NOT 'category: designers' (would only match if the next char is space or EOL).
+# Wave 3 deviation: drafts EXCLUDED — finance-as-draft does NOT count toward any floor.
+for required_cat in design marketing; do
+  cat_count=0
+  while IFS= read -r np_file; do
+    [[ -z "$np_file" ]] && continue
+    if grep -qE "^category: ${required_cat}( |$)" "$np_file" 2>/dev/null; then
+      cat_count=$((cat_count + 1))
+    fi
+  done < <(list_non_draft_pieces)
+  if (( cat_count < 1 )); then
+    echo "  FAIL: $required_cat has $cat_count non-draft pieces, expected >=1 (FOUND-05 strong category per D-10)"
+    fail=1
+  else
+    echo "  OK: $required_cat has $cat_count non-draft piece(s)"
+  fi
+done
+
+# 12d: no PLACEHOLDER substring in any NON-DRAFT piece's index.md
+# Phase 1 SUMMARY canonicalized PLACEHOLDER as the stand-in marker; Plan 02-05 was supposed to
+# remove all instances from shipping pieces. This gate ensures none slip back in via a future
+# content edit. Wave 3 deviation: drafts EXCLUDED so the deferred finance placeholder is
+# explicitly tolerated; only non-draft pieces are policed.
+placeholder_hits=""
+while IFS= read -r np_file; do
+  [[ -z "$np_file" ]] && continue
+  if grep -l 'PLACEHOLDER' "$np_file" >/dev/null 2>&1; then
+    placeholder_hits="$placeholder_hits$np_file"$'\n'
+  fi
+done < <(list_non_draft_pieces)
+if [[ -n "$placeholder_hits" ]]; then
+  echo "  FAIL: PLACEHOLDER substring found in non-draft piece(s):"
+  echo "$placeholder_hits" | sed '/^$/d; s/^/    /'
+  fail=1
+else
+  echo "  OK: no non-draft piece left with PLACEHOLDER substring"
+fi
+
+# 12e: no banned filler phrases in NON-DRAFT piece content (D-09 / D-12 voice rule)
+# Gate 9 covers About bio (rendered HTML <article>); Gate 12e covers piece source markdown.
+# Filter YAML comments via 'grep -v ^#' to avoid header-prose self-invalidation
+# (per planner critical-rule: a comment naming a banned phrase would itself trip the gate).
+# Wave 3 deviation: drafts EXCLUDED.
+banned_hits=""
+while IFS= read -r np_file; do
+  [[ -z "$np_file" ]] && continue
+  hit=$(grep -v '^#' "$np_file" 2>/dev/null | grep -iE 'passionate|multidisciplinary|intersection of' || true)
+  if [[ -n "$hit" ]]; then
+    banned_hits="$banned_hits$np_file: $hit"$'\n'
+  fi
+done < <(list_non_draft_pieces)
+if [[ -n "$banned_hits" ]]; then
+  echo "  FAIL: banned filler phrase found in non-draft piece content:"
+  echo "$banned_hits" | sed '/^$/d' | head -5 | sed 's/^/    /'
+  fail=1
+else
+  echo "  OK: no banned filler phrases in non-draft piece content"
+fi
+
+# Gate 13: CR-01 draft-skip smoke check (runtime exercise of Plan 02-06's pipeline guard)
+# Plan 02-06 added an early-continue in scripts/pdf-preprocess.mjs's discoverPieces()
+# for any piece with draft: true + source.pdf, preventing the asset leak documented in
+# 02-REVIEW.md CR-01. This gate creates a synthetic draft fixture, runs the prebuild,
+# and asserts the SKIP behavior fires correctly. Without this gate, CR-01 has no runtime
+# regression coverage — only the source-code patch is verifiable.
+#
+# The fixture slug uses '__draft-skip-test__' (double-underscore prefix + suffix) to
+# make it visually obvious as test-only and avoid collision with real Caleb pieces.
+# Cleanup runs via bash trap on EXIT so a mid-gate crash cannot pollute the worktree.
+DRAFT_TEST_SLUG="__draft-skip-test__"
+DRAFT_TEST_DIR="src/content/pieces/$DRAFT_TEST_SLUG"
+DRAFT_TEST_THUMB_DIR="public/generated/pdf-thumbs/$DRAFT_TEST_SLUG"
+DRAFT_TEST_SOURCE_PDF="public/source-pdfs/$DRAFT_TEST_SLUG.pdf"
+
+cleanup_draft_test() {
+  rm -rf "$DRAFT_TEST_DIR" "$DRAFT_TEST_THUMB_DIR" "$DRAFT_TEST_SOURCE_PDF" 2>/dev/null || true
+}
+# Trap EXIT so cleanup always runs (success, failure, or interrupt during Gate 13)
+trap cleanup_draft_test EXIT
+
+# Pre-clean (in case a previous failed run left fixtures behind)
+cleanup_draft_test
+
+# Create fixture
+mkdir -p "$DRAFT_TEST_DIR"
+cat > "$DRAFT_TEST_DIR/index.md" <<'DRAFT_FIXTURE_EOF'
+---
+title: "draft skip test fixture (do not commit)"
+category: design
+order: 9999
+draft: true
+hero: "./hero.png"
+fullPdf: "/source-pdfs/__draft-skip-test__.pdf"
+pdfPaginate: [1]
+role: |
+  Fixture role — never rendered.
+outcome: |
+  Fixture outcome — never rendered.
+context: |
+  Fixture context — never rendered. This piece exists only to verify CR-01 draft-skip behavior in pdf-preprocess.mjs.
+DRAFT_FIXTURE_EOF
+# Stub assets — pdf-preprocess never opens them because draft-skip fires first.
+EXISTING_HERO=$(find src/content/pieces -mindepth 2 -maxdepth 2 -name 'hero.*' -not -path "*$DRAFT_TEST_SLUG*" 2>/dev/null | head -1)
+if [[ -n "$EXISTING_HERO" ]]; then
+  cp "$EXISTING_HERO" "$DRAFT_TEST_DIR/hero.png"
+else
+  printf '\x89PNG\r\n\x1a\n' > "$DRAFT_TEST_DIR/hero.png"
+fi
+# Stub source.pdf — never opened because draft-skip fires before getDocument()
+echo > "$DRAFT_TEST_DIR/source.pdf"
+
+# Run the prebuild script directly (npm run pdf-preprocess uses the same script)
+# Capture stdout for the SKIP assertion. Use 'set +e' temporarily so a non-zero
+# exit doesn't crash this gate before the assertions run.
+set +e
+PREBUILD_OUTPUT=$(node scripts/pdf-preprocess.mjs 2>&1)
+PREBUILD_EXIT=$?
+set -e
+
+gate13_fail=0
+
+# Assertion 1: prebuild exited 0 (CR-01 skip is non-fatal — should not crash the build)
+if [[ $PREBUILD_EXIT -ne 0 ]]; then
+  echo "  FAIL: Gate 13 — pdf-preprocess.mjs exited $PREBUILD_EXIT against draft fixture (expected 0; CR-01 should skip cleanly)"
+  echo "$PREBUILD_OUTPUT" | head -10 | sed 's/^/    /'
+  gate13_fail=1
+fi
+
+# Assertion 2: SKIP log line present (proves CR-01 fix observable in stdout)
+if ! echo "$PREBUILD_OUTPUT" | grep -q "SKIP $DRAFT_TEST_SLUG (draft)"; then
+  echo "  FAIL: Gate 13 — expected 'SKIP $DRAFT_TEST_SLUG (draft)' in prebuild output (CR-01 fix may have regressed)"
+  echo "$PREBUILD_OUTPUT" | tail -5 | sed 's/^/    /'
+  gate13_fail=1
+fi
+
+# Assertion 3: no thumb directory created (proves no rasterization happened)
+if [[ -d "$DRAFT_TEST_THUMB_DIR" ]]; then
+  echo "  FAIL: Gate 13 — $DRAFT_TEST_THUMB_DIR/ exists; draft piece's assets leaked (CR-01 BLOCKER regressed)"
+  gate13_fail=1
+fi
+
+# Assertion 4: no source.pdf copy created (proves fullPdf side-effect skipped)
+if [[ -f "$DRAFT_TEST_SOURCE_PDF" ]]; then
+  echo "  FAIL: Gate 13 — $DRAFT_TEST_SOURCE_PDF exists; draft piece's source PDF leaked (CR-01 BLOCKER regressed for fullPdf side-effect)"
+  gate13_fail=1
+fi
+
+if [[ $gate13_fail -eq 0 ]]; then
+  echo "  OK: Gate 13 — CR-01 draft-skip behavior verified (fixture: $DRAFT_TEST_SLUG)"
+else
+  fail=1
+fi
+
+# Cleanup happens via trap; explicit call here is belt-and-suspenders for the success path
+cleanup_draft_test
+trap - EXIT
 
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
