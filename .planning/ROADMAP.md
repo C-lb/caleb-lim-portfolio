@@ -61,7 +61,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 02-04-PLAN.md — Real content authoring (delete phase-1-skeleton + replace placeholders + commit generated outputs + Gate 12) — SHIPPED-WITH-PLACEHOLDERS; Tasks 2-4 deferred to gap closure
 - [x] 02-05-PLAN.md — [GAP CLOSURE] Real content authoring per D-13 collaborative flow (closes SC2 / SC5 / FOUND-05; exercises SC1 PDF pipeline against real input)
 - [x] 02-06-PLAN.md — [GAP CLOSURE] Pipeline correctness fixes from 02-REVIEW.md (CR-01 draft-skip, WR-01 orphan prune, WR-02 fullPdf canonical-path contract)
-- [ ] 02-07-PLAN.md — [GAP CLOSURE] Gate 12 (a-e) + Gate 13 (CR-01 runtime exercise) + commit generated outputs per D-03 + final integrated UAT
+- [x] 02-07-PLAN.md — [GAP CLOSURE] Gate 12 (a-e) + Gate 13 (CR-01 runtime exercise) + commit generated outputs per D-03 + final integrated UAT
 
 ### Phase 3: Visual Design System
 **Goal**: The locked Magazine-maximalist direction from sketch 001 is fully applied. The site reads as confident hand-crafted brand work, not as a v0/shadcn template. Every AI-tell from VISUAL-04 is verifiably absent.
