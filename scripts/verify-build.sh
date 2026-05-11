@@ -335,6 +335,104 @@ else
   echo "  OK: no banned filler phrases in non-draft piece content"
 fi
 
+# Gate 13: CR-01 draft-skip smoke check (runtime exercise of Plan 02-06's pipeline guard)
+# Plan 02-06 added an early-continue in scripts/pdf-preprocess.mjs's discoverPieces()
+# for any piece with draft: true + source.pdf, preventing the asset leak documented in
+# 02-REVIEW.md CR-01. This gate creates a synthetic draft fixture, runs the prebuild,
+# and asserts the SKIP behavior fires correctly. Without this gate, CR-01 has no runtime
+# regression coverage — only the source-code patch is verifiable.
+#
+# The fixture slug uses '__draft-skip-test__' (double-underscore prefix + suffix) to
+# make it visually obvious as test-only and avoid collision with real Caleb pieces.
+# Cleanup runs via bash trap on EXIT so a mid-gate crash cannot pollute the worktree.
+DRAFT_TEST_SLUG="__draft-skip-test__"
+DRAFT_TEST_DIR="src/content/pieces/$DRAFT_TEST_SLUG"
+DRAFT_TEST_THUMB_DIR="public/generated/pdf-thumbs/$DRAFT_TEST_SLUG"
+DRAFT_TEST_SOURCE_PDF="public/source-pdfs/$DRAFT_TEST_SLUG.pdf"
+
+cleanup_draft_test() {
+  rm -rf "$DRAFT_TEST_DIR" "$DRAFT_TEST_THUMB_DIR" "$DRAFT_TEST_SOURCE_PDF" 2>/dev/null || true
+}
+# Trap EXIT so cleanup always runs (success, failure, or interrupt during Gate 13)
+trap cleanup_draft_test EXIT
+
+# Pre-clean (in case a previous failed run left fixtures behind)
+cleanup_draft_test
+
+# Create fixture
+mkdir -p "$DRAFT_TEST_DIR"
+cat > "$DRAFT_TEST_DIR/index.md" <<'DRAFT_FIXTURE_EOF'
+---
+title: "draft skip test fixture (do not commit)"
+category: design
+order: 9999
+draft: true
+hero: "./hero.png"
+fullPdf: "/source-pdfs/__draft-skip-test__.pdf"
+pdfPaginate: [1]
+role: |
+  Fixture role — never rendered.
+outcome: |
+  Fixture outcome — never rendered.
+context: |
+  Fixture context — never rendered. This piece exists only to verify CR-01 draft-skip behavior in pdf-preprocess.mjs.
+DRAFT_FIXTURE_EOF
+# Stub assets — pdf-preprocess never opens them because draft-skip fires first.
+EXISTING_HERO=$(find src/content/pieces -mindepth 2 -maxdepth 2 -name 'hero.*' -not -path "*$DRAFT_TEST_SLUG*" 2>/dev/null | head -1)
+if [[ -n "$EXISTING_HERO" ]]; then
+  cp "$EXISTING_HERO" "$DRAFT_TEST_DIR/hero.png"
+else
+  printf '\x89PNG\r\n\x1a\n' > "$DRAFT_TEST_DIR/hero.png"
+fi
+# Stub source.pdf — never opened because draft-skip fires before getDocument()
+echo > "$DRAFT_TEST_DIR/source.pdf"
+
+# Run the prebuild script directly (npm run pdf-preprocess uses the same script)
+# Capture stdout for the SKIP assertion. Use 'set +e' temporarily so a non-zero
+# exit doesn't crash this gate before the assertions run.
+set +e
+PREBUILD_OUTPUT=$(node scripts/pdf-preprocess.mjs 2>&1)
+PREBUILD_EXIT=$?
+set -e
+
+gate13_fail=0
+
+# Assertion 1: prebuild exited 0 (CR-01 skip is non-fatal — should not crash the build)
+if [[ $PREBUILD_EXIT -ne 0 ]]; then
+  echo "  FAIL: Gate 13 — pdf-preprocess.mjs exited $PREBUILD_EXIT against draft fixture (expected 0; CR-01 should skip cleanly)"
+  echo "$PREBUILD_OUTPUT" | head -10 | sed 's/^/    /'
+  gate13_fail=1
+fi
+
+# Assertion 2: SKIP log line present (proves CR-01 fix observable in stdout)
+if ! echo "$PREBUILD_OUTPUT" | grep -q "SKIP $DRAFT_TEST_SLUG (draft)"; then
+  echo "  FAIL: Gate 13 — expected 'SKIP $DRAFT_TEST_SLUG (draft)' in prebuild output (CR-01 fix may have regressed)"
+  echo "$PREBUILD_OUTPUT" | tail -5 | sed 's/^/    /'
+  gate13_fail=1
+fi
+
+# Assertion 3: no thumb directory created (proves no rasterization happened)
+if [[ -d "$DRAFT_TEST_THUMB_DIR" ]]; then
+  echo "  FAIL: Gate 13 — $DRAFT_TEST_THUMB_DIR/ exists; draft piece's assets leaked (CR-01 BLOCKER regressed)"
+  gate13_fail=1
+fi
+
+# Assertion 4: no source.pdf copy created (proves fullPdf side-effect skipped)
+if [[ -f "$DRAFT_TEST_SOURCE_PDF" ]]; then
+  echo "  FAIL: Gate 13 — $DRAFT_TEST_SOURCE_PDF exists; draft piece's source PDF leaked (CR-01 BLOCKER regressed for fullPdf side-effect)"
+  gate13_fail=1
+fi
+
+if [[ $gate13_fail -eq 0 ]]; then
+  echo "  OK: Gate 13 — CR-01 draft-skip behavior verified (fixture: $DRAFT_TEST_SLUG)"
+else
+  fail=1
+fi
+
+# Cleanup happens via trap; explicit call here is belt-and-suspenders for the success path
+cleanup_draft_test
+trap - EXIT
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
