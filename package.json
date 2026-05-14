@@ -12,7 +12,8 @@
     "pdf-poc": "node scripts/pdf-poc.mjs",
     "pdf-preprocess": "node scripts/pdf-preprocess.mjs",
     "prebuild": "node scripts/pdf-preprocess.mjs",
-    "test:smoke": "bash scripts/verify-build.sh"
+    "test:smoke": "bash scripts/verify-build.sh",
+    "verify:anti-ai": "bash scripts/verify-anti-ai-tells.sh"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.2.10",
