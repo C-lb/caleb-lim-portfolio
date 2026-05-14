@@ -1,20 +1,263 @@
 ---
-import { CATEGORIES } from '../content/categories';
+import Base from '../layouts/Base.astro';
+import DisciplineCard from '../components/DisciplineCard.astro';
+import { CATEGORIES, type Category } from '../content/categories';
+import { DISCIPLINE_ACCENT, DISCIPLINE_K } from '../styles/disciplines';
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import portrait from '../assets/portrait.jpg';
+
+// SPLASH-04 / D-07: drop cards for empty disciplines. Build-time count of
+// non-draft pieces per category. Personal often empty at launch.
+const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+const countByCategory: Record<Category, number> = {
+  design: 0, finance: 0, personal: 0, marketing: 0,
+};
+for (const piece of allPieces) {
+  countByCategory[piece.data.category]++;
+}
+const populatedCategories = CATEGORIES.filter((c) => countByCategory[c] > 0);
+// N-card grid template (UI-SPEC.md lines 446-451)
+const gridTemplate = {
+  4: '1.2fr 0.85fr 1fr 1fr',
+  3: '1fr 1fr 1fr',
+  2: '1fr 1fr',
+  1: '1fr',
+}[populatedCategories.length] ?? '1fr 1fr 1fr 1fr';
+// DISCIPLINE_ACCENT is imported to keep the splash's k→accent contract co-located
+// even though the card component owns its own CSS; suppress unused-import lint.
+void DISCIPLINE_ACCENT;
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Caleb Lim — Portfolio</title>
-  </head>
-  <body>
-    <h1>Caleb Lim</h1>
-    <p>What do you wish to see?</p>
-    <nav>
-      <ul>
-        {CATEGORIES.map((c) => <li><a href={`/${c}`}>{c}</a></li>)}
-      </ul>
-    </nav>
-  </body>
-</html>
+<Base title="Caleb Lim — Portfolio" bg="paper">
+  <section class="b-splash">
+    <div class="b-hero">
+      <div class="b-portrait">
+        <Image src={portrait} alt="Portrait of Caleb Lim" widths={[280, 560]} sizes="280px" />
+      </div>
+      <div class="b-name">
+        <h1>CALEB<br /><span class="lim">LIM</span><span class="stop">.</span></h1>
+        <span class="stamp">EST. 2026 · SG</span>
+        <div class="roles">
+          <span>analyst</span>
+          <span>brand strategist</span>
+          <span>designer</span>
+          <span>marketer</span>
+        </div>
+      </div>
+      <div class="b-bio">
+        <span class="b-bio-tag">→ THE PITCH</span>
+        <h3>CROSS-FUNCTIONAL — BY DESIGN.</h3>
+        <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
+        <span class="b-bio-strike" aria-hidden="true">04</span>
+        <span class="b-bio-arrow">→ KEEP READING</span>
+      </div>
+    </div>
+    <div class="b-question">
+      <span class="marker">→ PICK ONE</span>
+      <span class="q">What do you wish to <em>see</em>?</span>
+      <span class="arrow" aria-hidden="true">↓</span>
+    </div>
+    <div class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
+      {populatedCategories.map((cat, i) => (
+        <DisciplineCard
+          category={cat}
+          k={DISCIPLINE_K[cat]}
+          index={(i + 1) as 1 | 2 | 3 | 4}
+        />
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* --- Sketch lines 283-530 verbatim, adapted to scoped Astro --- */
+  .b-splash {
+    min-height: calc(100vh - 120px); /* leave room for Base topbar + footer */
+    padding: 22px 28px 22px; /* sketch line 285 — UI-SPEC OVERRIDE-03 */
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: 14px;
+  }
+
+  /* HERO BAND: portrait | name+roles | bio (sketch lines 309-414) */
+  .b-hero {
+    display: grid;
+    grid-template-columns: 280px 1.5fr 1.2fr;
+    gap: 16px;
+    align-items: stretch;
+    min-height: 380px;
+  }
+  .b-portrait {
+    background: var(--ink);
+    border-radius: 8px;
+    transform: rotate(-1.2deg);
+    overflow: hidden;
+    position: relative;
+  }
+  .b-portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .b-name {
+    position: relative;
+    padding: 8px 0;
+  }
+  .b-name h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    font-variation-settings: "wdth" 100, "opsz" 96;
+    margin: 0;
+  }
+  .b-name h1 .lim { color: var(--terracotta); }
+  .b-name h1 .stop { color: var(--cobalt); }
+  .b-name .stamp {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: rotate(4deg);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .b-name .roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-1);
+    margin-top: var(--sp-5);
+    font-size: var(--fs-body);
+    line-height: var(--lh-tight);
+  }
+  .b-name .roles span { padding: 0 8px; }
+  .b-name .roles span:nth-child(odd)  { color: var(--cobalt); font-weight: 500; font-family: var(--sans); }
+  .b-name .roles span:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); font-weight: 400; }
+
+  /* BIO STICKER */
+  .b-bio {
+    background: var(--acid);
+    color: var(--ink);
+    border-radius: 10px;
+    padding: 22px 24px 64px; /* sketch line 387 — UI-SPEC OVERRIDE-03 */
+    position: relative;
+    overflow: hidden;
+    transform: rotate(0.5deg);
+  }
+  .b-bio-tag {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: var(--sp-2);
+  }
+  .b-bio h3 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: var(--fs-h3);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin: 0 0 var(--sp-2);
+  }
+  .b-bio p {
+    font-family: var(--serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    font-weight: 400;
+    margin: 0;
+    max-width: 32ch;
+  }
+  .b-bio-strike {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: var(--fs-deco-numeral);
+    color: var(--ink);
+    opacity: 0.1;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .b-bio-arrow {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* QUESTION BAR */
+  .b-question {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 12px 0; /* sketch line 424 — UI-SPEC OVERRIDE-03 */
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  .b-question .marker {
+    background: var(--acid);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+  .b-question .q {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: var(--fs-q);
+    font-weight: 600;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .b-question .q em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--terracotta);
+    text-transform: none;
+  }
+  .b-question .arrow {
+    color: var(--cobalt);
+    font-family: var(--sans);
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  /* CARDS ROW */
+  .b-cards {
+    display: grid;
+    gap: 10px; /* sketch line 452 — UI-SPEC OVERRIDE-03 */
+  }
+
+  /* Mobile collapse @ ≤900px (sketch lines 615-626) */
+  @media (max-width: 900px) {
+    .b-splash { padding: var(--sp-5); }
+    .b-hero {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .b-portrait { aspect-ratio: 4/3; transform: none; }
+    .b-cards { grid-template-columns: 1fr 1fr !important; }
+    .b-question { flex-direction: column; align-items: flex-start; }
+  }
+</style>
