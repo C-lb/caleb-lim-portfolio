@@ -5,11 +5,28 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-05-14
+revised: 2026-05-14
 ---
 
 # Phase 3 — UI Design Contract
 
 > Visual and interaction contract for the Magazine-maximalist visual system. The locked anchor is `.planning/sketches/001-direction-comparison/index.html` `.variant-b` (CSS lines 262–627). Numbers below are extracted verbatim from that sketch — re-deriving them is how the magazine composition becomes a portfolio template (anti-AI-tell, see CONTEXT.md D-17 + RESEARCH.md "Don't Hand-Roll").
+
+---
+
+## Verification Override Register
+
+This phase's design intentionally exceeds two of `gsd-ui-checker`'s default thresholds. Both are SaaS-app defaults; this is a magazine-grade portfolio whose typographic and spatial hierarchy IS the brand artifact. The overrides are bounded, enumerated, and audit-greppable.
+
+`grep -A 1 "verification_override" 03-UI-SPEC.md` — machine-readable audit hook for `/gsd-ui-review` and `/gsd-code-review`.
+
+| verification_override | Dimension | Default Threshold | Override Value | Justification | Source |
+|-----------------------|-----------|-------------------|----------------|---------------|--------|
+| OVERRIDE-01 | Dimension 4 — Typography (font-size count) | Max 4 font-size tokens | 11 sizes (`--fs-display`, `--fs-cat`, `--fs-q`, `--fs-card`, `--fs-h3`, `--fs-ttl`, `--fs-body`, `--fs-tile-role`, `--fs-mono`, `--fs-card-no`, `--fs-deco-numeral`) | Magazine-grade typographic hierarchy is the brand artifact for a portfolio targeting brand-management roles. Reducing to 4 sizes would force the design into the editorial-minimalist Variant A direction the user explicitly rejected. | PROJECT.md "bold/expressive visual identity"; REQUIREMENTS.md VISUAL-01 (locks the type triple); REQUIREMENTS.md VISUAL-04 (rejects Inter — implies intentional type system); CONTEXT.md D-15/D-16; sketch 001 README.md (winner = Variant B "Magazine maximalist") |
+| OVERRIDE-02 | Dimension 4 — Typography (font-weight count) | Max 2 font-weights | 6 weights (800, 700, 600, 500, 400, 300) — each role-coded, not stylistic noise | Bricolage variable axis exists precisely to render multi-weight hierarchy without per-weight HTTP cost. Fraunces 300 italic IS the editorial pairing — without the light italic accent, Fraunces collapses into "another serif." | sketch 001 lines 357, 364–365, 374–379, 384, 399, 411, 435, 441, 482, 557, 596; CONTEXT.md D-15/D-16 (Bricolage `wght` 200..800 axis shipped, Fraunces italic-only variable, JetBrains Mono 400 + 600) |
+| OVERRIDE-03 | Dimension 5 — Spacing (4-multiple constraint) | All spacing values multiples of 4 in standard set {4, 8, 16, 24, 32, 48, 64} | Standard token scale conforms; 7 sketch-locked raw values exist as documented component spacing OUTSIDE the token system | Magazine-maximalist composition requires sketch-locked tile/pill geometry that doesn't quantize to a 4px grid. Restructuring would shift sketch composition. Override is bounded — any NEW spacing value must conform to the token scale. | sketch 001 lines 285, 299, 314, 387, 424, 452, 586 |
+
+**Override discipline:** Overrides are NOT a blanket exemption. New typography roles must justify themselves against the existing 11-size system (extend the system, don't sprawl it). New spacing values must conform to the strict token scale below. The sketch-locked raw values are an enumerated whitelist — anything beyond them is drift.
 
 ---
 
@@ -45,35 +62,70 @@ created: 2026-05-14
 
 ## Spacing Scale
 
-The sketch uses ad-hoc px values (gaps of 10/12/14/16/22/24/28/32). Phase 3 formalizes into a token scale on a 4px base. **Token names declared, used in tokens.css; the existing sketch px values map onto these tokens 1:1 below.**
+The spacing TOKEN scale is strict and conforming to the 4-multiple standard set. Sketch-locked raw values that fall outside this scale live in the dedicated section below — they are NOT tokens.
 
-Declared values (multiples of 4):
+### Token scale (strict, conforming)
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--sp-1` | 4px | Roles list inter-token gap (`gap: 4px 12px`); stamp margin nudges |
-| `--sp-2` | 8px | Pulsing-dot inline padding; status-pill internal margins |
-| `--sp-3` | 12px | Gallery tile gap (`b-pieces gap`); card column gap (`b-cards gap` rounded from 10px → 12px), border-bottom paddings |
-| `--sp-4` | 16px | Hero-band gap; bio-block internal gap; question-bar inner gap (rounded from 18px) |
-| `--sp-5` | 24px | Bio-block padding (rounded from 22px); category header column gap (`b-cat-head gap: 32px` keeps 32px); section-divider padding |
-| `--sp-6` | 32px | Category page padding; gallery top margin (`margin-top: 32px`); category back-pill row spacing |
+| `--sp-1` | 4px | Roles list inter-token gap; stamp margin nudges |
+| `--sp-2` | 8px | Pulsing-dot inline padding; status-pill internal margins; back-pill vertical padding |
+| `--sp-4` | 16px | Hero-band gap (sketch line 314); bio-block internal gap; gallery tile vertical padding |
+| `--sp-5` | 24px | Bio-block right padding (sketch line 387, second value); category header column gap when in scale |
+| `--sp-6` | 32px | Category page padding; gallery top margin; category back-pill row spacing; category header `b-cat-head gap: 32px` |
 | `--sp-8` | 48px | Below-fold breathing on detail page (CRO blurb stacks); 404 caption-to-cards gap |
-| `--sp-10` | 64px | Bio sticker bottom inset (`padding-bottom: 64px` accommodates the strike-text deco); page-level vertical rhythm |
+| `--sp-10` | 64px | Bio sticker bottom inset (sketch line 387, third value — accommodates the strike-text deco + KEEP READING chip); page-level vertical rhythm |
 
-**Exceptions (sketch-locked, do NOT round to scale):**
+**Contract for new spacing decisions:** Any spacing value introduced during execution that is NOT on the sketch-locked list below MUST come from this token scale. The override (OVERRIDE-03) is bounded to the enumerated sketch-locked values only — not a blanket exemption to invent new raw-px values.
 
-- `padding: 22px 28px 22px` on `.b-splash` outer — sketch's compact above-fold-fit value at 1280px. Rounding loses the splash composition.
-- `gap: 10px` between cards (`.b-cards`) — sketch precision; rounding to 12px breaks 4-card fit at 1280px.
-- `padding: 6px 14px` on status pill — pill geometry locked to sketch.
-- `padding: 14px 16px 16px` on `.b-card` interior — tuned to keep card title baseline aligned across rotated cards.
-- `padding: 16px 18px` on gallery tile — sketch precision.
-- Decoration absolutes (`right: -22px`, `top: -22px`, `top: 18px right: 16px`, etc.) — verbatim per sketch lines 495–516. These are spatial composition, not spacing.
+### Sketch-Locked Component Spacing (Outside Token Scale)
 
-These exceptions are not violations of the scale — they are sketch-locked values that the scale supports as raw `px` on a per-component basis. The scale governs all NEW spacing decisions in Phase 3 components; existing sketch values are honored.
+These raw-px values are extracted verbatim from sketch 001 `.variant-b` and sized for specific composition decisions. They live as raw values inside their owning component's scoped style block — they are NOT promoted to tokens. Each is enumerated with its sketch line citation so `/gsd-code-review` can verify nothing new sneaks into this list.
+
+| Component | Property | Value | Sketch Line | Why |
+|-----------|----------|-------|-------------|-----|
+| Status pill (`StatusPill.astro`) | `padding` | `6px 14px` | line 299 | Sized for 11px JetBrains Mono micro-text + 8px lime dot. 4-multiple padding would oversize the pill and break the topbar grid. |
+| Splash cards row (`.b-cards`) | `gap` | `10px` | line 452 | Tighter than 16px to keep all 4 cards visible above the fold @ 1280px. Rounding to 12px breaks the 4-card fit. |
+| Splash outer (`.b-splash`) | `padding` | `22px 28px 22px` | line 285 | Hand-tuned for above-the-fold composition — every additional 2px of vertical pad pushes the cards lower. |
+| Gallery tile (`.b-piece`) | `padding` | `16px 18px` | line 586 | 16 is in scale; 18 is sketch-locked horizontal — hand-tuned to fit 22px tile title + 13px italic role caption with breathing room. |
+| Question bar (`.b-question`) | `padding` | `12px 0` | line 424 | Tuned to align with 2px ink borders top + bottom, producing the magazine-rule effect. |
+| Bio block (`.b-bio`) | `padding` | `22px 24px 64px` | line 387 | 24 + 64 are token-scale; 22 is sketch-locked top — hand-tuned so the `→ THE PITCH` tag clears the sticker corner. The 64px bottom reserves room for the absolute-positioned `→ KEEP READING` chip. |
+| Splash card interior (`.b-card`) | `padding` | `14px 16px 16px` | (sketch composition) | Tuned to keep card title baseline aligned across rotated cards (the sketch's -1° to +1° rotations would misalign on a strict 16px top pad). |
+
+**Decoration absolutes** (e.g. `right: -22px`, `top: -22px`, `top: 18px right: 16px`) — verbatim per sketch lines 495–516. These are `position: absolute` placement, not spacing — they are spatial composition and are not subject to the spacing scale at all.
 
 ---
 
 ## Typography
+
+> **Override note:** This system declares 11 font-size roles and 6 font-weight roles. See `verification_override` register above (OVERRIDE-01, OVERRIDE-02) for justification. Each role is enumerated below with semantic purpose and sketch line citation — the count is intentional, role-coded, and bounded.
+
+### Font-size roles (11, all sketch-locked)
+
+| Token | Size | Semantic role | Sketch line |
+|-------|------|---------------|-------------|
+| `--fs-display` | `clamp(72px, 11vw, 168px)` | Splash hero name `CALEB LIM.` — the brand anchor | 357 |
+| `--fs-cat` | `clamp(56px, 8vw, 130px)` | Category page title (e.g. `GRAPHIC / DESIGN`) | 557 |
+| `--fs-q` | `clamp(22px, 3vw, 38px)` | Splash question bar `WHAT DO YOU WISH TO SEE?` | 435 |
+| `--fs-card` | `clamp(22px, 2.7vw, 36px)` | Discipline card name on splash | 482 |
+| `--fs-h3` | 26px | Bio sticker headline `CROSS-FUNCTIONAL — BY DESIGN.` | 399 |
+| `--fs-ttl` | 22px | Gallery tile title | 596 |
+| `--fs-body` | 15.5px | Bio paragraph + roles list (same size, different families per index) | 403, 374 |
+| `--fs-tile-role` | 13px | Gallery tile role caption (italic Fraunces) | 600 |
+| `--fs-mono` | 11px | JetBrains Mono micro-labels (status pill, back-pill, footer, topbar nav) | 295–296, 392–393 |
+| `--fs-card-no` | 9px | Splash card index number (top-left of each card, JetBrains Mono uppercase) | 470 |
+| `--fs-deco-numeral` | clamp(64px, 8vw, 96px) | Fraunces italic decorative numeral inside Finance card and bio-sticker overflow | 411 (bio-strike), k2 deco |
+
+### Font-weight roles (6, all role-coded)
+
+| Weight | Role | Where |
+|--------|------|-------|
+| 800 | Display + card name — the loud moments | Splash name, category title, splash card name |
+| 700 | Secondary headline tier | Bio sticker headline `h3`, gallery tile title |
+| 600 | Mono micro-labels (emphasized) | Status pill text, marker chips, "→ PICK ONE", back-pill, footer mono |
+| 500 | Roles list (cobalt sans entries) | Mid-weight to harmonize with Fraunces italic alternation in roles list |
+| 400 | Body copy + mono default + Fraunces italic decorative | Bio paragraph (Fraunces), JetBrains Mono default, decorative italic numerals |
+| 300 | Fraunces italic accent — the editorial moment | Question bar `<em>`, category title italic numeral, italic role-list entries — light weight is the entire point of the editorial pairing |
 
 ### Faces (D-15 / D-16)
 
@@ -100,6 +152,7 @@ These exceptions are not violations of the scale — they are sketch-locked valu
 | Tile role caption | 13px | 400 | 1.2 | serif italic | Sketch line 600. |
 | Topbar / pill / micro-labels | 11px | 600 | 1.0 | mono | letter-spacing 0.1em–0.16em; uppercase. Sketch lines 295–296, 392–393. |
 | Card number `0N` | 9px | 600 | 1.0 | mono | letter-spacing 0.1em. Sketch line 470. |
+| Decorative numeral | clamp(64px, 8vw, 96px) | 300/400 | 1.0 | serif italic | Fraunces italic, used for the bio-sticker shadow numeral (`.b-bio-strike`, ink @ 10% opacity, sketch line 411) and the Finance card's italic numeral deco in lime. |
 
 **Tokens (in `tokens.css`):**
 
@@ -109,16 +162,17 @@ These exceptions are not violations of the scale — they are sketch-locked valu
   --serif: "Fraunces Variable", Georgia, serif;
   --mono:  "JetBrains Mono Variable", ui-monospace, monospace;
 
-  --fs-display: clamp(72px, 11vw, 168px);
-  --fs-cat:     clamp(56px, 8vw, 130px);
-  --fs-card:    clamp(22px, 2.7vw, 36px);
-  --fs-q:       clamp(22px, 3vw, 38px);
-  --fs-h3:      26px;
-  --fs-ttl:     22px;
-  --fs-body:    15.5px;
-  --fs-tile-role: 13px;
-  --fs-mono:    11px;
-  --fs-card-no: 9px;
+  --fs-display:      clamp(72px, 11vw, 168px);
+  --fs-cat:          clamp(56px, 8vw, 130px);
+  --fs-q:            clamp(22px, 3vw, 38px);
+  --fs-card:         clamp(22px, 2.7vw, 36px);
+  --fs-h3:           26px;
+  --fs-ttl:          22px;
+  --fs-body:         15.5px;
+  --fs-tile-role:    13px;
+  --fs-mono:         11px;
+  --fs-card-no:      9px;
+  --fs-deco-numeral: clamp(64px, 8vw, 96px);
 
   --lh-display: 0.82;
   --lh-cat:     0.85;
@@ -523,11 +577,11 @@ Phase 3 ships responsive CSS, Phase 5 verifies on hardware:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
+- [ ] Dimension 1 Copywriting: PASS (FLAG noted for `→ KEEP READING` directional cue — accepted as sketch-locked)
 - [ ] Dimension 2 Visuals: PASS
 - [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
+- [ ] Dimension 4 Typography: PASS WITH OVERRIDE (OVERRIDE-01 + OVERRIDE-02 — see Verification Override Register)
+- [ ] Dimension 5 Spacing: PASS WITH OVERRIDE (OVERRIDE-03 — see Verification Override Register; token scale conforms strictly, sketch-locked raw values enumerated outside the scale)
 - [ ] Dimension 6 Registry Safety: PASS
 
 **Approval:** pending
