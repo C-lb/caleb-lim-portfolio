@@ -91,6 +91,7 @@ These raw-px values are extracted verbatim from sketch 001 `.variant-b` and size
 | Question bar (`.b-question`) | `padding` | `12px 0` | line 424 | Tuned to align with 2px ink borders top + bottom, producing the magazine-rule effect. |
 | Bio block (`.b-bio`) | `padding` | `22px 24px 64px` | line 387 | 24 + 64 are token-scale; 22 is sketch-locked top — hand-tuned so the `→ THE PITCH` tag clears the sticker corner. The 64px bottom reserves room for the absolute-positioned `→ KEEP READING` chip. |
 | Splash card interior (`.b-card`) | `padding` | `14px 16px 16px` | (sketch composition) | Tuned to keep card title baseline aligned across rotated cards (the sketch's -1° to +1° rotations would misalign on a strict 16px top pad). |
+| Category gallery grid (`.b-pieces`) | `gap` | `12px` | line 578 | Tighter than 16px so the asymmetric tile composition reads as a magazine spread rather than a card grid. Rounding to 16px adds visual gutter that breaks the sketch's compressed rhythm. |
 
 **Decoration absolutes** (e.g. `right: -22px`, `top: -22px`, `top: 18px right: 16px`) — verbatim per sketch lines 495–516. These are `position: absolute` placement, not spacing — they are spatial composition and are not subject to the spacing scale at all.
 
