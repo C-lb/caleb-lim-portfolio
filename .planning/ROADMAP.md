@@ -82,7 +82,7 @@ Plans:
 - [x] 03-02-PLAN.md — Splash slice: DisciplineCard component + full re-skin of index.astro with hero band, question bar, 4 rotated cards, SPLASH-04 drop-card logic
 - [x] 03-03-PLAN.md — Gallery slice: GalleryA12 + GalleryB35 + GalleryC68 bucket templates + [category].astro with ink bg, accent flow, empty-discipline route drop
 - [x] 03-04-PLAN.md — Detail + about re-skin: [category]/[slug].astro accent header (paginated PDF block preserved verbatim) + about.astro Phase 3 typography (bio copy preserved)
-- [ ] 03-05-PLAN.md — 404 page (D-14) + local HTTP 404 verification (SPLASH-05 SC5) + final anti-AI-tell walk + phase-exit verification (all verify-build.sh gates 1-18 green + ANTI-AI-CHECKLIST.md fully ticked)
+- [x] 03-05-PLAN.md — 404 page (D-14) + local HTTP 404 verification (SPLASH-05 SC5) + final anti-AI-tell walk + phase-exit verification (all verify-build.sh gates 1-18 green + ANTI-AI-CHECKLIST.md fully ticked)
 **UI hint**: yes
 
 ### Phase 4: Navigation & Secondary Surfaces
