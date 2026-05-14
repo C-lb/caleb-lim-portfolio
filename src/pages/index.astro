@@ -129,7 +129,7 @@ void DISCIPLINE_ACCENT;
   /* BIO STICKER */
   .b-bio {
     background: var(--acid);
-    color: var(--ink);
+    color: var(--paper); /* flipped after palette swap: acid is now dusty brick (dark) */
     border-radius: 10px;
     padding: 18px 22px 36px; /* sketch line 387 — UI-SPEC OVERRIDE-03 (tightened for fold) */
     position: relative;
@@ -170,8 +170,8 @@ void DISCIPLINE_ACCENT;
     font-style: italic;
     font-weight: 300;
     font-size: var(--fs-deco-numeral);
-    color: var(--ink);
-    opacity: 0.1;
+    color: var(--paper); /* flipped after palette swap (matches .b-bio paper text) */
+    opacity: 0.18;
     line-height: 1;
     pointer-events: none;
   }
@@ -197,7 +197,7 @@ void DISCIPLINE_ACCENT;
   }
   .b-question .marker {
     background: var(--acid);
-    color: var(--ink);
+    color: var(--paper); /* flipped after palette swap (brick is dark) */
     font-family: var(--sans);
     font-weight: 800;
     font-size: 13px;

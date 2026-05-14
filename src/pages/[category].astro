@@ -28,11 +28,11 @@ const accent = DISCIPLINE_ACCENT[category];
 const n = pieces.length;
 if (n > 8) console.warn(`[gallery] ${category} has ${n} pieces — Bucket C truncates to 8 (D-06)`);
 
-// UI-SPEC.md Copywriting Contract line 294 — category title labels
+// UI-SPEC Copywriting Contract overridden during phase-exit walk: drop slash.
 const categoryLabel: Record<Category, string> = {
-  design:    'GRAPHIC / DESIGN',
-  finance:   'FINANCIAL / MODELS',
-  personal:  'PERSONAL / PROJECTS',
+  design:    'GRAPHIC DESIGN',
+  finance:   'FINANCIAL MODELS',
+  personal:  'PERSONAL PROJECTS',
   marketing: 'MARKETING',
 };
 const label = categoryLabel[category];
@@ -118,7 +118,7 @@ const countStr = String(n).padStart(2, '0');
     align-self: end;
   }
   .b-cat-meta strong {
-    color: var(--acid);
+    color: var(--accent); /* flow discipline accent (was hard-coded lime; phase-exit palette swap) */
     font-weight: 600;
   }
 
