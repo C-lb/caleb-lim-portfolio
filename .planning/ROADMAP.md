@@ -86,8 +86,10 @@ Plans:
 **UI hint**: yes
 
 ### Phase 4: Navigation & Secondary Surfaces
-**Goal**: Every page has the persistent navigation chrome a recruiter expects — resume / mailto / LinkedIn always one tap away from the header, prev/next at the bottom of every detail page, full contact block on About.
+**Goal**: As a hiring manager, I want to move between similar pieces and contact Caleb when I see one I like, so that I can act on interest the moment I have it, without hunting for an email address.
 **Mode:** mvp
+**SPIDR split**: by Interface — 3 plans expected (header chrome, detail prev/next + back-to-category, About contact block).
+**Original goal (pre-mvp-phase)**: Every page has the persistent navigation chrome a recruiter expects — resume / mailto / LinkedIn always one tap away from the header, prev/next at the bottom of every detail page, full contact block on About.
 **Depends on**: Phase 3 (header chrome is styled to the design system, not designed in isolation)
 **Requirements**: PIECE-05, CONTACT-03, CONTACT-04, CONTACT-05
 **Success Criteria** (what must be TRUE):
