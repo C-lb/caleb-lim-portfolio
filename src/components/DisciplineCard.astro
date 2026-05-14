@@ -11,11 +11,12 @@ interface Props {
 }
 const { category, k, index } = Astro.props;
 
-// UI-SPEC.md Copywriting Contract line 287 — exact strings
+// UI-SPEC Copywriting Contract overridden by user during phase-exit walk:
+// drop slash separator for parallel reading at recruiter skim-speed.
 const cardLabel: Record<Category, string> = {
-  design:    'Graphic / Design',
-  finance:   'Financial / Models',
-  personal:  'Personal / Projects',
+  design:    'Graphic Design',
+  finance:   'Financial Models',
+  personal:  'Personal Projects',
   marketing: 'Marketing',
 };
 
