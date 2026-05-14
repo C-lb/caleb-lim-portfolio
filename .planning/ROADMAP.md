@@ -18,9 +18,9 @@ The site is continuously deployable from end of Phase 1 onward — each later ph
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Walking Skeleton** - Astro project, content schema, one piece per category routes end-to-end (ugly is fine)
-- [ ] **Phase 2: Asset Pipeline + Real Content** - Build-time PDF rasterization productionized, all 5–15 pieces with real CRO blurbs, About + resume live
-- [ ] **Phase 3: Visual Design System** - Magazine-maximalist direction applied across splash, galleries, detail pages; AI-tell verification
+- [x] **Phase 1: Walking Skeleton** - Astro project, content schema, one piece per category routes end-to-end (ugly is fine)
+- [x] **Phase 2: Asset Pipeline + Real Content** - Build-time PDF rasterization productionized, all 5–15 pieces with real CRO blurbs, About + resume live
+- [x] **Phase 3: Visual Design System** - Magazine-maximalist direction applied across splash, galleries, detail pages; AI-tell verification
 - [ ] **Phase 4: Navigation & Secondary Surfaces** - Header chrome (mailto, LinkedIn), prev/next within discipline, About contact block
 - [ ] **Phase 5: Mobile, Performance, Accessibility** - Real-device iPhone Safari pass, Lighthouse mobile ≥85 / a11y ≥95, prefers-reduced-motion verified
 - [ ] **Phase 6: Deploy & Maintenance Handoff** - caleblim.com live on Cloudflare Pages, Caleb-adds-a-piece dry run passes
