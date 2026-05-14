@@ -28,6 +28,7 @@ const k2Numeral = '2';
   <div>
     <span class="b-card-name">{cardLabel[category]}</span>
   </div>
+  <span class="b-card-cue">View the work →</span>
   <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
 </a>
 
@@ -35,18 +36,20 @@ const k2Numeral = '2';
   .b-card {
     position: relative;
     border-radius: 10px;
-    padding: 14px 16px 16px; /* sketch-locked raw — UI-SPEC OVERRIDE-03 */
+    padding: 22px 22px 24px; /* phase-exit walk: beefed for primary-nav weight */
     cursor: pointer;
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1fr auto;
     gap: 4px;
-    min-height: 0;
+    min-height: 180px; /* phase-exit walk: cards must read as primary nav, not asides */
     text-decoration: none;
+    box-shadow: 0 1px 0 rgba(15, 13, 12, 0.15);
   }
   .b-card:hover {
-    transform: translateY(-2px) rotate(-0.3deg);
+    transform: translateY(-4px) rotate(-0.3deg);
+    box-shadow: 0 10px 22px rgba(15, 13, 12, 0.22);
   }
   .b-card:focus-visible {
     outline: 3px solid var(--ink);
@@ -58,19 +61,30 @@ const k2Numeral = '2';
 
   .b-card-no {
     font-family: var(--mono);
-    font-size: var(--fs-card-no);
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
+    opacity: 0.85;
   }
   .b-card-name {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: var(--fs-card);
-    line-height: var(--lh-card);
-    letter-spacing: -0.03em;
+    font-size: clamp(28px, 3.4vw, 44px); /* phase-exit walk: bumped from --fs-card */
+    line-height: 0.92;
+    letter-spacing: -0.035em;
     text-transform: uppercase;
     align-self: end;
+  }
+  .b-card-cue {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    align-self: end;
+    margin-top: var(--sp-2);
+    opacity: 0.85;
   }
 
   /* k1 = Design (terracotta) — outline circle top-right (sketch lines 495-497) */

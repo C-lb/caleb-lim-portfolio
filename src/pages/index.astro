@@ -35,8 +35,7 @@ void DISCIPLINE_ACCENT;
         <Image src={portrait} alt="Portrait of Caleb Lim" widths={[280, 560]} sizes="280px" />
       </div>
       <div class="b-name">
-        <h1>CALEB<br /><span class="lim">LIM</span><span class="stop">.</span></h1>
-        <span class="stamp">EST. 2026 · SG</span>
+        <h1>CALEB<br /><span class="lim">LIM</span></h1>
         <div class="roles">
           <span>analyst</span>
           <span>brand strategist</span>
@@ -73,7 +72,7 @@ void DISCIPLINE_ACCENT;
   /* --- Sketch lines 283-530 verbatim, adapted to scoped Astro --- */
   .b-splash {
     min-height: calc(100vh - 120px); /* leave room for Base topbar + footer */
-    padding: 22px 28px 22px; /* sketch line 285 — UI-SPEC OVERRIDE-03 */
+    padding: 16px 28px 22px; /* sketch line 285 — UI-SPEC OVERRIDE-03 (top tightened for fold) */
     display: grid;
     grid-template-rows: auto 1fr auto auto;
     gap: 14px;
@@ -85,7 +84,7 @@ void DISCIPLINE_ACCENT;
     grid-template-columns: 280px 1.5fr 1.2fr;
     gap: 16px;
     align-items: stretch;
-    min-height: 380px;
+    min-height: 320px;
   }
   .b-portrait {
     background: var(--ink);
@@ -115,18 +114,6 @@ void DISCIPLINE_ACCENT;
     margin: 0;
   }
   .b-name h1 .lim { color: var(--terracotta); }
-  .b-name h1 .stop { color: var(--cobalt); }
-  .b-name .stamp {
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: rotate(4deg);
-    font-family: var(--mono);
-    font-size: var(--fs-mono);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
   .b-name .roles {
     display: flex;
     flex-wrap: wrap;
@@ -144,7 +131,7 @@ void DISCIPLINE_ACCENT;
     background: var(--acid);
     color: var(--ink);
     border-radius: 10px;
-    padding: 22px 24px 64px; /* sketch line 387 — UI-SPEC OVERRIDE-03 */
+    padding: 18px 22px 36px; /* sketch line 387 — UI-SPEC OVERRIDE-03 (tightened for fold) */
     position: relative;
     overflow: hidden;
     transform: rotate(0.5deg);
@@ -203,7 +190,7 @@ void DISCIPLINE_ACCENT;
   .b-question {
     border-top: 2px solid var(--ink);
     border-bottom: 2px solid var(--ink);
-    padding: 12px 0; /* sketch line 424 — UI-SPEC OVERRIDE-03 */
+    padding: 8px 0; /* sketch line 424 — UI-SPEC OVERRIDE-03 (tightened for fold) */
     display: flex;
     align-items: center;
     gap: var(--sp-5);
