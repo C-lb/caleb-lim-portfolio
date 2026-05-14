@@ -2,12 +2,12 @@
 // NEVER hard-code these hexes elsewhere — always import.
 import type { Category } from '../content/categories';
 
-// Hexes mirror tokens.css; phase-exit palette swap kept these in sync.
+// Hexes mirror tokens.css; rustic-vibrant palette (Mexican-folk + ochre override).
 export const DISCIPLINE_ACCENT: Record<Category, string> = {
-  design:    '#a75935',  // burnt sienna — k1 (was terracotta #e85d2a)
-  finance:   '#3f8370',  // moss        — k2 (was cobalt     #1947ff)
-  personal:  '#a75e5b',  // dusty brick — k3 (was acid lime  #d4ff3a)
-  marketing: '#a7d2c4',  // sage mint   — k4 (was plum       #5a1a55)
+  design:    '#cc7722',  // ochre              — k1
+  finance:   '#2e6e8f',  // weathered cerulean — k2
+  personal:  '#e8a82a',  // turmeric           — k3
+  marketing: '#6a8b3a',  // olive lime         — k4
 } as const;
 
 // D-03: decorative-geometry variant per discipline. k1=outline circle,

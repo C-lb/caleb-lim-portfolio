@@ -7,11 +7,12 @@
   /* Color tokens (sketch lines 263-273, verbatim hexes) */
   --paper:      #f4ebd9;  /* warm cream */
   --ink:        #0a0a0a;
-  --acid:       #a75e5b;  /* dusty brick — Personal accent (was electric lime; phase-exit palette swap) */
-  --cobalt:     #3f8370;  /* moss — Finance accent (was slate-teal; second phase-exit tweak) */
-  --terracotta: #a75935;  /* burnt sienna — Design accent (was bright terracotta; second phase-exit tweak) */
-  --plum:       #a7d2c4;  /* sage mint — Marketing accent (was deep purple; phase-exit palette swap) */
-  --teal:       #e7b87d;  /* warm sand — gallery-tile-only fifth accent (was teal; phase-exit palette swap) */
+  /* Rustic-vibrant palette (Mexican-folk leaning, ochre + sage overrides). */
+  --acid:       #e8a82a;  /* turmeric — Personal accent (bright earth yellow) */
+  --cobalt:     #2e6e8f;  /* weathered cerulean — Finance accent (vibrant blue) */
+  --terracotta: #cc7722;  /* ochre — Design accent (was burnt sienna; user override) */
+  --plum:       #6a8b3a;  /* olive lime — Marketing accent (bright vegetal green) */
+  --teal:       #87a96b;  /* sage green — gallery decoration (was warm sand / dusty fuchsia; user override) */
 
   /* Font family tokens — Fontsource appends 'Variable' to family names */
   --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;

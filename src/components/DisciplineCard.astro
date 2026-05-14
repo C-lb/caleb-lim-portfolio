@@ -55,9 +55,7 @@ const k2Numeral = '2';
     outline: 3px solid var(--ink);
     outline-offset: 4px;
   }
-  .b-card.k3:focus-visible {
-    outline-color: var(--paper); /* acid bg → ink outline disappears */
-  }
+  /* k3 (turmeric) — default ink outline reads clearly; no override needed */
 
   .b-card-no {
     font-family: var(--mono);
@@ -121,10 +119,10 @@ const k2Numeral = '2';
     line-height: 0.8;
   }
 
-  /* k3 = Personal (acid → dusty brick) — horizontal dotted line (sketch lines 504-509) */
+  /* k3 = Personal (turmeric, light) — horizontal dotted line */
   .b-card.k3 {
     background: var(--acid);
-    color: var(--paper); /* flipped after palette swap: acid is now dark brick */
+    color: var(--ink); /* turmeric bg → ink */
     transform: rotate(-0.5deg);
   }
   .b-card.k3 .deco {
@@ -133,14 +131,14 @@ const k2Numeral = '2';
     right: 16px;
     top: 50%;
     height: 24px;
-    background-image: repeating-linear-gradient(90deg, var(--paper) 0, var(--paper) 2px, transparent 2px, transparent 10px);
-    opacity: 0.45;
+    background-image: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 2px, transparent 2px, transparent 10px);
+    opacity: 0.55;
   }
 
-  /* k4 = Marketing (plum → sage mint) — accent triangle (sketch lines 510-516) */
+  /* k4 = Marketing (olive lime, dark) — accent triangle */
   .b-card.k4 {
     background: var(--plum);
-    color: var(--ink); /* flipped after palette swap: plum is now light sage */
+    color: var(--paper); /* olive lime bg → paper */
     transform: rotate(0.7deg);
   }
   .b-card.k4 .deco {
