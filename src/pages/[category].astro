@@ -45,11 +45,9 @@ const countStr = String(n).padStart(2, '0');
       <h2>{label} <em>/{countStr}</em></h2>
       <span class="b-cat-meta">{countStr} PIECES · <strong>UPDATED MAY 2026</strong></span>
     </header>
-    {n <= 2
-      ? <GalleryA12 pieces={pieces} category={category} />
-      : n <= 5
-        ? <GalleryB35 pieces={pieces} category={category} />
-        : <GalleryC68 pieces={pieces} category={category} />}
+    {n <= 2 && <GalleryA12 pieces={pieces} category={category} />}
+    {n >= 3 && n <= 5 && <GalleryB35 pieces={pieces} category={category} />}
+    {n >= 6 && <GalleryC68 pieces={pieces} category={category} />}
   </section>
 </Base>
 
