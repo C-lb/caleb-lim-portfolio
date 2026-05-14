@@ -1,9 +1,12 @@
 ---
+import Base from '../../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { DISCIPLINE_ACCENT } from '../../styles/disciplines';
+import type { Category } from '../../content/categories';
 
 export async function getStaticPaths() {
   const pieces = await getCollection('pieces', ({ data }) => data.draft !== true);
@@ -32,52 +35,180 @@ const paginatedPages = pdfPaginate && thumbCache
       .map((n) => thumbCache!.pages.find((p) => p.n === n))
       .filter(Boolean) as Array<{ n: number; w: number; h: number; file: string }>)
   : [];
+
+const accent = DISCIPLINE_ACCENT[category as Category];
+
+// UI-SPEC.md "Detail page copy" line 303 — back-pill label per discipline
+const backLabel: Record<Category, string> = {
+  design:    '← graphic / design',
+  finance:   '← financial / models',
+  personal:  '← personal / projects',
+  marketing: '← marketing',
+};
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — Caleb Lim</title>
-  </head>
-  <body>
-    <p><a href={`/${category}`}>← back to {category}</a></p>
-    <article>
+<Base title={`${title} — Caleb Lim`} bg="paper">
+  <article class="detail" style={`--accent: ${accent}`}>
+    <header class="detail-head">
+      <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
       <h1>{title}</h1>
-      {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
-      <Image src={hero} alt={title} />
-      {/* PIECE-02: three blurb blocks — Context / Role / Outcome */}
-      <section>
-        <h2>Context</h2>
+    </header>
+
+    {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
+    <Image src={hero} alt={title} class="detail-hero" />
+
+    {/* PIECE-02: three blurb blocks — Context / Role / Outcome with uppercase mono labels */}
+    <section class="cro">
+      <div class="cro-block">
+        <span class="label">Context</span>
         <p>{context}</p>
-      </section>
-      <section>
-        <h2>Role</h2>
+      </div>
+      <div class="cro-block">
+        <span class="label">Role</span>
         <p>{role}</p>
-      </section>
-      <section>
-        <h2>Outcome</h2>
+      </div>
+      <div class="cro-block">
+        <span class="label">Outcome</span>
         <p>{outcome}</p>
+      </div>
+    </section>
+
+    {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
+    {/* Width/height sourced from .cache.json for CLS prevention. Render order = pdfPaginate order (D-09). */}
+    {paginatedPages.length > 0 && (
+      <section class="paginated-pages">
+        {paginatedPages.map((p) => (
+          <img
+            src={`/generated/pdf-thumbs/${slug}/${p.file}`}
+            width={p.w}
+            height={p.h}
+            alt={`${title} — page ${p.n}`}
+            loading="lazy"
+          />
+        ))}
       </section>
-      {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
-      {/* Width/height sourced from .cache.json for CLS prevention. Render order = pdfPaginate order (D-09). */}
-      {paginatedPages.length > 0 && (
-        <section class="paginated-pages">
-          {paginatedPages.map((p) => (
-            <img
-              src={`/generated/pdf-thumbs/${slug}/${p.file}`}
-              width={p.w}
-              height={p.h}
-              alt={`${title} — page ${p.n}`}
-              loading="lazy"
-            />
-          ))}
-        </section>
-      )}
-      {/* PIECE-06: optional Open full PDF link — surfaces only on pieces with fullPdf set (D-17). */}
-      {fullPdf && (
-        <p><a href={fullPdf} download>Open full PDF</a></p>
-      )}
-    </article>
-  </body>
-</html>
+    )}
+
+    {/* PIECE-06: optional Open full PDF link — surfaces only on pieces with fullPdf set (D-17). */}
+    {fullPdf && (
+      <p class="full-pdf-link">
+        <a href={fullPdf} download>Open full PDF →</a>
+      </p>
+    )}
+  </article>
+</Base>
+
+<style>
+  .detail {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--sp-6);
+  }
+  .detail-head {
+    border-top: 4px solid var(--accent);
+    padding-top: var(--sp-4);
+    margin-bottom: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .b-cat-back {
+    display: inline-block;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    align-self: flex-start;
+    border: 1px solid var(--ink);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .b-cat-back:hover {
+    background: var(--accent);
+    color: var(--paper);
+  }
+  .b-cat-back:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .detail h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-cat);
+    line-height: var(--lh-cat);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+  .detail-hero {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: var(--sp-8);
+  }
+  .cro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    margin-bottom: var(--sp-8);
+  }
+  .cro-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .cro .label {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+  .cro p {
+    font-family: var(--serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    color: var(--ink);
+    margin: 0;
+  }
+  .paginated-pages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    margin-bottom: var(--sp-8);
+  }
+  .paginated-pages img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  .full-pdf-link {
+    margin: var(--sp-6) 0;
+  }
+  .full-pdf-link a {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .full-pdf-link a:hover {
+    color: var(--accent);
+  }
+  .full-pdf-link a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .detail { padding: var(--sp-5); }
+  }
+</style>
