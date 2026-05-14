@@ -433,6 +433,80 @@ fi
 cleanup_draft_test
 trap - EXIT
 
+# Gate 15 (Phase 3): splash imports / mentions Bricolage Grotesque (font is wired through Base.astro → tokens.css)
+if [[ -f "$DIST/index.html" ]]; then
+  # Astro inlines preload links + may bundle the font in linked stylesheets. Check the splash HTML + the linked _astro/*.css for Bricolage.
+  bricolage_hit=0
+  # Both probes are wrapped with `|| true` so a no-match (grep exit 1) doesn't trip `set -e`
+  # and abort the entire script before Gates 16-18 run. The bricolage_hit assignment must
+  # not be the last expression in a short-circuit chain under pipefail/-e.
+  grep -q -i 'bricolage' "$DIST/index.html" 2>/dev/null && bricolage_hit=1 || true
+  grep -r -l -i 'bricolage' "$DIST/_astro/" 2>/dev/null | head -1 | grep -q . && bricolage_hit=1 || true
+  if [[ "$bricolage_hit" -eq 0 ]]; then
+    echo "  FAIL: Bricolage Grotesque not referenced in splash HTML or _astro CSS — Phase 3 type system not wired"
+    fail=1
+  else
+    echo "  OK: Bricolage Grotesque referenced in splash output"
+  fi
+fi
+
+# Gate 16 (Phase 3): each POPULATED category has a dist/<cat>/index.html; each EMPTY category does NOT (D-07).
+for cat in design finance personal marketing; do
+  # `xargs grep -L` exits 1 on macOS BSD xargs even when the inner grep returns 0;
+  # the trailing `|| true` swallows that pipefail propagation so the loop continues.
+  count=$(find "src/content/pieces" -mindepth 2 -name index.md -type f -exec grep -l "category: $cat" {} \; 2>/dev/null | xargs grep -L "^draft: true" 2>/dev/null | wc -l | tr -d ' ' || true)
+  if [[ "$count" -eq 0 ]]; then
+    if [[ -f "$DIST/$cat/index.html" ]]; then
+      echo "  FAIL: $cat has 0 non-draft pieces but $DIST/$cat/index.html exists — D-07 requires the route to 404"
+      fail=1
+    else
+      echo "  OK: $cat is empty (0 pieces) and route correctly absent"
+    fi
+  else
+    if [[ ! -f "$DIST/$cat/index.html" ]]; then
+      echo "  FAIL: $cat has $count piece(s) but $DIST/$cat/index.html is missing"
+      fail=1
+    else
+      echo "  OK: $cat populated ($count pieces) — gallery exists"
+    fi
+  fi
+done
+
+# Gate 17 (Phase 3): dist/404.html exists, contains <h1> with "404", contains a discipline card link back to one of the 4 categories.
+if [[ ! -f "$DIST/404.html" ]]; then
+  echo "  FAIL: $DIST/404.html missing — D-14 custom 404 not built"
+  fail=1
+else
+  if ! grep -q '<h1' "$DIST/404.html" 2>/dev/null; then
+    echo "  FAIL: $DIST/404.html missing <h1>"
+    fail=1
+  fi
+  if ! grep -qE 'href="/(design|finance|personal|marketing)"' "$DIST/404.html" 2>/dev/null; then
+    echo "  FAIL: $DIST/404.html missing discipline card link back to a category"
+    fail=1
+  fi
+  if [[ -f "$DIST/404.html" ]] && grep -q '<h1' "$DIST/404.html" 2>/dev/null && grep -qE 'href="/(design|finance|personal|marketing)"' "$DIST/404.html" 2>/dev/null; then
+    echo "  OK: 404.html present with h1 + discipline card link"
+  fi
+fi
+
+# Gate 18 (Phase 3): populated-category count on splash === count of dist/<cat>/index.html present (SPLASH-04 dropped-card contract).
+if [[ -f "$DIST/index.html" ]]; then
+  splash_cards=$(grep -oE 'href="/(design|finance|personal|marketing)"' "$DIST/index.html" 2>/dev/null | sort -u | wc -l | tr -d ' ')
+  populated=0
+  for cat in design finance personal marketing; do
+    if [[ -f "$DIST/$cat/index.html" ]]; then
+      populated=$((populated + 1))
+    fi
+  done
+  if [[ "$splash_cards" -ne "$populated" ]]; then
+    echo "  FAIL: splash has $splash_cards discipline-card links but $populated category routes exist — SPLASH-04 drop-card contract violated"
+    fail=1
+  else
+    echo "  OK: splash card count ($splash_cards) matches populated category count ($populated)"
+  fi
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"

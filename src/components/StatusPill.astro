@@ -1,0 +1,38 @@
+---
+// Phase 3 D-11 status pill — uppercase mono "OPEN TO ROLES" with pulsing acid dot.
+// CSS verbatim from sketch lines 297-305. Pulse animation honors prefers-reduced-motion
+// via global block in tokens.css (D-13).
+---
+<span class="pill">
+  <span class="dot" aria-hidden="true"></span>OPEN TO ROLES
+</span>
+
+<style>
+  .pill {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+  .pill .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--acid);
+    margin-right: 8px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+</style>
