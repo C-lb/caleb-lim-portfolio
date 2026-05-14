@@ -1,0 +1,82 @@
+---
+// Phase 3 D-14 custom 404. Cream-paper canvas (matches splash). Big Bricolage "404",
+// one dry Fraunces italic caption, four DisciplineCards repeated below.
+// Cloudflare Pages auto-serves dist/404.html with HTTP 404 for unknown routes
+// (zero-config; verified locally at Plan 05 Task 3 via npm run preview + curl, and re-verified on Cloudflare Pages at Phase 6 deploy).
+import Base from '../layouts/Base.astro';
+import DisciplineCard from '../components/DisciplineCard.astro';
+import { getCollection } from 'astro:content';
+import { CATEGORIES, type Category } from '../content/categories';
+import { DISCIPLINE_K } from '../styles/disciplines';
+
+// SPLASH-04 / D-07 mirror: the 404 page only shows populated disciplines, same as splash.
+const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+const countByCategory: Record<Category, number> = {
+  design: 0, finance: 0, personal: 0, marketing: 0,
+};
+for (const piece of allPieces) {
+  countByCategory[piece.data.category]++;
+}
+const populatedCategories = CATEGORIES.filter((c) => countByCategory[c] > 0);
+const gridTemplate = {
+  4: '1.2fr 0.85fr 1fr 1fr',
+  3: '1fr 1fr 1fr',
+  2: '1fr 1fr',
+  1: '1fr',
+}[populatedCategories.length] ?? '1fr 1fr 1fr 1fr';
+---
+<Base title="404 — Caleb Lim" bg="paper">
+  <section class="four-oh-four">
+    <h1>404</h1>
+    <p class="caption">This page doesn't exist. The four that do are below.</p>
+    <div class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
+      {populatedCategories.map((cat, i) => (
+        <DisciplineCard
+          category={cat}
+          k={DISCIPLINE_K[cat]}
+          index={(i + 1) as 1 | 2 | 3 | 4}
+        />
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .four-oh-four {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--sp-10) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .four-oh-four h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-display);
+    line-height: var(--lh-display);
+    letter-spacing: -0.045em;
+    color: var(--ink);
+    margin: 0;
+    font-variation-settings: "wdth" 100, "opsz" 96;
+  }
+  .four-oh-four .caption {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.4;
+    color: var(--ink);
+    opacity: 0.4;
+    margin: 0 0 var(--sp-8);
+  }
+  .four-oh-four .b-cards {
+    display: grid;
+    gap: 10px; /* sketch line 452 — UI-SPEC OVERRIDE-03 */
+  }
+
+  @media (max-width: 900px) {
+    .four-oh-four { padding: var(--sp-8) var(--sp-5); }
+    .four-oh-four .b-cards { grid-template-columns: 1fr 1fr !important; }
+  }
+</style>

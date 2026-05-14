@@ -19,22 +19,35 @@ fi
 echo "  OK: splash exists ($DIST/index.html)"
 
 # Gate 2: splash contains the SPLASH-01 prompt text (placeholder fidelity)
-if ! grep -q 'What do you wish to see' "$DIST/index.html"; then
+# Phase 3 D-07 update: the splash now wraps "see" in an italic <em> per UI-SPEC.md line 284.
+# Astro injects data-astro-cid-* attributes on scoped elements, so accept any attribute payload
+# inside the em tag. Pattern matches BOTH the legacy bare form and the Phase 3 spec form.
+if ! grep -qE 'What do you wish to (see|<em[^>]*>see)' "$DIST/index.html"; then
   echo "  FAIL: splash missing 'What do you wish to see?' prompt"
   fail=1
 else
   echo "  OK: splash prompt present"
 fi
 
-# Gate 3: all four category gallery routes exist
+# Gate 3: each category route either exists OR is correctly absent per D-07
+# (Phase 3 D-07 closed by Plan 03-03: empty disciplines drop their /[category] route via
+# getStaticPaths filter. Gate 16 is the authoritative D-07-aware check; Gate 3 here is the
+# pre-Gate-16 sanity that the script doesn't abort when category dirs are missing.)
+# This gate is intentionally lenient — Gate 16 below polices the strict "populated ↔ exists"
+# contract. Gate 3 only asserts: if any of the four exists, fine; we'll let Gate 16 judge.
+any_cat_exists=0
 for cat in design finance personal marketing; do
-  if [[ ! -f "$DIST/$cat/index.html" ]]; then
-    echo "  FAIL: $DIST/$cat/index.html missing — category route did not build"
-    fail=1
-  else
+  if [[ -f "$DIST/$cat/index.html" ]]; then
     echo "  OK: $cat gallery exists"
+    any_cat_exists=1
+  else
+    echo "  OK: $cat gallery absent (Gate 16 will judge whether this is D-07-correct)"
   fi
 done
+if [[ "$any_cat_exists" -eq 0 ]]; then
+  echo "  FAIL: no category routes built — at least one populated discipline is required (FOUND-05)"
+  fail=1
+fi
 
 # Gate 4: report piece count per category (empty galleries acceptable here)
 # Per Phase 2 D-11: 'personal' may be empty at launch — Phase 4 / SPLASH-04 will drop the
@@ -44,10 +57,13 @@ done
 # this layer. The FOUND-05 strong-floor (design + marketing must each have ≥1) is
 # enforced separately by Gate 12c so the distinction between "empty by intent" and
 # "missing critical content" stays explicit.
+# D-07 update: missing $DIST/$cat directories no longer trigger set -e abort —
+# `find` is wrapped with `|| true` so a non-zero exit (missing dir) doesn't propagate.
 for cat in design finance personal marketing; do
-  count=$(find "$DIST/$cat" -mindepth 2 -name index.html 2>/dev/null | wc -l | tr -d ' ')
+  count=$(find "$DIST/$cat" -mindepth 2 -name index.html 2>/dev/null | wc -l | tr -d ' ' || true)
+  count=${count:-0}
   if [[ "$count" -lt 1 ]]; then
-    echo "  OK: $cat has 0 pieces (empty gallery acceptable per D-11 / Wave 3 deviation; Gate 12c enforces strong-floor categories)"
+    echo "  OK: $cat has 0 pieces (empty gallery acceptable per D-11 / Wave 3 deviation / D-07; Gate 12c enforces strong-floor categories)"
   else
     echo "  OK: $cat has $count piece(s)"
   fi
