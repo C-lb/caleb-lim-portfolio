@@ -1,35 +1,135 @@
 ---
+import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORIES, type Category } from '../content/categories';
+import { DISCIPLINE_ACCENT } from '../styles/disciplines';
+import GalleryA12 from '../components/GalleryA12.astro';
+import GalleryB35 from '../components/GalleryB35.astro';
+import GalleryC68 from '../components/GalleryC68.astro';
 
 export async function getStaticPaths() {
-  return CATEGORIES.map((cat) => ({ params: { category: cat } }));
+  // D-07: only emit a route for disciplines with ≥1 non-draft piece.
+  // Empty categories fall through to Cloudflare Pages' dist/404.html.
+  const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+  const populated = new Set(allPieces.map((p) => p.data.category));
+  return CATEGORIES.filter((c) => populated.has(c)).map((cat) => ({
+    params: { category: cat },
+  }));
 }
 
 const { category } = Astro.params as { category: Category };
 
+// Existing filter+sort idiom — Phase 1 D-01 contract (PATTERNS.md S3)
 const pieces = (await getCollection('pieces', ({ data }) =>
   data.category === category && data.draft !== true
 )).sort((a, b) => a.data.order - b.data.order);
+
+const accent = DISCIPLINE_ACCENT[category];
+const n = pieces.length;
+if (n > 8) console.warn(`[gallery] ${category} has ${n} pieces — Bucket C truncates to 8 (D-06)`);
+
+// UI-SPEC.md Copywriting Contract line 294 — category title labels
+const categoryLabel: Record<Category, string> = {
+  design:    'GRAPHIC / DESIGN',
+  finance:   'FINANCIAL / MODELS',
+  personal:  'PERSONAL / PROJECTS',
+  marketing: 'MARKETING',
+};
+const label = categoryLabel[category];
+const countStr = String(n).padStart(2, '0');
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{category} — Caleb Lim</title>
-  </head>
-  <body>
-    <p><a href="/">← splash</a></p>
-    <h1>{category}</h1>
-    {pieces.length === 0 ? (
-      <p>(No pieces in this discipline yet.)</p>
-    ) : (
-      <ul>
-        {pieces.map((p) => (
-          <li><a href={`/${category}/${p.id}`}>{p.data.title}</a></li>
-        ))}
-      </ul>
-    )}
-  </body>
-</html>
+<Base title={`${label.toLowerCase()} — Caleb Lim`} bg="ink">
+  <section class="b-category" style={`--accent: ${accent}`}>
+    <header class="b-cat-head">
+      <a href="/" class="b-cat-back">← splash</a>
+      <h2>{label} <em>/{countStr}</em></h2>
+      <span class="b-cat-meta">{countStr} PIECES · <strong>UPDATED MAY 2026</strong></span>
+    </header>
+    {n <= 2 && <GalleryA12 pieces={pieces} category={category} />}
+    {n >= 3 && n <= 5 && <GalleryB35 pieces={pieces} category={category} />}
+    {n >= 6 && <GalleryC68 pieces={pieces} category={category} />}
+  </section>
+</Base>
+
+<style>
+  /* --- Sketch lines 533-571 verbatim, adapted to scoped Astro --- */
+  .b-category {
+    padding: var(--sp-6); /* sketch line 535 */
+    min-height: calc(100vh - 120px);
+  }
+  .b-cat-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: end;
+    gap: var(--sp-6);
+    padding-bottom: var(--sp-5);
+    border-bottom: 1px solid #333;
+  }
+  .b-cat-back {
+    display: inline-block;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    align-self: end;
+    justify-self: start;
+    transition: background 0.2s ease;
+    text-decoration: none;
+  }
+  .b-cat-back:hover {
+    background: var(--accent);
+    color: var(--paper);
+  }
+  .b-cat-back:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
+  }
+  .b-category h2 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-cat);
+    line-height: var(--lh-cat);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--paper);
+    margin: 0;
+  }
+  .b-category h2 em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+    text-transform: none;
+  }
+  .b-cat-meta {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    opacity: 0.8;
+    justify-self: end;
+    align-self: end;
+  }
+  .b-cat-meta strong {
+    color: var(--acid);
+    font-weight: 600;
+  }
+
+  /* Reduced-motion (D-13) */
+  @media (prefers-reduced-motion: reduce) {
+    .b-cat-back { transition: none; }
+  }
+
+  @media (max-width: 900px) {
+    .b-category { padding: var(--sp-5); }
+    .b-cat-head { grid-template-columns: 1fr; gap: var(--sp-2); align-items: start; }
+    .b-cat-meta { justify-self: start; }
+  }
+</style>

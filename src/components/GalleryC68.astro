@@ -1,0 +1,181 @@
+---
+// Phase 3 D-05 Bucket C (6-8 pieces) — Bucket B's 5-tile composition + extra row.
+// p6/p7/p8 reuse the palette + deco patterns cycled, with slight rotation variance
+// so the second row doesn't read as a literal repeat (D-05 contract).
+// D-06: pieces.length > 8 → console.warn and render first 8 only (truncate).
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import type { Category } from '../content/categories';
+
+interface Props {
+  pieces: CollectionEntry<'pieces'>[];
+  category: Category;
+}
+const { pieces: rawPieces, category } = Astro.props;
+if (rawPieces.length > 8) {
+  console.warn(`[gallery] ${category} has ${rawPieces.length} pieces — Bucket C truncates to 8 (D-06)`);
+}
+const pieces = rawPieces.slice(0, 8);
+const total = pieces.length;
+---
+<div class="b-pieces">
+  {pieces.map((piece, i) => {
+    const slot = i + 1;
+    return (
+      <a href={`/${category}/${piece.id}`} class={`b-piece p${slot}`}>
+        <span class="tag">0{slot} / 0{total}</span>
+        <Image src={piece.data.hero} alt={piece.data.title} class="cover" />
+        <div class="meta">
+          <span class="ttl">{piece.data.title}</span>
+          <span class="role">{piece.data.role}</span>
+        </div>
+        <span class="deco" aria-hidden="true"></span>
+      </a>
+    );
+  })}
+</div>
+
+<style>
+  /* Bucket C: copy B's CSS verbatim, then add p6/p7/p8 below */
+  .b-pieces {
+    margin-top: var(--sp-6);
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 240px;
+    gap: 12px;
+  }
+  .b-piece {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s ease;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-decoration: none;
+  }
+  .b-piece:hover {
+    transform: scale(1.02) rotate(-0.3deg);
+    z-index: 2;
+  }
+  .b-piece:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
+  }
+  .b-piece .cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.55;
+  }
+  .b-piece .tag {
+    position: relative;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .b-piece .meta {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .b-piece .ttl {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: var(--fs-ttl);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .b-piece .role {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: var(--fs-tile-role);
+    line-height: 1.2;
+  }
+
+  /* p1-p5 verbatim from Bucket B */
+  .b-piece.p1 {
+    grid-column: span 3;
+    grid-row: span 2;
+    background: var(--terracotta);
+    color: var(--paper);
+    transform: rotate(-0.6deg);
+  }
+  .b-piece.p1 .deco {
+    position: absolute;
+    right: -30px; top: 30%;
+    font-family: var(--sans); font-weight: 800; font-size: 240px; line-height: 1;
+    color: rgba(255,255,255,0.12); letter-spacing: -0.05em; z-index: 0;
+  }
+  .b-piece.p2 { grid-column: span 3; background: var(--cobalt); color: var(--paper); }
+  .b-piece.p2 .deco {
+    position: absolute; right: 20px; bottom: 20px;
+    font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 90px;
+    line-height: 0.85; color: var(--acid); z-index: 0;
+  }
+  .b-piece.p3 {
+    grid-column: span 2; background: var(--acid); color: var(--ink); transform: rotate(0.5deg);
+  }
+  .b-piece.p3 .deco {
+    position: absolute; right: -8px; bottom: -10px;
+    width: 100px; height: 100px; border: 10px solid var(--ink); border-radius: 50%;
+  }
+  .b-piece.p4 { grid-column: span 2; background: var(--plum); color: var(--paper); }
+  .b-piece.p4 .deco {
+    position: absolute; bottom: 20px; right: 20px;
+    width: 60px; height: 60px; background: var(--terracotta); transform: rotate(45deg);
+  }
+  .b-piece.p5 {
+    grid-column: span 2; background: var(--teal); color: var(--paper); transform: rotate(-0.4deg);
+  }
+  .b-piece.p5 .deco {
+    position: absolute; left: 22px; bottom: 22px; right: 22px; top: 60%;
+    background-image: repeating-linear-gradient(45deg, var(--acid) 0, var(--acid) 4px, transparent 4px, transparent 18px);
+    opacity: 0.6;
+  }
+
+  /* p6/p7/p8 — second row, palette cycled, rotation varied vs row 1 (D-05) */
+  .b-piece.p6 {
+    grid-column: span 2; background: var(--cobalt); color: var(--paper); transform: rotate(0.4deg);
+  }
+  .b-piece.p6 .deco { /* reuse p4's triangle */
+    position: absolute; bottom: 20px; right: 20px;
+    width: 60px; height: 60px; background: var(--acid); transform: rotate(45deg);
+  }
+  .b-piece.p7 {
+    grid-column: span 2; background: var(--terracotta); color: var(--paper); transform: rotate(-0.3deg);
+  }
+  .b-piece.p7 .deco { /* reuse p5's diagonal stripes */
+    position: absolute; left: 22px; bottom: 22px; right: 22px; top: 60%;
+    background-image: repeating-linear-gradient(45deg, var(--acid) 0, var(--acid) 4px, transparent 4px, transparent 18px);
+    opacity: 0.6;
+  }
+  .b-piece.p8 {
+    grid-column: span 2; background: var(--plum); color: var(--paper); transform: rotate(0.7deg);
+  }
+  .b-piece.p8 .deco { /* reuse p3's outline circle */
+    position: absolute; right: -8px; bottom: -10px;
+    width: 100px; height: 100px; border: 10px solid var(--acid); border-radius: 50%;
+  }
+
+  /* Reduced-motion (D-13) */
+  @media (prefers-reduced-motion: reduce) {
+    .b-piece { transition: none; }
+    .b-piece:hover { transform: none; }
+  }
+
+  @media (max-width: 900px) {
+    .b-pieces { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+    .b-piece { grid-column: span 1 !important; grid-row: span 1 !important; aspect-ratio: 4/5; min-height: 220px; }
+  }
+</style>
