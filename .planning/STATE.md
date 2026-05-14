@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 3 context gathered
-last_updated: "2026-05-13T06:13:01.792Z"
+stopped_at: Phase 3 UI-SPEC approved
+last_updated: "2026-05-14T01:32:48.356Z"
 last_activity: 2026-05-11
 progress:
   total_phases: 6
@@ -84,10 +84,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-13T06:13:01.781Z
-Stopped at: Phase 3 context gathered
+Last session: 2026-05-14T01:32:48.345Z
+Stopped at: Phase 3 UI-SPEC approved
 Resume command: `/gsd-execute-phase 2 --gaps-only` (the executor will skip 02-06 + the design-piece work in 02-05 that already shipped, and re-spawn at the marketing checkpoint)
-Resume file: .planning/phases/03-visual-design-system/03-CONTEXT.md
+Resume file: .planning/phases/03-visual-design-system/03-UI-SPEC.md
 
 **Inputs needed for marketing-real-piece (next session):**
 
