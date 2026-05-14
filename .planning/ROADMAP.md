@@ -78,7 +78,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 6 plans
 Plans:
 - [x] 03-01a-PLAN.md — Foundation tokens: Fontsource install + tokens.css + disciplines.ts (Wave 1a, 3 tasks)
-- [ ] 03-01b-PLAN.md — Foundation layout + verification harness: portrait checkpoint + StatusPill + Base.astro + verify-anti-ai-tells.sh + ANTI-AI-CHECKLIST.md + verify-build.sh Phase 3 gates + build smoke (Wave 1b, 7 tasks, depends_on 03-01a)
+- [x] 03-01b-PLAN.md — Foundation layout + verification harness: portrait checkpoint + StatusPill + Base.astro + verify-anti-ai-tells.sh + ANTI-AI-CHECKLIST.md + verify-build.sh Phase 3 gates + build smoke (Wave 1b, 7 tasks, depends_on 03-01a)
 - [ ] 03-02-PLAN.md — Splash slice: DisciplineCard component + full re-skin of index.astro with hero band, question bar, 4 rotated cards, SPLASH-04 drop-card logic
 - [ ] 03-03-PLAN.md — Gallery slice: GalleryA12 + GalleryB35 + GalleryC68 bucket templates + [category].astro with ink bg, accent flow, empty-discipline route drop
 - [ ] 03-04-PLAN.md — Detail + about re-skin: [category]/[slug].astro accent header (paginated PDF block preserved verbatim) + about.astro Phase 3 typography (bio copy preserved)
