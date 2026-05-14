@@ -1,43 +1,100 @@
 ---
-// No frontmatter logic — bio is inline static text per RESEARCH.md Q2
-// (hard-coded .astro page, not a content collection).
-//
-// Phase 2 visuals stay placeholder — no CSS, no Tailwind, no design tokens.
-// Magazine-maximalist visual system lands in Phase 3.
-//
-// Bio voice contract (D-12, D-14, RESEARCH.md PITFALLS):
-// - 80–150 words (Gate 9 enforces; current draft is 111)
-// - First person
-// - Takes a stance on the cross-functional analyst+brand pitch
-// - No banned filler: "passionate", "multidisciplinary", "intersection of"
-//
-// DRAFT pending Caleb sign-off — sourced from .planning/PROJECT.md
-// (Core Value + four-discipline split). Caleb may edit in place; the
-// wording committed here ships as-is until he replaces it.
+// Phase 3 re-skin — about page on Base, paper canvas, Phase 3 typography.
+// Bio paragraph copy is Phase 2 D-12/D-14 contract — preserved verbatim.
+// Phase 4 will add the larger contact block per CONTACT-05.
+import Base from '../layouts/Base.astro';
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About — Caleb Lim</title>
-  </head>
-  <body>
-    <p><a href="/">← splash</a></p>
+<Base title="About — Caleb Lim" bg="paper">
+  <article class="about">
+    <a href="/" class="b-cat-back">← splash</a>
     <h1>Caleb Lim</h1>
-    <article>
-      <p>
-        I'm Caleb Lim. I work across four lanes — financial models, brand and
-        marketing, graphic design, and personal builds — because the same job
-        description rarely covers all of them and I'd rather hold the pitch
-        deck, the brand mark, and the model behind it without handing any of
-        them off. The portfolio is split four ways for the same reason: pick
-        the lane you're hiring for and the work that's relevant to it is one
-        click away. I built and write this site myself, so the format is its
-        own evidence — opinionated layout, deliberate typography, no template
-        smell. If you want the long version, the resume's a click below.
-      </p>
-    </article>
-    <p><a href="/caleb-lim-resume.pdf" download>Download resume (PDF)</a></p>
-  </body>
-</html>
+    <p>
+      I'm Caleb Lim. I work across four lanes — financial models, brand and
+      marketing, graphic design, and personal builds — because the same job
+      description rarely covers all of them and I'd rather hold the pitch
+      deck, the brand mark, and the model behind it without handing any of
+      them off. The portfolio is split four ways for the same reason: pick
+      the lane you're hiring for and the work that's relevant to it is one
+      click away. I built and write this site myself, so the format is its
+      own evidence — opinionated layout, deliberate typography, no template
+      smell. If you want the long version, the resume's a click below.
+    </p>
+    <p class="resume-link">
+      <a href="/caleb-lim-resume.pdf" download>Download resume (PDF) →</a>
+    </p>
+  </article>
+</Base>
+
+<style>
+  .about {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--sp-10) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .b-cat-back {
+    display: inline-block;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    align-self: flex-start;
+    border: 1px solid var(--ink);
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+  }
+  .b-cat-back:hover {
+    background: var(--terracotta);
+    color: var(--paper);
+  }
+  .b-cat-back:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .about h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-cat);
+    line-height: var(--lh-cat);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 0;
+  }
+  .about p {
+    font-family: var(--serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    color: var(--ink);
+    margin: 0;
+  }
+  .about p a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+  .about p a:hover {
+    color: var(--terracotta);
+  }
+  .about p a:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .resume-link a {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .about { padding: var(--sp-8) var(--sp-5); }
+  }
+</style>
