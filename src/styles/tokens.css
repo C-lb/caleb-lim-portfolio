@@ -1,0 +1,68 @@
+/* Phase 3 design tokens — Magazine-maximalist visual system.
+   Source: .planning/sketches/001-direction-comparison/index.html .variant-b :root
+           + .planning/phases/03-visual-design-system/03-UI-SPEC.md
+   Do NOT add new tokens without updating UI-SPEC.md verification_override register. */
+
+:root {
+  /* Color tokens (sketch lines 263-273, verbatim hexes) */
+  --paper:      #f4ebd9;  /* warm cream */
+  --ink:        #0a0a0a;
+  --acid:       #d4ff3a;  /* electric lime — Personal accent + inside fills */
+  --cobalt:     #1947ff;  /* Finance accent */
+  --terracotta: #e85d2a;  /* Design accent */
+  --plum:       #5a1a55;  /* Marketing accent */
+  --teal:       #0d5e5a;  /* gallery-tile-only fifth accent — NOT a discipline color */
+
+  /* Font family tokens — Fontsource appends 'Variable' to family names */
+  --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;
+  --serif: "Fraunces Variable", Georgia, serif;
+  --mono:  "JetBrains Mono Variable", ui-monospace, monospace;
+
+  /* Font-size tokens (UI-SPEC.md lines 160-176, 11 roles — see OVERRIDE-01) */
+  --fs-display:      clamp(72px, 11vw, 168px);
+  --fs-cat:          clamp(56px, 8vw, 130px);
+  --fs-q:            clamp(22px, 3vw, 38px);
+  --fs-card:         clamp(22px, 2.7vw, 36px);
+  --fs-h3:           26px;
+  --fs-ttl:          22px;
+  --fs-body:         15.5px;
+  --fs-tile-role:    13px;
+  --fs-mono:         11px;
+  --fs-card-no:      9px;
+  --fs-deco-numeral: clamp(64px, 8vw, 96px);
+
+  /* Line-height tokens (UI-SPEC.md lines 178-183) */
+  --lh-display: 0.82;
+  --lh-cat:     0.85;
+  --lh-card:    0.88;
+  --lh-tight:   1.0;
+  --lh-bio:     1.42;
+
+  /* Spacing tokens (UI-SPEC.md lines 67-78, strict 4-multiple scale) */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-4:  16px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-8:  48px;
+  --sp-10: 64px;
+}
+
+/* Minimal reset (hand-rolled per RESEARCH.md alternatives note — no modern-normalize dep) */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+img, picture, svg { display: block; max-width: 100%; }
+h1, h2, h3, h4, h5, h6, p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+/* Reduced-motion global block (UI-SPEC.md lines 511-520, verbatim — D-13) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .b-card:hover, .b-piece:hover { transform: none !important; }
+}
