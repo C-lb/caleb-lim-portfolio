@@ -437,7 +437,10 @@ trap - EXIT
 if [[ -f "$DIST/index.html" ]]; then
   # Astro inlines preload links + may bundle the font in linked stylesheets. Check the splash HTML + the linked _astro/*.css for Bricolage.
   bricolage_hit=0
-  grep -q -i 'bricolage' "$DIST/index.html" 2>/dev/null && bricolage_hit=1
+  # Both probes are wrapped with `|| true` so a no-match (grep exit 1) doesn't trip `set -e`
+  # and abort the entire script before Gates 16-18 run. The bricolage_hit assignment must
+  # not be the last expression in a short-circuit chain under pipefail/-e.
+  grep -q -i 'bricolage' "$DIST/index.html" 2>/dev/null && bricolage_hit=1 || true
   grep -r -l -i 'bricolage' "$DIST/_astro/" 2>/dev/null | head -1 | grep -q . && bricolage_hit=1 || true
   if [[ "$bricolage_hit" -eq 0 ]]; then
     echo "  FAIL: Bricolage Grotesque not referenced in splash HTML or _astro CSS — Phase 3 type system not wired"
@@ -449,7 +452,9 @@ fi
 
 # Gate 16 (Phase 3): each POPULATED category has a dist/<cat>/index.html; each EMPTY category does NOT (D-07).
 for cat in design finance personal marketing; do
-  count=$(find "src/content/pieces" -mindepth 2 -name index.md -type f -exec grep -l "category: $cat" {} \; 2>/dev/null | xargs grep -L "^draft: true" 2>/dev/null | wc -l | tr -d ' ')
+  # `xargs grep -L` exits 1 on macOS BSD xargs even when the inner grep returns 0;
+  # the trailing `|| true` swallows that pipefail propagation so the loop continues.
+  count=$(find "src/content/pieces" -mindepth 2 -name index.md -type f -exec grep -l "category: $cat" {} \; 2>/dev/null | xargs grep -L "^draft: true" 2>/dev/null | wc -l | tr -d ' ' || true)
   if [[ "$count" -eq 0 ]]; then
     if [[ -f "$DIST/$cat/index.html" ]]; then
       echo "  FAIL: $cat has 0 non-draft pieces but $DIST/$cat/index.html exists — D-07 requires the route to 404"
