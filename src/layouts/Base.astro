@@ -1,0 +1,100 @@
+---
+// Phase 3 D-18 Base layout. Every page extends this.
+// Imports tokens, fontsource CSS, preloads Bricolage display woff2.
+import '../styles/tokens.css';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/jetbrains-mono';
+// Preload only the Bricolage display woff2 actually used above the fold.
+// Path is the canonical Fontsource v5 file name for the Latin variable-wght file.
+import bricolageDisplay from '@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2?url';
+import StatusPill from '../components/StatusPill.astro';
+
+interface Props {
+  title: string;
+  bg?: 'paper' | 'ink';
+}
+const { title, bg = 'paper' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="preload" as="font" type="font/woff2" href={bricolageDisplay} crossorigin="anonymous" />
+  </head>
+  <body class={`bg-${bg}`}>
+    <header class="topbar">
+      <span class="brand">caleb lim</span>
+      <StatusPill />
+      <nav aria-label="primary"><!-- Phase 4 wires mailto / LinkedIn / Resume here --></nav>
+    </header>
+    <slot />
+    <footer class="foot">
+      <span class="left">caleb lim — 2026</span>
+      <span class="center">available for full-time roles, brand+analyst+design</span>
+      <span class="right">singapore · global</span>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  /* Body background switches per page via bg='paper' | 'ink' prop.
+     is:global is required so the body class selector wins (scoped styles hash). */
+  body.bg-paper { background: var(--paper); color: var(--ink); }
+  body.bg-ink   { background: var(--ink);   color: var(--paper); }
+</style>
+
+<style>
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--sp-5) var(--sp-6);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .topbar .brand {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+  }
+  .topbar nav {
+    display: flex;
+    gap: 18px;
+    min-width: 1px; /* reserves the grid slot for Phase 4 */
+  }
+  .topbar nav a:hover { color: var(--terracotta); }
+
+  .foot {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    padding: var(--sp-5) var(--sp-6);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    gap: var(--sp-4);
+  }
+  .foot .center {
+    text-align: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .foot .right { text-align: right; }
+
+  @media (max-width: 900px) {
+    .foot { grid-template-columns: 1fr; gap: var(--sp-2); text-align: left; }
+    .foot .center, .foot .right { text-align: left; }
+  }
+</style>
