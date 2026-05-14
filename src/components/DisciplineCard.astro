@@ -1,0 +1,140 @@
+---
+// Phase 3 DisciplineCard — single source of truth for the four discipline cards
+// on splash + 404. CSS verbatim from sketch lines 456-516. Decoration per
+// D-03 k1-k4 mapping. Used in <a> form so the entire card is the click target.
+import type { Category } from '../content/categories';
+
+interface Props {
+  category: Category;
+  k: 1 | 2 | 3 | 4;
+  index: 1 | 2 | 3 | 4;
+}
+const { category, k, index } = Astro.props;
+
+// UI-SPEC.md Copywriting Contract line 287 — exact strings
+const cardLabel: Record<Category, string> = {
+  design:    'Graphic / Design',
+  finance:   'Financial / Models',
+  personal:  'Personal / Projects',
+  marketing: 'Marketing',
+};
+
+// k2 deco contains a Fraunces italic numeral; the rest are CSS-only (empty span).
+const k2Numeral = '2';
+---
+<a href={`/${category}`} class={`b-card k${k}`}>
+  <span class="b-card-no">0{index} / 04</span>
+  <div>
+    <span class="b-card-name">{cardLabel[category]}</span>
+  </div>
+  <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
+</a>
+
+<style>
+  .b-card {
+    position: relative;
+    border-radius: 10px;
+    padding: 14px 16px 16px; /* sketch-locked raw — UI-SPEC OVERRIDE-03 */
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 4px;
+    min-height: 0;
+    text-decoration: none;
+  }
+  .b-card:hover {
+    transform: translateY(-2px) rotate(-0.3deg);
+  }
+  .b-card:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 4px;
+  }
+  .b-card.k3:focus-visible {
+    outline-color: var(--paper); /* acid bg → ink outline disappears */
+  }
+
+  .b-card-no {
+    font-family: var(--mono);
+    font-size: var(--fs-card-no);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .b-card-name {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-card);
+    line-height: var(--lh-card);
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    align-self: end;
+  }
+
+  /* k1 = Design (terracotta) — outline circle top-right (sketch lines 495-497) */
+  .b-card.k1 {
+    background: var(--terracotta);
+    color: var(--paper);
+    transform: rotate(-1deg);
+  }
+  .b-card.k1 .deco {
+    position: absolute;
+    right: -22px;
+    top: -22px;
+    width: 100px;
+    height: 100px;
+    border: 9px solid var(--paper);
+    border-radius: 50%;
+  }
+
+  /* k2 = Finance (cobalt) — oversized italic Fraunces numeral in lime (sketch lines 498-503) */
+  .b-card.k2 {
+    background: var(--cobalt);
+    color: var(--paper);
+    transform: rotate(1deg);
+  }
+  .b-card.k2 .deco {
+    position: absolute;
+    top: 18px;
+    right: 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 64px;
+    font-weight: 300;
+    color: var(--acid);
+    line-height: 0.8;
+  }
+
+  /* k3 = Personal (acid) — horizontal dotted line (sketch lines 504-509) */
+  .b-card.k3 {
+    background: var(--acid);
+    color: var(--ink);
+    transform: rotate(-0.5deg);
+  }
+  .b-card.k3 .deco {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 50%;
+    height: 24px;
+    background-image: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 2px, transparent 2px, transparent 10px);
+    opacity: 0.55;
+  }
+
+  /* k4 = Marketing (plum) — lime triangle (sketch lines 510-516) */
+  .b-card.k4 {
+    background: var(--plum);
+    color: var(--paper);
+    transform: rotate(0.7deg);
+  }
+  .b-card.k4 .deco {
+    position: absolute;
+    top: 36px;
+    right: 18px;
+    width: 56px;
+    height: 56px;
+    background: var(--acid);
+    clip-path: polygon(50% 0%, 100% 100%, 0 100%);
+  }
+</style>
