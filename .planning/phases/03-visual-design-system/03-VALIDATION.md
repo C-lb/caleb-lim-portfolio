@@ -2,7 +2,7 @@
 phase: 3
 slug: visual-design-system
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-05-14
 ---
@@ -39,15 +39,15 @@ created: 2026-05-14
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD-* | TBD | TBD | SPLASH-01 | — | Splash above fold @ 1280px shows portrait + name + roles + bio + question + 4 cards | manual UI sweep | `npm run preview` + manual @1280px | ❌ W0 (no automated viewport tester; manual is the right bar) | ⬜ pending |
-| TBD-* | TBD | TBD | SPLASH-02 | — | Each card shows category, accent color, routes correctly | smoke (grep dist) | `bash scripts/verify-build.sh` (extended) | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | SPLASH-03 | — | Galleries render asymmetric grid (B-template marker present in dist HTML) | smoke (grep dist/<cat>/index.html for `b-pieces` class) | extend `verify-build.sh` | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | SPLASH-04 | — | Empty discipline drops splash card AND 404s its route | smoke (mark category draft, rebuild, verify dist/<cat>/index.html absent + splash card count) | extend `verify-build.sh` | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | SPLASH-05 | — | 404 page returns HTTP 404 on CF Pages preview | manual curl | `curl -sI <preview-url>/no-such-page` → expect `HTTP/2 404` | ❌ W0 (manual at deploy) | ⬜ pending |
-| TBD-* | TBD | TBD | VISUAL-01 | — | Bricolage + Fraunces + JetBrains; no Inter; preload + swap | grep + DevTools | `bash scripts/verify-anti-ai-tells.sh` (font block) | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | VISUAL-02 | — | Color tokens (paper, ink, terracotta, cobalt, lime, plum) present + accent flow | grep dist for hex values | extend `verify-anti-ai-tells.sh` | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | VISUAL-03 | — | Rotated cards + decorative geometry (outline circle / italic numeral / dotted line / triangle) | manual UI sweep | manual @1280px on preview | ❌ W0 | ⬜ pending |
-| TBD-* | TBD | TBD | VISUAL-04 | — | Anti-AI-tell list verifiably absent (no Inter, no shadcn, no purple gradient, no lucide, no bento, no "Built with X") | grep + manual | `bash scripts/verify-anti-ai-tells.sh` + `ANTI-AI-CHECKLIST.md` walk | ❌ W0 | ⬜ pending |
+| 03-02-T3 | 03-02 | 2 | SPLASH-01 | — | Splash above fold @ 1280px shows portrait + name + roles + bio + question + 4 cards | manual UI sweep (checkpoint) | `npm run preview` + manual @1280px (`checkpoint:human-verify`) | ✅ planned | ⬜ pending |
+| 03-02-T1, 03-02-T2 | 03-02 | 2 | SPLASH-02 | T-03-07 | Each card shows category, accent color, routes correctly | smoke (grep dist) + manual | `bash scripts/verify-build.sh` Gate 18 + grep `DISCIPLINE_ACCENT` | ✅ planned | ⬜ pending |
+| 03-03-T1, 03-03-T2, 03-03-T3 | 03-03 | 2 | SPLASH-03 | — | Galleries render asymmetric grid (`b-pieces` class + tile rotations in dist HTML) | smoke (grep dist) | `bash scripts/verify-build.sh` Gates 15/16 + grep tile classes | ✅ planned | ⬜ pending |
+| 03-03-T2, 03-03-T3 | 03-03 | 2 | SPLASH-04 | T-03-11 | Empty discipline drops splash card AND its route 404s | smoke (filesystem assertion) | `bash scripts/verify-build.sh` Gates 16 + 18 | ✅ planned | ⬜ pending |
+| 03-05-T1, 03-05-T2, 03-05-T3 | 03-05 | 3 | SPLASH-05 | T-03-17 | 404 page returns HTTP 404 via local `npm run preview` (curl) + at CF Pages preview (Phase 6) | smoke + curl | `curl -sI http://localhost:<port>/no-such-page \| head -1 \| grep -q 404` (03-05-T3); CF Pages re-verified Phase 6 | ✅ planned | ⬜ pending |
+| 03-01-T2, 03-01-T3, 03-01-T6 | 03-01 | 1 | VISUAL-01 | T-03-01, T-03-05 | Bricolage + Fraunces + JetBrains; no Inter; preload + swap on display face | grep + smoke | `bash scripts/verify-anti-ai-tells.sh` (Gate A1) + `bash scripts/verify-build.sh` Gate 15 | ✅ planned | ⬜ pending |
+| 03-01-T3, 03-01-T4 | 03-01 | 1 | VISUAL-02 | — | Color tokens (paper, ink, terracotta, cobalt, acid, plum, teal) present + accent flow via `--accent` CSS custom property | grep dist for hex values + `var(--accent)` usage | grep tokens.css + `var(--accent)` in `[category].astro` + detail page | ✅ planned | ⬜ pending |
+| 03-02-T1, 03-02-T3, 03-03-T1, 03-05-T4 | 03-02, 03-03, 03-05 | 2, 3 | VISUAL-03 | — | Rotated cards + decorative geometry (outline circle / italic numeral / dotted line / triangle) | manual UI sweep (checkpoint) + grep transform values | `checkpoint:human-verify` (03-02-T3, 03-05-T4) + grep `transform: rotate` in dist | ✅ planned | ⬜ pending |
+| 03-01-T7, 03-01-T8, 03-05-T2, 03-05-T4 | 03-01, 03-05 | 1, 3 | VISUAL-04 | T-03-01 | Anti-AI-tell list verifiably absent (no Inter, no shadcn, no purple gradient, no lucide, no bento, no "Built with X") | grep + manual walk | `bash scripts/verify-anti-ai-tells.sh` (all 7 gates) + `ANTI-AI-CHECKLIST.md` walk (03-05-T4) | ✅ planned | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 *Task IDs filled in by gsd-planner once plans are split.*
@@ -81,11 +81,11 @@ created: 2026-05-14
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies (filled in by planner)
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify (filled in by planner)
-- [ ] Wave 0 covers all MISSING references (Wave 0 = `verify-anti-ai-tells.sh` + `ANTI-AI-CHECKLIST.md` + `verify-build.sh` extensions)
-- [ ] No watch-mode flags (smoke scripts run once, exit)
-- [ ] Feedback latency < 60s (build + smoke + grep)
-- [ ] `nyquist_compliant: true` set in frontmatter (after planner fills task IDs and verifies sampling continuity)
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies (every task in Plans 01–05 has an `<automated>` block; `checkpoint:human-verify` tasks 03-02-T3 and 03-05-T4 carry user-confirmation acceptance criteria)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify (every Plan 01–05 task has an automated grep / build / curl command)
+- [x] Wave 0 covers all MISSING references — Wave 0 deliverables planned in 03-01 (Plan 01 ships `verify-anti-ai-tells.sh` + `ANTI-AI-CHECKLIST.md` + `verify-build.sh` Gates 15–18). Wave_0_complete remains `false` in frontmatter until 03-01 executes.
+- [x] No watch-mode flags (smoke scripts run once, exit)
+- [x] Feedback latency < 60s (build + smoke + grep)
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved (planning-time validation contract ready; runtime sign-off occurs after Plan 01 execution flips `wave_0_complete` → `true`)

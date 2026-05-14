@@ -1,12 +1,11 @@
 ---
 phase: 03-visual-design-system
-plan: 01
+plan: 01b
 type: execute
-wave: 1
-depends_on: []
+wave: 2
+depends_on:
+  - 03-01a
 files_modified:
-  - src/styles/tokens.css
-  - src/styles/disciplines.ts
   - src/layouts/Base.astro
   - src/components/StatusPill.astro
   - src/assets/portrait.jpg
@@ -21,8 +20,6 @@ requirements:
   - VISUAL-04
 tags:
   - design-system
-  - tokens
-  - fonts
   - layout
   - anti-ai-verification
 user_setup:
@@ -34,22 +31,15 @@ user_setup:
 
 must_haves:
   truths:
-    - "Design tokens (paper, ink, terracotta, cobalt, acid, plum, teal) are defined as :root CSS custom properties in src/styles/tokens.css"
-    - "Discipline → accent hex mapping is a single typed const in src/styles/disciplines.ts; no consumer hard-codes hex"
-    - "Bricolage Grotesque, Fraunces, and JetBrains Mono load from Fontsource self-hosted variable woff2 files; Inter is nowhere in the stylesheet"
+    - "Real portrait image exists at src/assets/portrait.jpg (or .webp) — D-08 BLOCKER cleared OR user explicitly approved placeholder fallback"
     - "Bricolage display woff2 is preloaded via <link rel=preload>; font-display: swap is on all three families"
     - "Base.astro is a single Astro layout taking title + bg='paper'|'ink' props; body class flips between bg-paper and bg-ink"
     - "StatusPill.astro renders 'OPEN TO ROLES' with a pulsing acid dot; pulse keyframes verbatim from sketch lines 297–305"
-    - "Reduced-motion global block disables all transitions/animations under prefers-reduced-motion: reduce"
     - "scripts/verify-anti-ai-tells.sh executes 0 with no anti-AI-tell matches; non-zero with any match"
     - "ANTI-AI-CHECKLIST.md exists with all VISUAL-04 + ROADMAP SC6 items enumerated"
+    - "scripts/verify-build.sh has been extended with Phase 3 Gates 15-18"
+    - "Decisions implemented in this plan: D-08 (real portrait blocker checkpoint), D-15 (Fontsource preload + font-display swap wiring in Base.astro head), D-18 (new Base.astro with bg prop, body class flip for paper/ink)"
   artifacts:
-    - path: "src/styles/tokens.css"
-      provides: "Color, font, spacing, font-size, line-height tokens + global reduced-motion block"
-      contains: "--paper: #f4ebd9"
-    - path: "src/styles/disciplines.ts"
-      provides: "DISCIPLINE_ACCENT and DISCIPLINE_K typed consts"
-      exports: ["DISCIPLINE_ACCENT", "DISCIPLINE_K"]
     - path: "src/layouts/Base.astro"
       provides: "Global chrome: topbar with StatusPill, slot, footer, font preload, tokens import"
     - path: "src/components/StatusPill.astro"
@@ -76,11 +66,11 @@ must_haves:
 ---
 
 <objective>
-Establish the foundation for the entire Magazine-maximalist visual system: design tokens, discipline accent const, Base layout, status pill, real portrait asset, and the anti-AI-tell verification harness. Every subsequent plan in Phase 3 depends on these artifacts.
+Phase 3 Wave 1b: assemble the foundation lego bricks from 03-01a (tokens.css + disciplines.ts + Fontsource packages) into the Base layout + StatusPill component, gate the portrait blocker, ship the anti-AI-tell verification harness (`verify-anti-ai-tells.sh` + `ANTI-AI-CHECKLIST.md` + `verify-build.sh` Phase 3 gates), and run the Wave 0 build smoke.
 
-Purpose: Wave 0 infrastructure. The downstream slice plans (splash, gallery, detail, 404) all extend Base.astro, import tokens.css indirectly through Base, reference DISCIPLINE_ACCENT/DISCIPLINE_K from disciplines.ts, and must pass the anti-AI-tell gate.
+Purpose: After 03-01b ships, every downstream plan in Phase 3 (02 splash, 03 gallery, 04 detail+about, 05 404) has a single shared Base.astro to extend AND a green automated gate that prevents anti-AI-tells from sneaking in during execution.
 
-Output: tokens.css + disciplines.ts + Base.astro + StatusPill.astro + portrait.jpg + ANTI-AI-CHECKLIST.md + verify-anti-ai-tells.sh + extended verify-build.sh + three @fontsource-variable/* npm packages installed.
+Output: portrait file + Base.astro + StatusPill.astro + verify-anti-ai-tells.sh + ANTI-AI-CHECKLIST.md + verify-build.sh extended.
 </objective>
 
 <execution_context>
@@ -97,24 +87,33 @@ Output: tokens.css + disciplines.ts + Base.astro + StatusPill.astro + portrait.j
 @.planning/phases/03-visual-design-system/03-PATTERNS.md
 @.planning/phases/03-visual-design-system/03-UI-SPEC.md
 @.planning/phases/03-visual-design-system/03-VALIDATION.md
+@.planning/phases/03-visual-design-system/03-01a-SUMMARY.md
 @.planning/sketches/001-direction-comparison/index.html
 
 <interfaces>
-<!-- Existing categories enum (DO NOT modify) -->
-From src/content/categories.ts:
-```typescript
-export const CATEGORIES = ['design', 'finance', 'personal', 'marketing'] as const;
-export type Category = typeof CATEGORIES[number];
-```
+<!-- Contracts from 03-01a (Wave 1a) -->
 
-<!-- This plan creates the following consumable contracts -->
+From src/styles/tokens.css (already on disk after 03-01a):
+- Colors: --paper, --ink, --acid, --cobalt, --terracotta, --plum, --teal
+- Families: --sans (Bricolage Variable), --serif (Fraunces Variable), --mono (JetBrains Mono Variable)
+- Font sizes: --fs-display, --fs-cat, --fs-q, --fs-card, --fs-h3, --fs-ttl, --fs-body, --fs-tile-role, --fs-mono, --fs-card-no, --fs-deco-numeral
+- Line heights: --lh-display, --lh-cat, --lh-card, --lh-tight, --lh-bio
+- Spacing: --sp-1..--sp-10
+- @media (prefers-reduced-motion: reduce) global block
 
-src/styles/disciplines.ts will export:
+From src/styles/disciplines.ts (already on disk after 03-01a):
 ```typescript
 import type { Category } from '../content/categories';
 export const DISCIPLINE_ACCENT: Record<Category, string>;
 export const DISCIPLINE_K: Record<Category, 1 | 2 | 3 | 4>;
 ```
+
+Fontsource packages (installed in 03-01a Task 1):
+- @fontsource-variable/bricolage-grotesque@5.2.10
+- @fontsource-variable/fraunces@5.2.9
+- @fontsource-variable/jetbrains-mono@5.2.8
+
+<!-- This plan creates the following consumable contracts -->
 
 src/layouts/Base.astro will accept:
 ```typescript
@@ -157,196 +156,8 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
   <done>Portrait file exists at src/assets/portrait.jpg (or .webp) OR user has explicitly approved placeholder fallback.</done>
 </task>
 
-<task type="auto">
-  <name>Task 2: Install Fontsource variable font packages</name>
-  <read_first>
-    - package.json (verify exact current dependency layout before editing)
-    - .planning/phases/03-visual-design-system/03-RESEARCH.md lines 144-176 (Standard Stack: exact versions, npm verification, install command)
-    - .planning/phases/03-visual-design-system/03-UI-SPEC.md "Registry Safety" section (lines 545-549, vetted versions)
-  </read_first>
-  <action>
-    Install three Fontsource variable font packages — exact versions verified in RESEARCH.md and UI-SPEC.md Registry Safety table.
-
-    Run from project root:
-    ```bash
-    npm install @fontsource-variable/bricolage-grotesque@5.2.10 @fontsource-variable/fraunces@5.2.9 @fontsource-variable/jetbrains-mono@5.2.8
-    ```
-
-    Do NOT install: motion, framer-motion, gsap, lenis, tailwindcss, lucide-*, @radix-ui/*, @shadcn/*, tailwindcss-animate. Phase 3 explicitly forbids these (CONTEXT.md D-11/D-17, UI-SPEC.md Registry Safety, VISUAL-04). Do NOT pass --legacy-peer-deps unless npm errors specifically demand it (these are font-only packages with no peer deps).
-
-    After install, verify versions match by reading package.json — expected entries in `dependencies` (NOT devDependencies):
-    - "@fontsource-variable/bricolage-grotesque": "^5.2.10"
-    - "@fontsource-variable/fraunces": "^5.2.9"
-    - "@fontsource-variable/jetbrains-mono": "^5.2.8"
-  </action>
-  <verify>
-    <automated>node -e "const p=require('./package.json'); const need=['@fontsource-variable/bricolage-grotesque','@fontsource-variable/fraunces','@fontsource-variable/jetbrains-mono']; const missing=need.filter(n=>!p.dependencies?.[n]); if(missing.length){console.error('Missing:',missing); process.exit(1)} console.log('OK')"</automated>
-  </verify>
-  <acceptance_criteria>
-    - package.json `dependencies` block contains "@fontsource-variable/bricolage-grotesque" with version starting "5.2."
-    - package.json `dependencies` block contains "@fontsource-variable/fraunces" with version starting "5.2."
-    - package.json `dependencies` block contains "@fontsource-variable/jetbrains-mono" with version starting "5.2."
-    - `grep -E "lucide|@radix|@shadcn|tailwind|motion|gsap|lenis" package.json` returns 0 matches
-    - `ls node_modules/@fontsource-variable/bricolage-grotesque/files/` lists .woff2 files
-  </acceptance_criteria>
-  <done>Three Fontsource variable packages installed at expected versions; no forbidden dependencies present.</done>
-</task>
-
 <task type="auto" tdd="false">
-  <name>Task 3: Create src/styles/tokens.css with color, font, spacing, font-size, line-height tokens + reduced-motion block</name>
-  <read_first>
-    - .planning/phases/03-visual-design-system/03-UI-SPEC.md lines 158-184 (the :root { --fs-display: clamp(...); ... } block — copy verbatim including ALL 11 font-size tokens and 5 line-height tokens)
-    - .planning/phases/03-visual-design-system/03-UI-SPEC.md lines 67-78 (spacing token table)
-    - .planning/phases/03-visual-design-system/03-UI-SPEC.md lines 511-520 (reduced-motion verbatim block)
-    - .planning/phases/03-visual-design-system/03-PATTERNS.md lines 29-82 (tokens.css analog instructions — color values, variable family-name suffix)
-    - .planning/sketches/001-direction-comparison/index.html lines 262-278 (color token values — copy hex verbatim)
-  </read_first>
-  <action>
-    Create `src/styles/tokens.css` with the complete token system. This is the SINGLE source of truth for color, type, spacing across the site. Every value below is sketch-locked or UI-SPEC-locked — do NOT invent new ones.
-
-    Required file contents (write this exact CSS):
-    ```css
-    /* Phase 3 design tokens — Magazine-maximalist visual system.
-       Source: .planning/sketches/001-direction-comparison/index.html .variant-b :root
-               + .planning/phases/03-visual-design-system/03-UI-SPEC.md
-       Do NOT add new tokens without updating UI-SPEC.md verification_override register. */
-
-    :root {
-      /* Color tokens (sketch lines 263-273, verbatim hexes) */
-      --paper:      #f4ebd9;  /* warm cream */
-      --ink:        #0a0a0a;
-      --acid:       #d4ff3a;  /* electric lime — Personal accent + interior fills */
-      --cobalt:     #1947ff;  /* Finance accent */
-      --terracotta: #e85d2a;  /* Design accent */
-      --plum:       #5a1a55;  /* Marketing accent */
-      --teal:       #0d5e5a;  /* gallery-tile-only fifth accent — NOT a discipline color */
-
-      /* Font family tokens — Fontsource appends 'Variable' to family names */
-      --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;
-      --serif: "Fraunces Variable", Georgia, serif;
-      --mono:  "JetBrains Mono Variable", ui-monospace, monospace;
-
-      /* Font-size tokens (UI-SPEC.md lines 160-176, 11 roles — see OVERRIDE-01) */
-      --fs-display:      clamp(72px, 11vw, 168px);
-      --fs-cat:          clamp(56px, 8vw, 130px);
-      --fs-q:            clamp(22px, 3vw, 38px);
-      --fs-card:         clamp(22px, 2.7vw, 36px);
-      --fs-h3:           26px;
-      --fs-ttl:          22px;
-      --fs-body:         15.5px;
-      --fs-tile-role:    13px;
-      --fs-mono:         11px;
-      --fs-card-no:      9px;
-      --fs-deco-numeral: clamp(64px, 8vw, 96px);
-
-      /* Line-height tokens (UI-SPEC.md lines 178-183) */
-      --lh-display: 0.82;
-      --lh-cat:     0.85;
-      --lh-card:    0.88;
-      --lh-tight:   1.0;
-      --lh-bio:     1.42;
-
-      /* Spacing tokens (UI-SPEC.md lines 67-78, strict 4-multiple scale) */
-      --sp-1:  4px;
-      --sp-2:  8px;
-      --sp-4:  16px;
-      --sp-5:  24px;
-      --sp-6:  32px;
-      --sp-8:  48px;
-      --sp-10: 64px;
-    }
-
-    /* Minimal reset (hand-rolled per RESEARCH.md alternatives note — no modern-normalize dep) */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body { font-family: var(--sans); -webkit-font-smoothing: antialiased; }
-    a { color: inherit; text-decoration: none; }
-    img, picture, svg { display: block; max-width: 100%; }
-    h1, h2, h3, h4, h5, h6, p { margin: 0; }
-    ul, ol { margin: 0; padding: 0; list-style: none; }
-
-    /* Reduced-motion global block (UI-SPEC.md lines 511-520, verbatim — D-13) */
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-      .b-card:hover, .b-piece:hover { transform: none !important; }
-    }
-    ```
-
-    Anti-pattern guards (UI-SPEC.md "Anti-pattern guard" lines 80-82): No `--slate-*`, `--neutral-*`, no purple gradient tokens, no `--radius-2xl`, no shadcn neutral scales.
-  </action>
-  <verify>
-    <automated>test -f src/styles/tokens.css && grep -q -- "--paper:[[:space:]]*#f4ebd9" src/styles/tokens.css && grep -q -- "--terracotta:[[:space:]]*#e85d2a" src/styles/tokens.css && grep -q -- "--cobalt:[[:space:]]*#1947ff" src/styles/tokens.css && grep -q -- "--acid:[[:space:]]*#d4ff3a" src/styles/tokens.css && grep -q -- "--plum:[[:space:]]*#5a1a55" src/styles/tokens.css && grep -q "Bricolage Grotesque Variable" src/styles/tokens.css && grep -q "prefers-reduced-motion" src/styles/tokens.css && echo OK</automated>
-  </verify>
-  <acceptance_criteria>
-    - File exists at src/styles/tokens.css
-    - `grep -c -- "--fs-" src/styles/tokens.css` returns ≥ 11 (all 11 font-size tokens present)
-    - `grep -q -- "--paper:[[:space:]]*#f4ebd9" src/styles/tokens.css` exit 0
-    - `grep -q -- "--terracotta:[[:space:]]*#e85d2a" src/styles/tokens.css` exit 0
-    - `grep -q -- "--cobalt:[[:space:]]*#1947ff" src/styles/tokens.css` exit 0
-    - `grep -q -- "--acid:[[:space:]]*#d4ff3a" src/styles/tokens.css` exit 0
-    - `grep -q -- "--plum:[[:space:]]*#5a1a55" src/styles/tokens.css` exit 0
-    - `grep -q "Bricolage Grotesque Variable" src/styles/tokens.css` exit 0
-    - `grep -q "Fraunces Variable" src/styles/tokens.css` exit 0
-    - `grep -q "JetBrains Mono Variable" src/styles/tokens.css` exit 0
-    - `grep -q "@media (prefers-reduced-motion: reduce)" src/styles/tokens.css` exit 0
-    - `grep -i "slate\|neutral\|purple\|radius-2xl\|inter" src/styles/tokens.css` returns 0 matches
-  </acceptance_criteria>
-  <done>tokens.css exists with all colors, all 11 font-size tokens, all 5 line-height tokens, 7 spacing tokens, minimal reset, reduced-motion block. No forbidden tokens.</done>
-</task>
-
-<task type="auto" tdd="false">
-  <name>Task 4: Create src/styles/disciplines.ts with DISCIPLINE_ACCENT + DISCIPLINE_K consts</name>
-  <read_first>
-    - src/content/categories.ts (existing sibling-const pattern — DO NOT modify)
-    - .planning/phases/03-visual-design-system/03-PATTERNS.md lines 84-120 (disciplines.ts analog + required shape, verbatim)
-    - .planning/phases/03-visual-design-system/03-CONTEXT.md D-01 + D-03 (mapping rationale)
-  </read_first>
-  <action>
-    Create `src/styles/disciplines.ts` as the single source of truth for discipline → accent hex mapping (D-01) and discipline → k-index mapping (D-03). Imports Category type from existing `src/content/categories.ts` — never redeclare the category enum.
-
-    Write this exact content:
-    ```typescript
-    // Phase 3 D-01 + D-03: single source of truth for discipline → accent + decoration variant.
-    // NEVER hard-code these hexes elsewhere — always import.
-    import type { Category } from '../content/categories';
-
-    export const DISCIPLINE_ACCENT: Record<Category, string> = {
-      design:    '#e85d2a',  // terracotta — k1
-      finance:   '#1947ff',  // cobalt    — k2
-      personal:  '#d4ff3a',  // electric lime — k3
-      marketing: '#5a1a55',  // plum      — k4
-    } as const;
-
-    // D-03: decorative-geometry variant per discipline. k1=outline circle,
-    // k2=oversized italic numeral in lime, k3=horizontal dotted line, k4=lime triangle.
-    export const DISCIPLINE_K: Record<Category, 1 | 2 | 3 | 4> = {
-      design:    1,
-      finance:   2,
-      personal:  3,
-      marketing: 4,
-    } as const;
-    ```
-  </action>
-  <verify>
-    <automated>test -f src/styles/disciplines.ts && grep -q "DISCIPLINE_ACCENT" src/styles/disciplines.ts && grep -q "DISCIPLINE_K" src/styles/disciplines.ts && grep -q "'#e85d2a'" src/styles/disciplines.ts && grep -q "'#1947ff'" src/styles/disciplines.ts && grep -q "'#d4ff3a'" src/styles/disciplines.ts && grep -q "'#5a1a55'" src/styles/disciplines.ts && grep -q "import type { Category }" src/styles/disciplines.ts && echo OK</automated>
-  </verify>
-  <acceptance_criteria>
-    - File exists at src/styles/disciplines.ts
-    - `grep -q "export const DISCIPLINE_ACCENT: Record<Category, string>" src/styles/disciplines.ts` exit 0
-    - `grep -q "export const DISCIPLINE_K: Record<Category, 1 | 2 | 3 | 4>" src/styles/disciplines.ts` exit 0
-    - `grep -q "design:" src/styles/disciplines.ts && grep -q "finance:" src/styles/disciplines.ts && grep -q "personal:" src/styles/disciplines.ts && grep -q "marketing:" src/styles/disciplines.ts` all exit 0
-    - All four discipline hexes (#e85d2a, #1947ff, #d4ff3a, #5a1a55) present
-    - `grep -q "import type { Category } from '../content/categories'" src/styles/disciplines.ts` exit 0
-  </acceptance_criteria>
-  <done>disciplines.ts exports DISCIPLINE_ACCENT and DISCIPLINE_K typed against Category import.</done>
-</task>
-
-<task type="auto" tdd="false">
-  <name>Task 5: Create src/components/StatusPill.astro</name>
+  <name>Task 2: Create src/components/StatusPill.astro</name>
   <read_first>
     - .planning/phases/03-visual-design-system/03-PATTERNS.md lines 199-230 (StatusPill analog + verbatim CSS + a11y notes)
     - .planning/sketches/001-direction-comparison/index.html lines 297-308 (sketch CSS for .pill and .dot, verbatim source)
@@ -418,7 +229,7 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 6: Create src/layouts/Base.astro</name>
+  <name>Task 3: Create src/layouts/Base.astro</name>
   <read_first>
     - src/pages/index.astro (current chrome shape to consolidate; this layout replaces it)
     - .planning/phases/03-visual-design-system/03-PATTERNS.md lines 122-196 (Base.astro analog, props pattern, sketch chrome to embed, body-bg switching contract)
@@ -558,7 +369,7 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 7: Create scripts/verify-anti-ai-tells.sh — automated VISUAL-04 grep gate</name>
+  <name>Task 4: Create scripts/verify-anti-ai-tells.sh — automated VISUAL-04 grep gate</name>
   <read_first>
     - .planning/phases/03-visual-design-system/03-VALIDATION.md lines 57-67 (Wave 0 Requirements — exact grep contract)
     - .planning/phases/03-visual-design-system/03-UI-SPEC.md lines 551-561 (Anti-AI-tell verification gate — forbidden items)
@@ -695,7 +506,7 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 8: Create .planning/phases/03-visual-design-system/ANTI-AI-CHECKLIST.md</name>
+  <name>Task 5: Create .planning/phases/03-visual-design-system/ANTI-AI-CHECKLIST.md</name>
   <read_first>
     - .planning/phases/03-visual-design-system/03-UI-SPEC.md lines 552-561 (forbidden item list)
     - .planning/phases/03-visual-design-system/03-CONTEXT.md "Anti-AI-tell verification mechanism" item (Claude's Discretion section)
@@ -786,7 +597,7 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 9: Extend scripts/verify-build.sh with Phase 3 dist assertions</name>
+  <name>Task 6: Extend scripts/verify-build.sh with Phase 3 dist assertions</name>
   <read_first>
     - scripts/verify-build.sh (existing — read entire file to understand current gate structure, fail counter pattern, gate numbering)
     - .planning/phases/03-visual-design-system/03-VALIDATION.md lines 61-65 (the four new assertions to add)
@@ -886,7 +697,7 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 10: Build + run smoke verification — confirm Wave 0 is green</name>
+  <name>Task 7: Build + run smoke verification — confirm Wave 0 is green</name>
   <read_first>
     - All previously-created files in this plan (sanity self-check before triggering build)
   </read_first>
@@ -928,17 +739,14 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 | Boundary | Description |
 |----------|-------------|
 | user → static asset | Recruiter requests static HTML/CSS/woff2 from CDN. No untrusted input crosses into rendering. |
-| build → npm registry | Dependency install fetches Fontsource packages from npm. Build-time only. |
-| local fs → bundled CSS | tokens.css ships verbatim to client. No secrets cross this boundary. |
+| local fs → bundled output | Base.astro + StatusPill compile to static HTML. No secrets cross this boundary. |
 
 ## STRIDE Threat Register
 
 | Threat ID | Category | Component | Disposition | Mitigation Plan |
 |-----------|----------|-----------|-------------|-----------------|
-| T-03-01 | Tampering | npm dependency supply chain (Fontsource packages) | mitigate | Pin exact patch versions (5.2.10, 5.2.9, 5.2.8) per Registry Safety vetting in UI-SPEC.md line 549. npm install with package-lock.json committed. No `--legacy-peer-deps`. |
 | T-03-02 | Information Disclosure | Portrait image EXIF metadata | accept | Portrait is intentionally a public-facing brand asset. EXIF strip can be a Phase 6 polish item — not a v1 contract. Document in checklist. |
 | T-03-03 | Denial of Service | Custom 404 enumeration | accept | Static SSG; no rate limit needed. Cloudflare Pages free tier has its own DDoS protection. |
-| T-03-04 | Information Disclosure | Fontsource font fingerprinting | accept | Self-hosted woff2 → no third-party CDN tracking. Cloudflare Pages serves with no analytics by default. Better posture than Google Fonts CDN. |
 | T-03-05 | Spoofing | External font load on first paint | mitigate | font-display: swap (Fontsource default). Preloaded Bricolage display woff2. System sans fallback in --sans stack means no blank text if font load delays. |
 </threat_model>
 
@@ -956,8 +764,13 @@ src/components/StatusPill.astro will accept: no props (copy is internal).
 - Discipline accent never hard-coded — always imported from DISCIPLINE_ACCENT
 - StatusPill renders identically wherever Base.astro is used
 - Reduced-motion contract is global — downstream components inherit, no per-component duplication needed
+- Anti-AI-tell verification harness is GREEN and ready for end-of-phase walk
 </success_criteria>
 
 <output>
-After completion, create `.planning/phases/03-visual-design-system/03-01-SUMMARY.md` per template.
+After completion, create `.planning/phases/03-visual-design-system/03-01b-SUMMARY.md` per template.
 </output>
+</content>
+</invoke>
+</content>
+</invoke>

@@ -972,29 +972,29 @@ The project deliberately ships without a JS test framework — content-site, no 
 
 **If user pushes back on any of these:** A1, A2, A3 are easy to verify in the first execution wave (curl, grep, ls). A4-A7 are validated by build success.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should we upgrade to Astro 6 to use the stable `<Font>` API?**
+1. **Should we upgrade to Astro 6 to use the stable `<Font>` API?** **(RESOLVED — No. Stay on Astro 5.18.1 for Phase 3; use Fontsource direct import. Defer Astro 6 upgrade to post-launch maintenance.)**
    - What we know: Astro 6.3.2 is upstream current; we're on 5.18.1. Astro 6 stabilized `experimental.fonts` → `fonts` config + `<Font>` component. Other Astro 6 changes include CSP stable, Cloudflare adapter v13 (new wrangler entry), content collections require explicit `loader` (we already have it).
    - What's unclear: Whether the Phase 2 prebuild pipeline (`pdfjs-dist@5.7.284`, `sharp@0.34.5`) survives an Astro 6 upgrade unmodified.
    - Recommendation: **Stay on 5.18.1 for Phase 3.** Coupling a major-version upgrade to a visual-design phase risks introducing build regressions during the most subjective verification gate of the project. Use Fontsource direct import (10 lines of code). Defer Astro 6 upgrade to a future maintenance window after launch.
 
-2. **Should we install `modern-normalize` or hand-roll the reset?**
+2. **Should we install `modern-normalize` or hand-roll the reset?** **(RESOLVED — Hand-roll. ~5-line reset block already specified in tokens.css; no new dep.)**
    - What we know: `modern-normalize@3.0.1`, ~2KB, addresses cross-browser button/input/typography defaults. Hand-roll is ~5 lines of CSS.
    - What's unclear: Whether the bespoke design system needs the full normalize suite (it has no forms, no buttons in the OS-default sense, no native UI elements outside the topbar pill).
    - Recommendation: **Hand-roll.** One less dep; fits the bespoke aesthetic; matches D-17's "plain CSS" spirit. The example reset block in tokens.css above is sufficient.
 
-3. **Should the discipline → accent mapping live in `src/styles/disciplines.ts` (new file) or extend `src/content/categories.ts` (existing)?**
+3. **Should the discipline → accent mapping live in `src/styles/disciplines.ts` (new file) or extend `src/content/categories.ts` (existing)?** **(RESOLVED — New `src/styles/disciplines.ts`. Keeps `categories.ts` content-domain only; gives a home for future per-discipline visual config.)**
    - What we know: Either works. `categories.ts` is already imported by schema and routing; adding accent there couples color to the content domain. A separate `disciplines.ts` (or `theme.ts`) reads more like "design tokens."
    - What's unclear: Caleb's preference; D-01 leaves this as planner choice.
    - Recommendation: **New `src/styles/disciplines.ts`** — keeps `categories.ts` purely about the content enum and gives a sensible home for any future per-discipline visual config (icon, gradient, sort order). Re-export the discipline type from there.
 
-4. **For the k2 discipline card decoration ("oversized italic Fraunces numeral top-right in lime"), what's the actual character/glyph?**
+4. **For the k2 discipline card decoration ("oversized italic Fraunces numeral top-right in lime"), what's the actual character/glyph?** **(RESOLVED — Ship the literal sketch glyph (`$`) per Pattern 9 note. Easy to swap to a numeric variant at execution time if Caleb prefers.)**
    - What we know: Sketch uses the `$` glyph styled as "$" — Finance card decoration. The k2 deco needs to be a `<span>` with text content (Pattern 9 note).
    - What's unclear: Whether the production build keeps `$` (literal) or uses something more abstract like `02` (the card number in italic Fraunces).
    - Recommendation: Planner ships the literal sketch glyph (`$`); easy to swap during execution if Caleb prefers the numeric variant.
 
-5. **Should the splash card on 404 page reuse the exact same component (with same hover behavior + decoration) or a "lite" variant without hover?**
+5. **Should the splash card on 404 page reuse the exact same component (with same hover behavior + decoration) or a "lite" variant without hover?** **(RESOLVED — Identical reuse of `DisciplineCard`. Single source of truth per D-14; same hover behavior preserved.)**
    - What we know: D-14 says "reuses the splash's `DisciplineCard` component — single source of truth." That implies same hover.
    - What's unclear: Whether 404 should suppress the rotation transform under hover for visual restraint.
    - Recommendation: Identical reuse — single source of truth wins; the cards function the same way (clickable navigation back to a populated discipline).

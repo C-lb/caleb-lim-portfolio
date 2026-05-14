@@ -75,13 +75,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Each discipline gallery uses an asymmetric magazine layout (varied tile sizes, intentional negative space, NOT a uniform grid); the layout holds up visually with as few as 2 pieces (no thin-gallery placeholder feel) and degrades to dropping the card from splash if a category has zero pieces at launch
   5. Custom on-brand 404 page exists, returns HTTP 404, and links back to splash
   6. **Anti-AI-tell verification passes** — manual checklist confirms: no centered hero with gradient, no shadcn cards, no Inter anywhere, no purple gradients, no lucide icons, no bento grid, no "Built with X" footer
-**Plans:** 5 plans
+**Plans:** 6 plans
 Plans:
-- [ ] 03-01-PLAN.md — Foundation: tokens.css + disciplines.ts + Base.astro + StatusPill + portrait + anti-AI-tell verification harness (verify-anti-ai-tells.sh + ANTI-AI-CHECKLIST.md + verify-build.sh Phase 3 gates)
+- [ ] 03-01a-PLAN.md — Foundation tokens: Fontsource install + tokens.css + disciplines.ts (Wave 1a, 3 tasks)
+- [ ] 03-01b-PLAN.md — Foundation layout + verification harness: portrait checkpoint + StatusPill + Base.astro + verify-anti-ai-tells.sh + ANTI-AI-CHECKLIST.md + verify-build.sh Phase 3 gates + build smoke (Wave 1b, 7 tasks, depends_on 03-01a)
 - [ ] 03-02-PLAN.md — Splash slice: DisciplineCard component + full re-skin of index.astro with hero band, question bar, 4 rotated cards, SPLASH-04 drop-card logic
 - [ ] 03-03-PLAN.md — Gallery slice: GalleryA12 + GalleryB35 + GalleryC68 bucket templates + [category].astro with ink bg, accent flow, empty-discipline route drop
 - [ ] 03-04-PLAN.md — Detail + about re-skin: [category]/[slug].astro accent header (paginated PDF block preserved verbatim) + about.astro Phase 3 typography (bio copy preserved)
-- [ ] 03-05-PLAN.md — 404 page (D-14) + final anti-AI-tell walk + phase-exit verification (all verify-build.sh gates 1-18 green + ANTI-AI-CHECKLIST.md fully ticked)
+- [ ] 03-05-PLAN.md — 404 page (D-14) + local HTTP 404 verification (SPLASH-05 SC5) + final anti-AI-tell walk + phase-exit verification (all verify-build.sh gates 1-18 green + ANTI-AI-CHECKLIST.md fully ticked)
 **UI hint**: yes
 
 ### Phase 4: Navigation & Secondary Surfaces
@@ -144,7 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Walking Skeleton | 0/3 | Not started | - |
 | 2. Asset Pipeline + Real Content | 0/TBD | Not started | - |
-| 3. Visual Design System | 0/5 | Not started | - |
+| 3. Visual Design System | 0/6 | Not started | - |
 | 4. Navigation & Secondary Surfaces | 0/TBD | Not started | - |
 | 5. Mobile, Performance, Accessibility | 0/TBD | Not started | - |
 | 6. Deploy & Maintenance Handoff | 0/TBD | Not started | - |
