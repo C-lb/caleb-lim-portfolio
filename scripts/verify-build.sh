@@ -709,6 +709,131 @@ else
   fail=1
 fi
 
+# Gate 21a: PIECE-05 prev/next pager presence on detail pages in multi-piece categories.
+# Single-piece (or empty) categories MUST NOT render a pager nav (Pitfall P-3).
+# Multi-piece categories MUST render a pager nav on every detail page.
+for cat in design finance personal marketing; do
+  [[ -d "$DIST/$cat" ]] || continue
+  piece_count=$(find "$DIST/$cat" -mindepth 2 -name index.html -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [[ "$piece_count" -le 1 ]]; then
+    # Single-piece or empty category — pager MUST be absent on the lone detail page (Pitfall P-3).
+    p3_fail=0
+    while IFS= read -r detail; do
+      [[ -z "$detail" ]] && continue
+      if grep -q 'class="detail-pager"' "$detail" 2>/dev/null; then
+        echo "  FAIL: $detail — detail-pager rendered on single-piece category $cat (Pitfall P-3)"
+        fail=1
+        p3_fail=1
+      fi
+    done < <(find "$DIST/$cat" -mindepth 2 -name index.html -type f 2>/dev/null)
+    [[ $p3_fail -eq 0 ]] && echo "  OK: $cat (single/empty, $piece_count piece) — pager correctly absent on detail pages (Gate 21a)"
+  else
+    # Multi-piece category — every detail page MUST contain the pager.
+    miss=0
+    while IFS= read -r detail; do
+      [[ -z "$detail" ]] && continue
+      if ! grep -q 'class="detail-pager"' "$detail" 2>/dev/null; then
+        echo "  FAIL: $detail — detail-pager MISSING (multi-piece $cat — PIECE-05 unmet, Gate 21a)"
+        fail=1
+        miss=1
+      fi
+    done < <(find "$DIST/$cat" -mindepth 2 -name index.html -type f 2>/dev/null)
+    [[ $miss -eq 0 ]] && echo "  OK: $cat ($piece_count pieces) — detail-pager present on every detail page (Gate 21a)"
+  fi
+done
+
+# Gate 21b: back-pill (Phase 3 .b-cat-back) non-regression — Pitfall P-2 lock.
+# Every detail page across every category MUST still contain the existing back-pill anchor.
+gate21b_fail=0
+gate21b_count=0
+while IFS= read -r detail; do
+  [[ -z "$detail" ]] && continue
+  gate21b_count=$((gate21b_count + 1))
+  # Derive category from path: dist/<cat>/<slug>/index.html → <cat>
+  cat=$(echo "$detail" | awk -F/ '{print $2}')
+  # Attribute order is unstable across Astro builds — accept either href-first or class-first.
+  if ! grep -qE "<a[^>]*href=\"/${cat}\"[^>]*class=\"b-cat-back\"" "$detail" 2>/dev/null \
+     && ! grep -qE "<a[^>]*class=\"b-cat-back\"[^>]*href=\"/${cat}\"" "$detail" 2>/dev/null; then
+    echo "  FAIL: $detail — back-pill (.b-cat-back href=/${cat}) missing (Pitfall P-2, Gate 21b)"
+    fail=1
+    gate21b_fail=1
+  fi
+done < <(find "$DIST" -mindepth 3 -name index.html -type f 2>/dev/null)
+[[ $gate21b_fail -eq 0 ]] && echo "  OK: back-pill present on every detail page ($gate21b_count) — Pitfall P-2 lock (Gate 21b)"
+
+# Gate 21c: PIECE-05 cross-discipline scope lock — pager hrefs MUST stay within current category.
+# For each detail page, every <a class="pager-link ..."> href value must start with /<current-cat>/.
+gate21c_fail=0
+while IFS= read -r detail; do
+  [[ -z "$detail" ]] && continue
+  cat=$(echo "$detail" | awk -F/ '{print $2}')
+  # Extract every pager-link href; skip detail pages that don't have a pager.
+  pager_hrefs=$(grep -oE '<a [^>]*class="pager-link[^"]*"[^>]*href="[^"]+"' "$detail" 2>/dev/null \
+                | grep -oE 'href="[^"]+"' | sed 's/href="//;s/"$//' || true)
+  for href in $pager_hrefs; do
+    if [[ "$href" != /${cat}/* ]]; then
+      echo "  FAIL: $detail — pager href escapes $cat: $href (Gate 21c)"
+      fail=1
+      gate21c_fail=1
+    fi
+  done
+done < <(find "$DIST" -mindepth 3 -name index.html -type f 2>/dev/null)
+[[ $gate21c_fail -eq 0 ]] && echo "  OK: every detail-pager href stays within its discipline (Gate 21c)"
+
+# Gate 22: gallery-order parity — prev/next chain matches gallery tile order (Pitfall P-1).
+# For each populated multi-piece category:
+#   1. Extract gallery tile slug order from dist/<cat>/index.html (document order).
+#   2. Walk the next-chain from the first slug's detail page; assert the slug sequence
+#      equals the gallery order.
+# Single-piece and empty categories are vacuous — the parity walk is trivially satisfied.
+for cat in design finance personal marketing; do
+  [[ -f "$DIST/$cat/index.html" ]] || continue
+
+  # 1. Extract gallery tile slug order. Gallery emits <a href="/<cat>/<slug>"> per piece.
+  # `awk '!seen[$0]++'` preserves document order while deduplicating (one piece may appear
+  # twice on the gallery — e.g., tile + caption — we want only the first occurrence per slug).
+  gallery_slugs=$(grep -oE 'href="/'"$cat"'/[a-z0-9-]+"' "$DIST/$cat/index.html" 2>/dev/null \
+                  | sed -E 's|href="/'"$cat"'/||; s|"$||' \
+                  | awk '!seen[$0]++' || true)
+  if [[ -z "$gallery_slugs" ]]; then
+    echo "  OK: $cat — empty gallery or no pieces extractable; parity walk skipped (Gate 22)"
+    continue
+  fi
+
+  gallery_count=$(echo "$gallery_slugs" | wc -l | tr -d ' ')
+  if [[ "$gallery_count" -le 1 ]]; then
+    echo "  OK: $cat — single piece, parity walk vacuous (Gate 22)"
+    continue
+  fi
+
+  # 2. Walk next-chain from first slug.
+  first_slug=$(echo "$gallery_slugs" | head -1)
+  walk=()
+  current="$first_slug"
+  max_iters=20  # belt-and-braces self-loop guard (T-04-08 mitigation)
+  while [[ -n "$current" && ${#walk[@]} -lt $max_iters ]]; do
+    walk+=("$current")
+    detail="$DIST/$cat/$current/index.html"
+    [[ -f "$detail" ]] || break
+    next_href=$(grep -oE '<a [^>]*class="pager-link next"[^>]*href="[^"]+"' "$detail" 2>/dev/null \
+                | grep -oE 'href="[^"]+"' | sed 's/href="//;s/"$//' | head -1 || true)
+    if [[ -z "$next_href" ]]; then break; fi
+    next_slug=$(echo "$next_href" | sed -E "s|^/$cat/||; s|/$||")
+    if [[ "$next_slug" == "$current" ]]; then break; fi  # avoid self-loop
+    current="$next_slug"
+  done
+
+  walk_sequence=$(printf '%s\n' "${walk[@]}")
+  if [[ "$walk_sequence" != "$gallery_slugs" ]]; then
+    echo "  FAIL: $cat — pager next-chain diverges from gallery order (Pitfall P-1, Gate 22)"
+    echo "    gallery: $(echo "$gallery_slugs" | tr '\n' ' ')"
+    echo "    pager:   $(echo "$walk_sequence" | tr '\n' ' ')"
+    fail=1
+  else
+    echo "  OK: $cat — pager next-chain matches gallery tile order ($gallery_count pieces, Gate 22)"
+  fi
+done
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
