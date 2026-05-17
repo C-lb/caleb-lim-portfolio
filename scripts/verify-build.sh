@@ -523,6 +523,192 @@ if [[ -f "$DIST/index.html" ]]; then
   fi
 fi
 
+echo
+echo "Phase 4 gates"
+echo "============="
+
+# Helper: list of every built page (every index.html under dist/ + dist/404.html).
+# Used by Gates 19a/19b/19c/19d/19f/20 so we cover splash + galleries + details + about + 404.
+list_built_pages() {
+  find "$DIST" -name index.html -type f 2>/dev/null
+  [[ -f "$DIST/404.html" ]] && echo "$DIST/404.html"
+}
+
+# Gate 19a — CONTACT-03: mailto in every built page
+gate19a_fail=0
+gate19a_count=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  gate19a_count=$((gate19a_count + 1))
+  if ! grep -q 'href="mailto:caleblimster@gmail.com"' "$html"; then
+    echo "  FAIL: $html missing mailto (CONTACT-03)"
+    gate19a_fail=1
+  fi
+done < <(list_built_pages)
+if [[ $gate19a_fail -eq 0 ]]; then
+  echo "  OK: CONTACT-03 mailto present on $gate19a_count pages"
+else
+  fail=1
+fi
+
+# Gate 19b — CONTACT-04: LinkedIn href in every built page
+gate19b_fail=0
+gate19b_count=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  gate19b_count=$((gate19b_count + 1))
+  if ! grep -q 'href="https://linkedin.com/in/caleblkr"' "$html"; then
+    echo "  FAIL: $html missing LinkedIn href (CONTACT-04)"
+    gate19b_fail=1
+  fi
+done < <(list_built_pages)
+if [[ $gate19b_fail -eq 0 ]]; then
+  echo "  OK: CONTACT-04 LinkedIn href present on $gate19b_count pages"
+else
+  fail=1
+fi
+
+# Gate 19c — home link in every built page
+gate19c_fail=0
+gate19c_count=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  gate19c_count=$((gate19c_count + 1))
+  if ! grep -qE '<a[^>]*href="/"' "$html"; then
+    echo "  FAIL: $html missing home link <a href=\"/\">"
+    gate19c_fail=1
+  fi
+done < <(list_built_pages)
+if [[ $gate19c_fail -eq 0 ]]; then
+  echo "  OK: home link present on $gate19c_count pages"
+else
+  fail=1
+fi
+
+# Gate 19d — CONTACT-01 reinforcement: resume in header on every built page
+# Same-origin per Pitfall P-5; download attribute mandatory.
+gate19d_fail=0
+gate19d_count=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  gate19d_count=$((gate19d_count + 1))
+  if ! grep -qE '<a[^>]*href="/caleb-lim-resume\.pdf"[^>]*download' "$html"; then
+    echo "  FAIL: $html missing resume <a href=\"/caleb-lim-resume.pdf\" download>"
+    gate19d_fail=1
+  fi
+done < <(list_built_pages)
+if [[ $gate19d_fail -eq 0 ]]; then
+  echo "  OK: CONTACT-01 reinforcement resume link present on $gate19d_count pages"
+else
+  fail=1
+fi
+
+# Gate 19e — CONTACT-05: About contact block inside <article>
+# Gate 19e is RED until Plan 04-03 lands the About contact block. Do not regress.
+# IMPORTANT: Astro inlines templates so the header's <nav> (with mailto/LinkedIn) often lives
+# on the SAME long line as <article>. The plan's original `sed -n '/<article/,/<\/article>/p'`
+# recipe matches that whole line, which would falsely include header chrome inside the article
+# scope. Use awk-based substring trimming: drop everything BEFORE <article> on the opening line
+# and everything AFTER </article> on the closing line. Resilient to single-line and multi-line
+# layouts (Rule 1 fix during Plan 04-01 Task 1 RED-state authoring).
+extract_about_article() {
+  awk '
+    BEGIN { in_art = 0 }
+    {
+      line = $0
+      if (!in_art) {
+        i = index(line, "<article")
+        if (i > 0) { line = substr(line, i); in_art = 1 }
+      }
+      if (in_art) {
+        j = index(line, "</article>")
+        if (j > 0) {
+          print substr(line, 1, j + length("</article>") - 1)
+          in_art = 0
+        } else {
+          print line
+        }
+      }
+    }
+  ' "$1"
+}
+ABOUT_P4=dist/about/index.html
+if [[ ! -f "$ABOUT_P4" ]]; then
+  echo "  FAIL: $ABOUT_P4 missing — CONTACT-05 cannot be verified (Gate 19e)"
+  fail=1
+else
+  about_article=$(extract_about_article "$ABOUT_P4")
+  has_email=0; has_li=0
+  echo "$about_article" | grep -q 'href="mailto:caleblimster@gmail.com"' && has_email=1
+  echo "$about_article" | grep -q 'href="https://linkedin.com/in/caleblkr"' && has_li=1
+  if [[ $has_email -eq 1 && $has_li -eq 1 ]]; then
+    echo "  OK: CONTACT-05 email + LinkedIn present inside About <article> (Gate 19e)"
+  else
+    echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing email or LinkedIn inside <article> (Gate 19e)"
+    fail=1
+  fi
+fi
+
+# Gate 19f — landmark + aria-current discipline (site-wide *.html)
+gate19f_fail=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  # (1) no aria-current="false" anywhere (Pitfall P-4 — omit instead)
+  if grep -q 'aria-current="false"' "$html"; then
+    echo "  FAIL: $html — aria-current=\"false\" present (omit attribute instead, Pitfall P-4)"
+    gate19f_fail=1
+  fi
+  # (2) every <nav opening tag carries aria-label="..."
+  while IFS= read -r nav_tag; do
+    [[ -z "$nav_tag" ]] && continue
+    if ! echo "$nav_tag" | grep -q 'aria-label="'; then
+      echo "  FAIL: $html — anonymous <nav> landmark (missing aria-label): $nav_tag"
+      gate19f_fail=1
+    fi
+  done < <(grep -oE '<nav [^>]*>' "$html" 2>/dev/null || true)
+  # (3) no two <nav> tags on the same page share the same aria-label value
+  dup_labels=$(grep -oE '<nav [^>]*aria-label="[^"]*"' "$html" 2>/dev/null | grep -oE 'aria-label="[^"]*"' | sort | uniq -d)
+  if [[ -n "$dup_labels" ]]; then
+    echo "  FAIL: $html — duplicate <nav aria-label> values: $dup_labels"
+    gate19f_fail=1
+  fi
+done < <(find "$DIST" -name '*.html' -type f 2>/dev/null)
+if [[ $gate19f_fail -eq 0 ]]; then
+  echo "  OK: landmark + aria-current discipline (Gate 19f)"
+else
+  fail=1
+fi
+
+# Gate 20 — external-link safety: every target="_blank" anchor carries noopener + noreferrer
+# Regex truth table (orchestrator-verified, BSD grep + GNU grep):
+# |-------------------------------|----------|
+# | Input                         | Expected |
+# |-------------------------------|----------|
+# | rel="noopener noreferrer"     | MATCH    |
+# | rel="noreferrer noopener"     | MATCH    |
+# | rel="noopener"                | MATCH    |
+# | rel="noopener,noreferrer"     | no-match | (Pitfall P-7 enforced — comma-separated rejected)
+# |-------------------------------|----------|
+gate20_fail=0
+while IFS= read -r html; do
+  [[ -z "$html" ]] && continue
+  while IFS= read -r tag; do
+    [[ -z "$tag" ]] && continue
+    if echo "$tag" | grep -q 'target="_blank"'; then
+      if ! echo "$tag" | grep -qE 'rel="([^"]*[[:space:]])?noopener([[:space:]][^"]*)?"' \
+         || ! echo "$tag" | grep -qE 'rel="([^"]*[[:space:]])?noreferrer([[:space:]][^"]*)?"'; then
+        echo "  FAIL: $html — target=\"_blank\" anchor missing noopener+noreferrer: $tag"
+        gate20_fail=1
+      fi
+    fi
+  done < <(grep -oE '<a [^>]*>' "$html" 2>/dev/null || true)
+done < <(find "$DIST" -name '*.html' -type f 2>/dev/null)
+if [[ $gate20_fail -eq 0 ]]; then
+  echo "  OK: external-link safety — every target=\"_blank\" anchor carries noopener+noreferrer (Gate 20)"
+else
+  fail=1
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"

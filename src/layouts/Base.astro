@@ -15,6 +15,7 @@ interface Props {
   bg?: 'paper' | 'ink';
 }
 const { title, bg = 'paper' } = Astro.props;
+const isHome = Astro.url.pathname === '/';
 ---
 <!doctype html>
 <html lang="en">
@@ -25,12 +26,19 @@ const { title, bg = 'paper' } = Astro.props;
     <link rel="preload" as="font" type="font/woff2" href={bricolageDisplay} crossorigin="anonymous" />
   </head>
   <body class={`bg-${bg}`}>
+    <a href="#main" class="skip">Skip to content</a>
     <header class="topbar">
-      <span class="brand">caleb lim</span>
+      <a href="/" class="brand" aria-current={isHome ? 'page' : undefined}>caleb lim</a>
       <StatusPill />
-      <nav aria-label="primary"><!-- Phase 4 wires mailto / LinkedIn / Resume here --></nav>
+      <nav aria-label="primary">
+        <a href="mailto:caleblimster@gmail.com" class="nav-link">email</a>
+        <a href="https://linkedin.com/in/caleblkr" target="_blank" rel="noopener noreferrer" class="nav-link">linkedin</a>
+        <a href="/caleb-lim-resume.pdf" download class="nav-link">resume</a>
+      </nav>
     </header>
-    <slot />
+    <main id="main">
+      <slot />
+    </main>
     <footer class="foot">
       <span class="left">caleb lim — 2026</span>
       <span class="center">available for full-time roles, brand+analyst+design</span>
@@ -70,6 +78,52 @@ const { title, bg = 'paper' } = Astro.props;
     min-width: 1px; /* reserves the grid slot for Phase 4 */
   }
   .topbar nav a:hover { color: var(--terracotta); }
+
+  /* Phase 4 — header chrome links. Inherit .topbar typography; override text-transform to lowercase to match .brand. */
+  .topbar nav .nav-link {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: none;
+    padding: 4px 0;
+  }
+  .topbar nav .nav-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  /* aria-current="page" dim — only ever set on the brand link on splash (Pitfall P-4). */
+  .topbar .brand[aria-current="page"] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  /* Skip-to-content — visually hidden until focused (O-2). */
+  .skip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: var(--sp-2) var(--sp-4);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    transform: translateY(-200%);
+    transition: transform 0.15s ease-out;
+    z-index: 100;
+  }
+  .skip:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid var(--paper);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skip { transition: none; }
+  }
 
   .foot {
     display: grid;
