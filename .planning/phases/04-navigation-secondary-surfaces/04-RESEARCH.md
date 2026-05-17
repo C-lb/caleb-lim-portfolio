@@ -644,28 +644,33 @@ done
 | Email harvesting from the `mailto:` link by spam scrapers | Information disclosure | **Accepted risk.** Obfuscating the mailto with JS would break no-JS recruiters and screen readers, which is a much bigger UX hit than a marginal increase in spam. Mailto is published openly. |
 | Resume PDF metadata leak | Information disclosure | **Already mitigated** by `scripts/strip-resume-metadata.mjs` (Phase 2). Phase 4 doesn't touch the resume; the EXIF-stripped PDF stays as is. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **O-1: Prev/next at category edges — hide, or wrap-around?**
    - What we know: Success Criterion 2 says "prev/next navigation scoped to the same discipline (no cross-discipline jumps)" — doesn't specify edge behavior.
    - What's unclear: Should "next" on the last piece wrap to the first piece in the category, or render nothing?
    - Recommendation: **Hide at edges.** Recruiter mental model on a curated 5–15-piece portfolio is "I'm browsing a list," not "I'm in a carousel." Wrapping in a curated list reads weird. The back-pill already provides the always-available bail-out. **Defer to user confirmation in `/gsd-discuss-phase` if the planner wants to lock it.**
+   - **RESOLVED: HIDE at first/last (no wrap) — applied in 04-02 Task 1.**
 
 2. **O-2: Skip-to-content link — land in Phase 4 or defer to Phase 5?**
    - What we know: Phase 5 owns a11y polish formally. But a skip-to-content link is **two lines of HTML + a few lines of CSS** and only makes sense to land while the header chrome is open for edit.
    - Recommendation: **Land it in Phase 4 as a Claude's-discretion add-on.** Pattern: `<a href="#main" class="skip">Skip to content</a>` as the first child of `<body>` in `Base.astro`; positioned off-screen except on `:focus`. Wrap each page's main content (splash hero, gallery `.b-category`, detail `.detail`, about `.about`) in `<main id="main">` — most don't have this today and it's a one-line fix per page.
+   - **RESOLVED: LAND in Phase 4 plan 04-01 — applied in 04-01 Task 2.**
 
 3. **O-3: Subject prefill on header mailto?**
    - What we know: User did not specify. Two reasonable choices.
    - Recommendation: **No subject.** Discussed in Anti-Patterns. **Lockable in `/gsd-discuss-phase` if Caleb has a preference.**
+   - **RESOLVED: NONE (clean link) — applied in 04-01 Task 2 + 04-03 Task 1.**
 
 4. **O-4: aria-current on category-page nav when viewing the gallery?**
    - What we know: When a recruiter is on `/marketing`, should the header signal "you are inside marketing"? The current nav has email/linkedin/resume only — no category links to mark current.
    - Recommendation: **Only mark the brand `<a>` with aria-current="page" on splash.** No header-level discipline indicators are in scope for Phase 4.
+   - **RESOLVED: brand-only — applied in 04-01 Task 2.**
 
 5. **O-5: Should the detail-pager `<nav>` carry the discipline accent?**
    - What we know: Phase 3 already flows `var(--accent)` to the detail header's top border (`[slug].astro:107`) and the back-pill hover. The pager could rhyme.
    - Recommendation: **Accent only on hover** to keep the pager from competing visually with the back-pill. Default state ink-on-paper, hover state accent. Matches `.b-cat-back:hover` pattern.
+   - **RESOLVED: accent-on-hover-only — applied in 04-02 Task 1.**
 
 ## Assumptions Log
 
