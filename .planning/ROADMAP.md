@@ -100,7 +100,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 **Wave 1**
-- [ ] 04-01-PLAN.md — Header chrome (mailto, LinkedIn, Resume) + skip-to-content + <main> wrap in Base.astro + verify-build.sh Gates 19a-f + 20
+- [x] 04-01-PLAN.md — Header chrome (mailto, LinkedIn, Resume) + skip-to-content + <main> wrap in Base.astro + verify-build.sh Gates 19a-f + 20
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 04-02-PLAN.md — Detail-page prev/next pager in [category]/[slug].astro (same-discipline scoped, hide at edges) + Gates 21a-c + 22
