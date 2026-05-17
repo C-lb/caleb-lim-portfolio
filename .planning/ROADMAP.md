@@ -97,7 +97,14 @@ Plans:
   2. Each piece-detail page footer renders prev/next navigation scoped to the same discipline (no cross-discipline jumps) plus a "Back to [Category]" link that returns to the gallery the recruiter came from
   3. About page hosts a contact block with email + LinkedIn + (optional) Calendly — a slightly larger surface than the header chrome, intended for the recruiter who already read the bio
   4. External links audit passes — every outbound link uses `target="_blank" rel="noopener noreferrer"`; the `mailto:` link delivers to Caleb's actual inbox (verified by sending a test from a different account)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+**Wave 1**
+- [ ] 04-01-PLAN.md — Header chrome (mailto, LinkedIn, Resume) + skip-to-content + <main> wrap in Base.astro + verify-build.sh Gates 19a-f + 20
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-02-PLAN.md — Detail-page prev/next pager in [category]/[slug].astro (same-discipline scoped, hide at edges) + Gates 21a-c + 22
+- [ ] 04-03-PLAN.md — About contact block (email + LinkedIn; Calendly skipped per user lock) — closes Gate 19e
 **UI hint**: yes
 
 ### Phase 5: Mobile, Performance, Accessibility
@@ -148,6 +155,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Walking Skeleton | 0/3 | Not started | - |
 | 2. Asset Pipeline + Real Content | 0/TBD | Not started | - |
 | 3. Visual Design System | 0/6 | Not started | - |
-| 4. Navigation & Secondary Surfaces | 0/TBD | Not started | - |
+| 4. Navigation & Secondary Surfaces | 0/3 | Not started | - |
 | 5. Mobile, Performance, Accessibility | 0/TBD | Not started | - |
 | 6. Deploy & Maintenance Handoff | 0/TBD | Not started | - |
