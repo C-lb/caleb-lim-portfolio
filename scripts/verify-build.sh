@@ -634,22 +634,17 @@ extract_about_article() {
 }
 ABOUT_P4=dist/about/index.html
 if [[ ! -f "$ABOUT_P4" ]]; then
-  echo "  FAIL: $ABOUT_P4 missing — CONTACT-05 cannot be verified"
+  echo "  FAIL: $ABOUT_P4 missing — CONTACT-05 cannot be verified (Gate 19e)"
   fail=1
 else
-  gate19e_fail=0
   about_article=$(extract_about_article "$ABOUT_P4")
-  if ! echo "$about_article" | grep -q 'href="mailto:caleblimster@gmail.com"'; then
-    echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing email inside <article>"
-    gate19e_fail=1
-  fi
-  if ! echo "$about_article" | grep -q 'href="https://linkedin.com/in/caleblkr"'; then
-    echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing LinkedIn inside <article>"
-    gate19e_fail=1
-  fi
-  if [[ $gate19e_fail -eq 0 ]]; then
-    echo "  OK: CONTACT-05 email + LinkedIn present inside About <article>"
+  has_email=0; has_li=0
+  echo "$about_article" | grep -q 'href="mailto:caleblimster@gmail.com"' && has_email=1
+  echo "$about_article" | grep -q 'href="https://linkedin.com/in/caleblkr"' && has_li=1
+  if [[ $has_email -eq 1 && $has_li -eq 1 ]]; then
+    echo "  OK: CONTACT-05 email + LinkedIn present inside About <article> (Gate 19e)"
   else
+    echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing email or LinkedIn inside <article> (Gate 19e)"
     fail=1
   fi
 fi
