@@ -605,17 +605,45 @@ fi
 
 # Gate 19e — CONTACT-05: About contact block inside <article>
 # Gate 19e is RED until Plan 04-03 lands the About contact block. Do not regress.
+# IMPORTANT: Astro inlines templates so the header's <nav> (with mailto/LinkedIn) often lives
+# on the SAME long line as <article>. The plan's original `sed -n '/<article/,/<\/article>/p'`
+# recipe matches that whole line, which would falsely include header chrome inside the article
+# scope. Use awk-based substring trimming: drop everything BEFORE <article> on the opening line
+# and everything AFTER </article> on the closing line. Resilient to single-line and multi-line
+# layouts (Rule 1 fix during Plan 04-01 Task 1 RED-state authoring).
+extract_about_article() {
+  awk '
+    BEGIN { in_art = 0 }
+    {
+      line = $0
+      if (!in_art) {
+        i = index(line, "<article")
+        if (i > 0) { line = substr(line, i); in_art = 1 }
+      }
+      if (in_art) {
+        j = index(line, "</article>")
+        if (j > 0) {
+          print substr(line, 1, j + length("</article>") - 1)
+          in_art = 0
+        } else {
+          print line
+        }
+      }
+    }
+  ' "$1"
+}
 ABOUT_P4=dist/about/index.html
 if [[ ! -f "$ABOUT_P4" ]]; then
   echo "  FAIL: $ABOUT_P4 missing — CONTACT-05 cannot be verified"
   fail=1
 else
   gate19e_fail=0
-  if ! sed -n '/<article/,/<\/article>/p' "$ABOUT_P4" | grep -q 'href="mailto:caleblimster@gmail.com"'; then
+  about_article=$(extract_about_article "$ABOUT_P4")
+  if ! echo "$about_article" | grep -q 'href="mailto:caleblimster@gmail.com"'; then
     echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing email inside <article>"
     gate19e_fail=1
   fi
-  if ! sed -n '/<article/,/<\/article>/p' "$ABOUT_P4" | grep -q 'href="https://linkedin.com/in/caleblkr"'; then
+  if ! echo "$about_article" | grep -q 'href="https://linkedin.com/in/caleblkr"'; then
     echo "  FAIL: $ABOUT_P4 — CONTACT-05 missing LinkedIn inside <article>"
     gate19e_fail=1
   fi
