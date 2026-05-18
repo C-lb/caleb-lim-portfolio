@@ -295,7 +295,7 @@ Not applied to gallery tiles (`.b-piece`) — gallery tiles already have a per-h
 | `/about` | **≥85** | **≥95** | — | — | — |
 
 **Audit conditions:**
-- Run against **Cloudflare Pages preview URL** (`<branch>.<project>.pages.dev`), not localhost (D-13)
+- Run against **Vercel preview URL** (`<project>-git-<branch>-<scope>.vercel.app` — e.g. `caleb-lim-portfolio-git-phase-5-c-lb.vercel.app`), not localhost (D-13, amended 2026-05-18)
 - Mobile form factor, simulated Slow 4G throttling (Lighthouse default mobile preset — Moto G4, 412×823, 4× CPU slowdown, 1.6Mbps down / 750Kbps up / 150ms RTT) (D-15)
 - Manual runs via `scripts/lighthouse-audit.sh <preview-url>` — no CI gate (D-16)
 - Results recorded in `05-VERIFICATION.md` per route with raw JSON pulled into the phase directory
