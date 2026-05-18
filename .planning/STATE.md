@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-05-18T01:47:53.364Z"
-last_activity: 2026-05-18 -- Phase 04 marked complete
+status: planning
+stopped_at: Phase 5 plans approved
+last_updated: "2026-05-19T00:00:00.000Z"
+last_activity: 2026-05-19 -- Phase 05 plans approved (8 plans, 3 waves)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 19
+  total_plans: 27
   completed_plans: 19
-  percent: 67
+  percent: 70
 ---
 
 # Project State
@@ -21,16 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Core value:** A recruiter from any of the analyst / brand / marketing / design worlds can self-select into the work that's relevant to their role in under a minute and walk away convinced Caleb can do that job.
-**Current focus:** Phase 04 — Navigation & Secondary Surfaces
+**Current focus:** Phase 05 — Mobile, Performance, Accessibility (plans approved, ready to execute)
 
 ## Current Position
 
-Phase: 04 — COMPLETE
-Plan: 3 of 3
-Status: Phase 04 complete
-Last activity: 2026-05-18 -- Phase 04 marked complete
+Phase: 05 — PLANNED (8 plans across 3 waves)
+Plan: 0 of 8
+Status: Plans approved by gsd-plan-checker iteration 2; ready for `/gsd-execute-phase 5`
+Last activity: 2026-05-19 -- Phase 05 plans approved
 
-Progress: 5/7 plans complete (02-01..02-04 + 02-06; 02-05 partial; 02-07 pending)
+Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
+- Wave 0: 05-01 (validation harness)
+- Wave 1: 05-02 (Vercel), 05-03 (topbar), 05-04 (gallery + LCP), 05-05 (token sweep — runs after 03+04)
+- Wave 2: 05-06 (reduced-motion surgical), 05-07 (touch/hover/shimmer), 05-08 (phase-exit verification)
 
 ## Performance Metrics
 
@@ -84,17 +87,20 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-14T01:32:48.345Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume command: `/gsd-execute-phase 2 --gaps-only` (the executor will skip 02-06 + the design-piece work in 02-05 that already shipped, and re-spawn at the marketing checkpoint)
-Resume file: .planning/phases/03-visual-design-system/03-UI-SPEC.md
+Last session: 2026-05-19T00:00:00.000Z
+Stopped at: Phase 5 plans approved (gsd-plan-checker iteration 2 PASSED)
+Resume command: `/gsd-execute-phase 5`
+Resume file: .planning/phases/05-mobile-performance-accessibility/05-01-PLAN.md (Wave 0 entry point)
 
-**Inputs needed for marketing-real-piece (next session):**
+**Phase 5 plan inventory:**
 
-1. Hero — absolute path on Mac (image OR a PDF to extract page 1 from)
-2. Source PDF (optional) — absolute path; needed if you want Open full PDF link for marketing too
-3. fullPdf yes/no — only if PDF supplied
-4. CRO seed — 1-3 sentence rough notes on what / your role / outcome
-5. NDA gate — confirm publish-rights if PDF supplied
-
-Candidate folders: `~/Desktop/ARTWORKS`, `~/Desktop/SPARK/SPARK Projects`, `~/Desktop/OBESE`, `~/Desktop/TREBLE`, `~/Desktop/SMU/Internships/Portfolio`. Or finance instead — D-10 says design + marketing is the floor; finance is bonus.
+| Plan | Wave | depends_on | Closes |
+|------|------|------------|--------|
+| 05-01 | 0 | [] | SC1/2/3/6 instrumentation (lighthouse-audit.sh + Gates 23/24/25 + 05-VERIFICATION.md template + 05-TOKEN-MAP.md) |
+| 05-02 | 1 | [01] | SC2 (Vercel preview pipeline; user-driven checkpoint at vercel.com/new) |
+| 05-03 | 1 | [01] | SC1 / BLOCKER-1 (topbar ≤700px collapse, D-01–D-03) |
+| 05-04 | 1 | [01] | SC5 / BLOCKER-2 (gallery hero promote 60/40, D-09–D-12) + LCP priority/sizes |
+| 05-05 | 1 | [01, 03, 04] | SC6 / WARNING-1 (token sweep, D-17–D-18) |
+| 05-06 | 2 | [03, 04, 05] | SC3 architecture (D-08, loosen global reduced-motion clamp) |
+| 05-07 | 2 | [03, 04, 05, 06] | SC1+SC3 touch behaviour (D-04/06/07 gating + shimmer + StatusPill shrink) |
+| 05-08 | 2 | [02, 03, 04, 05, 06, 07] | Phase-exit: Lighthouse audit + real-iPhone walk + reduced-motion walk |

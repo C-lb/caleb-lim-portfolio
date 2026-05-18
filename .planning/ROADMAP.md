@@ -113,11 +113,35 @@ Plans:
 **Depends on**: Phase 4
 **Requirements**: FOUND-01, FOUND-02, FOUND-03
 **Success Criteria** (what must be TRUE):
-  1. Real-device test on iPhone Safari (not desktop devtools simulation, per PITFALLS.md) confirms: splash four cards readable above the fold, tap targets ≥44px, every PDF piece scrolls correctly through its rendered slide sequence, no horizontal scroll anywhere, resume PDF opens in the system viewer
+  1. Real-device test on iPhone Safari (not desktop devtools simulation, per PITFALLS.md) confirms: splash four cards readable above the fold, tap targets ≥44px, every PDF piece scrolls correctly through its rendered slide sequence, no horizontal scroll anywhere, resume PDF opens in the system viewer. **Explicit fix:** `.topbar` collapses cleanly at ≤700px (brand wraps at most 1 line; OPEN-TO-ROLES island already top-center fixed; nav links remain visible — no `resume` link cropped off-screen at 375px). Carries Phase 4 UI-REVIEW BLOCKER-1.
   2. Lighthouse mobile audit on a throttled 4G profile scores ≥85 Performance (LCP <2s on splash) and ≥95 Accessibility on splash, gallery, and detail pages — measured on the actual deployed preview URL, not localhost
   3. `prefers-reduced-motion: reduce` honored everywhere — rotations on splash cards collapse to 0°, scroll-driven reveals become instant opacity changes, magnetic/hover-deflection effects disable; verified by toggling the OS setting and walking the full site
   4. Recruiter on iPhone Safari can complete the full critical path — land on splash, click Graphic Design, see the gallery, click into a piece, scroll the detail page, return to gallery, switch to a different discipline, download the resume — without hitting a broken state, layout shift, or scroll-jacked section
-**Plans**: TBD
+  5. **Gallery tiles render the piece hero/thumbnail** (not empty colored slabs) on `/design`, `/marketing`, and any other populated discipline — recruiter arriving from the splash sees image-led tiles, not text-only placeholders. Piece `hero` asset already exists; gallery card just needs wiring (mirror the detail page's image use). Carries Phase 4 UI-REVIEW BLOCKER-2.
+  6. **Design-token hygiene pass**: (a) `--lime` and any other Phase-4 UAT-added tokens registered in `tokens.css` with documented contrast/use rationale (or removed if redundant against `--acid`); (b) `--terracotta` use audited — either re-scoped as load-bearing (drop the "decorative only" comment) or replaced where it carries semantic weight; (c) raw `font-size` and spacing literals in `src/pages/index.astro`, `src/pages/about.astro`, `src/components/*.astro` replaced with `--fs-*` and `--sp-*` tokens (target: zero raw `px` font-sizes outside `tokens.css`). Carries Phase 4 UI-REVIEW WARNING-1.
+**Plans**: 8 plans
+Plans:
+**Wave 0**
+- [ ] 05-01-PLAN.md — Validation harness (lighthouse-audit.sh + verify-build.sh Gates 23/24/25 + 05-VERIFICATION.md template + 05-TOKEN-MAP.md)
+
+**Wave 1** *(DAG inside the wave — files_modified overlap is gated via depends_on rather than partitioned)*
+- [ ] 05-02-PLAN.md — Vercel project import + phase-5 preview URL verification (D-13 amended) — depends_on: [01]
+- [ ] 05-03-PLAN.md — Topbar mobile collapse ≤700px (D-01–D-03) + desktop tap-target floor + .visually-hidden utility — closes BLOCKER-1 — depends_on: [01]
+- [ ] 05-04-PLAN.md — Gallery tile recomposition (D-09–D-12) + LCP priority/sizes on splash carousel + detail hero — closes BLOCKER-2 — depends_on: [01]
+- [ ] 05-05-PLAN.md — Token sweep (D-17, D-18) + --sp-3 add + --terracotta/--lime comments + Gate 25 closes — closes WARNING-1 — depends_on: [01, 03, 04] (sweeps the final versions of Base.astro/tokens.css/index.astro/[slug].astro after 03 + 04 land)
+
+**Wave 2** *(after Wave 1 — transitive deps named explicitly)*
+- [ ] 05-06-PLAN.md — Reduced-motion surgical pass (D-08): remove global * clamp from tokens.css + per-source disables for entrance shakes — depends_on: [03, 04, 05]
+- [ ] 05-07-PLAN.md — Touch-hover gating (D-06, 13 surfaces) + touch entrance shimmer (D-07) + StatusPill mobile shrink (D-04) — depends_on: [03, 04, 05, 06]
+- [ ] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview + real-iPhone walk + reduced-motion walk + record in 05-VERIFICATION.md — depends_on: [02, 03, 04, 05, 06, 07]
+
+
+**Carry-over from Phase 4 UI Review** (`.planning/phases/04-navigation-secondary-surfaces/04-UI-REVIEW.md`, 13/24 overall):
+- BLOCKER-1 — mobile `.topbar` overflow at 375px → folded into SC1.
+- BLOCKER-2 — empty gallery tiles on populated disciplines → new SC5.
+- WARNING-1 — design-token drift (`--lime` undocumented, `--terracotta` scope mismatch, raw literals) → new SC6.
+
+These are the only Phase-4 audit findings that must clear before Phase 6 ships; minor recs (14 total) are deferred to post-launch polish unless they surface during Phase 5 testing.
 
 ### Phase 6: Deploy & Maintenance Handoff
 **Goal**: Site is live on caleblim.com (or confirmed fallback domain) on Cloudflare Pages, and Caleb has personally added a new piece end-to-end via GitHub.dev without developer help. The maintenance pitfall is closed by demonstration, not by documentation alone.
