@@ -8,16 +8,53 @@ import path from 'node:path';
 import { DISCIPLINE_ACCENT } from '../../styles/disciplines';
 import type { Category } from '../../content/categories';
 
-export async function getStaticPaths() {
-  const pieces = await getCollection('pieces', ({ data }) => data.draft !== true);
-  return pieces.map((piece) => ({
-    params: { category: piece.data.category, slug: piece.id },
-    props: { piece },
-  }));
+type Piece = CollectionEntry<'pieces'>;
+interface NeighbourRef {
+  slug: string;
+  category: Category;
+  title: string;
 }
 
-interface Props { piece: CollectionEntry<'pieces'>; }
-const { piece } = Astro.props;
+export async function getStaticPaths() {
+  const all = await getCollection('pieces', ({ data }) => data.draft !== true);
+
+  // Group by category and sort each group by `data.order` ASC.
+  // MUST match the gallery's sort key at src/pages/[category].astro:25 verbatim.
+  // Pitfall P-1: drift between gallery sort and prev/next sort breaks recruiter UX.
+  const byCategory: Record<Category, Piece[]> = {
+    design: [], finance: [], personal: [], marketing: [],
+  };
+  for (const p of all) {
+    const cat = p.data.category as Category;
+    byCategory[cat].push(p);
+  }
+  for (const cat of Object.keys(byCategory) as Category[]) {
+    byCategory[cat].sort((a, b) => a.data.order - b.data.order);
+  }
+
+  const toRef = (p: Piece | null): NeighbourRef | null =>
+    p ? { slug: p.id, category: p.data.category as Category, title: p.data.title } : null;
+
+  return all.map((piece) => {
+    const sibs = byCategory[piece.data.category as Category];
+    const idx = sibs.findIndex((s) => s.id === piece.id);
+    return {
+      params: { category: piece.data.category, slug: piece.id },
+      props: {
+        piece,
+        prev: toRef(idx > 0 ? sibs[idx - 1] : null),
+        next: toRef(idx < sibs.length - 1 ? sibs[idx + 1] : null),
+      },
+    };
+  });
+}
+
+interface Props {
+  piece: CollectionEntry<'pieces'>;
+  prev: NeighbourRef | null;
+  next: NeighbourRef | null;
+}
+const { piece, prev, next } = Astro.props;
 const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf } = piece.data;
 const slug = piece.id;
 
@@ -93,6 +130,25 @@ const backLabel: Record<Category, string> = {
       <p class="full-pdf-link">
         <a href={fullPdf} download>Open full PDF →</a>
       </p>
+    )}
+
+    {/* PIECE-05 prev/next pager — same-discipline only, hide at edges (O-1, Pitfall P-3). */}
+    {/* Back-pill (line 52) already satisfies the "Back to Category" half — do NOT duplicate (Pitfall P-2). */}
+    {(prev || next) && (
+      <nav class="detail-pager" aria-label="other pieces in this discipline">
+        {prev ? (
+          <a class="pager-link prev" href={`/${prev.category}/${prev.slug}`} rel="prev">
+            <span class="pager-dir">← previous</span>
+            <span class="pager-title">{prev.title}</span>
+          </a>
+        ) : <span />}
+        {next ? (
+          <a class="pager-link next" href={`/${next.category}/${next.slug}`} rel="next">
+            <span class="pager-dir">next →</span>
+            <span class="pager-title">{next.title}</span>
+          </a>
+        ) : <span />}
+      </nav>
     )}
   </article>
 </Base>
@@ -208,7 +264,57 @@ const backLabel: Record<Category, string> = {
     outline-offset: 2px;
   }
 
+  .detail-pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6);
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--ink);
+  }
+  .pager-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .pager-link.next {
+    text-align: right;
+    align-items: flex-end;
+  }
+  .pager-dir {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+  .pager-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    line-height: var(--lh-bio);
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+  .pager-link:hover .pager-title { color: var(--accent); }
+  .pager-link:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pager-link { transition: none; }
+  }
+
   @media (max-width: 900px) {
     .detail { padding: var(--sp-5); }
+    .detail-pager { grid-template-columns: 1fr; gap: var(--sp-5); }
+    .pager-link.next { text-align: left; align-items: flex-start; }
   }
 </style>
