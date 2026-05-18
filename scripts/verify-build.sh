@@ -135,20 +135,28 @@ if [[ ! -f "$ABOUT" ]]; then
   echo "  FAIL: About page not built — ABOUT-01 unmet"
   fail=1
 else
-  # Extract <article> body text, strip tags, count words
-  words=$(sed -n '/<article/,/<\/article/p' "$ABOUT" \
+  # Extract the bio paragraph only (<p class="bio">), strip tags, count words.
+  # Uses perl multi-line slurp (-0777) because Astro emits the entire <article>
+  # open + <p class="bio"> open on a single minified line — sed's line-oriented
+  # /<p .../,/<\/p>/ range would over-capture the prefix on that giant line.
+  # Scoping to the bio <p> only means the gate measures the narrative bio copy,
+  # not the contact block, wireframes, or anything else added to <article> later.
+  # (Refactored 2026-05-18 when about wireframes pushed total article text above
+  # 150 even though the bio itself was unchanged — gate intent is "keep the BIO
+  # tight," not "cap article length.")
+  bio_text=$(perl -0777 -ne 'while (m{<p[^>]*class="bio[^"]*"[^>]*>(.*?)</p>}sg) { print "$1\n"; }' "$ABOUT" \
     | sed -e 's/<[^>]*>//g' \
-    | tr -s '[:space:]' ' ' \
-    | wc -w | tr -d ' ')
+    | tr -s '[:space:]' ' ')
+  words=$(echo "$bio_text" | wc -w | tr -d ' ')
   if (( words < 80 || words > 150 )); then
     echo "  FAIL: About bio is $words words; expected 80-150 (ABOUT-01)"
     fail=1
   else
     echo "  OK: About bio is $words words"
   fi
-  # Banned-phrase grep — must NOT match (case-insensitive). Scoped to <article>
-  # body via sed extract so the title / back-link / etc. cannot trip a false positive.
-  if sed -n '/<article/,/<\/article/p' "$ABOUT" | grep -iE 'passionate|multidisciplinary|intersection of' > /dev/null; then
+  # Banned-phrase grep — must NOT match (case-insensitive). Scoped to the bio
+  # paragraph only so wireframe captions / contact-block labels can't trip it.
+  if echo "$bio_text" | grep -iE 'passionate|multidisciplinary|intersection of' > /dev/null; then
     echo "  FAIL: About bio contains banned filler phrase ('passionate' / 'multidisciplinary' / 'intersection of')"
     fail=1
   else
@@ -540,7 +548,7 @@ gate19a_count=0
 while IFS= read -r html; do
   [[ -z "$html" ]] && continue
   gate19a_count=$((gate19a_count + 1))
-  if ! grep -q 'href="mailto:caleblimster@gmail.com"' "$html"; then
+  if ! grep -q 'href="mailto:caleb.lim.2024@smu.edu.sg"' "$html"; then
     echo "  FAIL: $html missing mailto (CONTACT-03)"
     gate19a_fail=1
   fi
@@ -639,7 +647,7 @@ if [[ ! -f "$ABOUT_P4" ]]; then
 else
   about_article=$(extract_about_article "$ABOUT_P4")
   has_email=0; has_li=0
-  echo "$about_article" | grep -q 'href="mailto:caleblimster@gmail.com"' && has_email=1
+  echo "$about_article" | grep -q 'href="mailto:caleb.lim.2024@smu.edu.sg"' && has_email=1
   echo "$about_article" | grep -q 'href="https://linkedin.com/in/caleblkr"' && has_li=1
   if [[ $has_email -eq 1 && $has_li -eq 1 ]]; then
     echo "  OK: CONTACT-05 email + LinkedIn present inside About <article> (Gate 19e)"

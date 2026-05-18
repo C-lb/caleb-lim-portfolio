@@ -4,15 +4,15 @@
    Do NOT add new tokens without updating UI-SPEC.md verification_override register. */
 
 :root {
-  /* Color tokens (sketch lines 263-273, verbatim hexes) */
-  --paper:      #f4ebd9;  /* warm cream */
+  /* Color tokens — palette refresh 2026-05-18 (earthy-muted, olive/umber direction). */
+  --paper:      #f2ebdb;  /* warm cream (was #f4ebd9 — slightly cooler mix) */
   --ink:        #0a0a0a;
-  /* Rustic-vibrant palette (Mexican-folk leaning, ochre + sage overrides). */
-  --acid:       #e8a82a;  /* turmeric — Personal accent (bright earth yellow) */
-  --cobalt:     #2e6e8f;  /* weathered cerulean — Finance accent (vibrant blue) */
-  --terracotta: #cc7722;  /* ochre — Design accent (was burnt sienna; user override) */
-  --plum:       #6a8a5a;  /* deep sage — Marketing accent (was olive lime) */
-  --teal:       #87a96b;  /* sage green — gallery decoration (was warm sand / dusty fuchsia; user override) */
+  --design:     #8c6326;  /* deep ochre/umber — DEDICATED Graphic Design accent (NEW token; previously Design rode --terracotta) */
+  --acid:       #dc972a;  /* deep gold — Personal accent (was #e8a82a turmeric) */
+  --cobalt:     #8ba1a9;  /* silvered blue-gray — Finance accent (was #2e6e8f weathered cerulean) */
+  --terracotta: #82785d;  /* olive-khaki — decorative accent only (was #b4a682; deepened to bridge the taupe-to-ink range) */
+  --plum:       #536644;  /* dark forest sage — Marketing accent (was #6a8a5a deep sage) */
+  --teal:       #b4a682;  /* sage-tinted taupe — gallery decoration (was #87a96b sage green; absorbs the prior terracotta hex) */
 
   /* Font family tokens — Fontsource appends 'Variable' to family names */
   --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;

@@ -1,24 +1,45 @@
 ---
 // Phase 3 re-skin — about page on Base, paper canvas, Phase 3 typography.
-// Bio paragraph copy is Phase 2 D-12/D-14 contract — preserved verbatim.
-// Phase 4 will add the larger contact block per CONTACT-05.
+// Bio paragraph copy revised 2026-05-18 (UAT-driven) for a more humanised tone —
+// supersedes the Phase 2 D-12/D-14 verbatim contract. Word count stays in the
+// 80-150 band; banned words (passionate/multidisciplinary/intersection of) avoided.
+// Phase 4 added the contact block per CONTACT-05 + 3 photo wireframes.
 import Base from '../layouts/Base.astro';
 ---
 <Base title="About — Caleb Lim" bg="paper">
   <article class="about">
     <a href="/" class="b-cat-back">← splash</a>
     <h1>Caleb Lim</h1>
-    <p>
-      I'm Caleb Lim. I work across four lanes — financial models, brand and
-      marketing, graphic design, and personal builds — because the same job
-      description rarely covers all of them and I'd rather hold the pitch
-      deck, the brand mark, and the model behind it without handing any of
-      them off. The portfolio is split four ways for the same reason: pick
-      the lane you're hiring for and the work that's relevant to it is one
-      click away. I built and write this site myself, so the format is its
-      own evidence — opinionated layout, deliberate typography, no template
-      smell. If you want the long version, the resume's a click below.
+    <p class="bio">
+      I'm Caleb, and I don't pick a lane. I sit between financial models,
+      brand strategy, graphic design, and the side projects that don't fit
+      anywhere, because the work that excites me rarely fits a job spec's
+      bullet points. Numbers in the morning, type at night, a campaign
+      brief in between. I'd rather hold the pitch deck, the brand mark, and
+      the model behind it than hand any of them off, and this site is part
+      of that argument. I built it, I wrote it, I picked every type pairing
+      and rotated card. Pick the room that fits your role; the work in it
+      is the case. If you want the full story, the resume's one click below.
     </p>
+    {/* Photo wireframes — placeholders for personality photos. Replace with real images
+        from src/assets/about/ when available. Wireframes are intentional scaffolding
+        (dashed border + caption hint) so the layout reads as "photos coming" rather
+        than as a polished gallery missing assets. */}
+    <section class="about-photos-track" aria-label="Photos of Caleb">
+      <figure class="about-photo">
+        <span class="about-photo-tag">PHOTO · 01</span>
+        <span class="about-photo-hint">at the desk</span>
+      </figure>
+      <figure class="about-photo">
+        <span class="about-photo-tag">PHOTO · 02</span>
+        <span class="about-photo-hint">in the studio</span>
+      </figure>
+      <figure class="about-photo">
+        <span class="about-photo-tag">PHOTO · 03</span>
+        <span class="about-photo-hint">process / sketch</span>
+      </figure>
+    </section>
+
     <p class="resume-link">
       <a href="/caleb-lim-resume.pdf" download>Download resume (PDF) →</a>
     </p>
@@ -30,7 +51,7 @@ import Base from '../layouts/Base.astro';
       <ul class="contact-list">
         <li>
           <span class="label">email</span>
-          <a href="mailto:caleblimster@gmail.com">caleblimster@gmail.com</a>
+          <a href="mailto:caleb.lim.2024@smu.edu.sg">caleb.lim.2024@smu.edu.sg</a>
         </li>
         <li>
           <span class="label">linkedin</span>
@@ -49,6 +70,71 @@ import Base from '../layouts/Base.astro';
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
+  }
+
+  /* Photo wireframes — horizontally scrollable carousel of placeholder figures.
+     Centered when the row fits the viewport; scroll-snaps + scrollbar styling when
+     it overflows. Initial scroll position is centered via the inline script at the
+     end of this file. Each wireframe stays uniform (no --wide variant) so the
+     carousel has a consistent rhythm. */
+  .about-photos-track {
+    display: flex;
+    gap: var(--sp-3);
+    margin: var(--sp-2) 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    justify-content: center;       /* centers when content fits without scroll */
+    padding: 0 var(--sp-2) var(--sp-3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--terracotta) transparent;
+  }
+  .about-photos-track::-webkit-scrollbar { height: 6px; }
+  .about-photos-track::-webkit-scrollbar-thumb {
+    background: var(--terracotta);
+    border-radius: 999px;
+  }
+  .about-photo {
+    flex: 0 0 32%;
+    min-width: 200px;
+    aspect-ratio: 4 / 5;
+    margin: 0;
+    border: 1.5px dashed var(--terracotta);
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--paper) 92%, var(--terracotta) 8%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3);
+    color: var(--ink);
+    text-align: center;
+    scroll-snap-align: center;
+  }
+  .about-photo-tag {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--terracotta);
+    text-transform: uppercase;
+  }
+  .about-photo-hint {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    color: color-mix(in oklab, var(--ink) 70%, transparent);
+    max-width: 18ch;
+  }
+  @media (max-width: 600px) {
+    .about-photo {
+      flex: 0 0 70%;
+      aspect-ratio: 4 / 5;
+    }
+    .about-photos-track {
+      justify-content: flex-start;  /* swipeable from leftmost on narrow screens */
+    }
   }
   .b-cat-back {
     display: inline-block;
@@ -169,3 +255,14 @@ import Base from '../layouts/Base.astro';
     .contact-list li { grid-template-columns: 1fr; gap: var(--sp-1); }
   }
 </style>
+
+<script>
+  // On load, if the photo carousel overflows the viewport (typically narrower
+  // screens), pre-scroll it to the centre so the middle wireframe is the
+  // "initial" view. When the row fits without overflow, CSS justify-content: center
+  // already centres the track and this script is a no-op.
+  const track = document.querySelector<HTMLElement>('.about-photos-track');
+  if (track && track.scrollWidth > track.clientWidth) {
+    track.scrollLeft = (track.scrollWidth - track.clientWidth) / 2;
+  }
+</script>

@@ -16,14 +16,42 @@ const countByCategory: Record<Category, number> = {
 for (const piece of allPieces) {
   countByCategory[piece.data.category]++;
 }
-const populatedCategories = CATEGORIES.filter((c) => countByCategory[c] > 0);
-// N-card grid template (UI-SPEC.md lines 446-451)
+// 2026-05-18 (UAT-driven): user reversed Phase 3's SPLASH-04 drop-empty-cards
+// rule. Splash now shows all 4 disciplines always — populated ones link to /{cat},
+// empty ones render as non-clickable placeholders with a "coming soon" cue. The
+// thesis (4 disciplines, cross-functional) reads clearly even at launch when only
+// 2 are populated.
+const allCategoriesOnSplash = CATEGORIES;
+// UAT-driven splash interaction (2026-05-18): the four role labels under "CALEB LIM"
+// scroll to the discipline card their role-pitch maps to. Now that all 4 cards
+// are always rendered, the role link always targets the discipline-specific card.
+const ROLE_TO_CATEGORY: { role: string; category: Category }[] = [
+  { role: 'analyst',          category: 'finance' },
+  { role: 'brand strategist', category: 'marketing' },
+  { role: 'designer',         category: 'design' },
+  { role: 'marketer',         category: 'marketing' },
+];
+const roleHref = (cat: Category) => `#card-${cat}`;
+const roleAria = (cat: Category) => ({
+  design: 'graphic design',
+  finance: 'financial models',
+  personal: 'personal projects',
+  marketing: 'marketing',
+}[cat]);
+// N-card grid template (UI-SPEC.md lines 446-451). With placeholder cards landed
+// 2026-05-18 the splash always shows 4 cards, so the 4-card template is the only
+// one that fires in practice — the other entries kept for forward-compat with
+// future scope changes (e.g., a 5th discipline).
+// 2026-05-18 (UAT): 4-card layout flipped from a single row (1.2fr 0.85fr 1fr 1fr)
+// to a 2x2 matrix — two columns, two rows. Reads as a balanced grid rather than
+// a wide horizontal sweep, and pairs each populated card next to its placeholder
+// counterpart at desktop widths.
 const gridTemplate = {
-  4: '1.2fr 0.85fr 1fr 1fr',
+  4: '1fr 1fr',
   3: '1fr 1fr 1fr',
   2: '1fr 1fr',
   1: '1fr',
-}[populatedCategories.length] ?? '1fr 1fr 1fr 1fr';
+}[allCategoriesOnSplash.length] ?? '1fr 1fr';
 // DISCIPLINE_ACCENT is imported to keep the splash's k→accent contract co-located
 // even though the card component owns its own CSS; suppress unused-import lint.
 void DISCIPLINE_ACCENT;
@@ -37,31 +65,31 @@ void DISCIPLINE_ACCENT;
       <div class="b-name">
         <h1>CALEB<br /><span class="lim">LIM</span></h1>
         <div class="roles">
-          <span>analyst</span>
-          <span>brand strategist</span>
-          <span>designer</span>
-          <span>marketer</span>
+          {ROLE_TO_CATEGORY.map(({ role, category }) => (
+            <a href={roleHref(category)} class="role-link" aria-label={`Jump to ${roleAria(category)} work`}>{role}</a>
+          ))}
         </div>
       </div>
-      <div class="b-bio">
+      <a href="/about" class="b-bio" aria-label="Read the full bio on the About page">
         <span class="b-bio-tag">→ THE PITCH</span>
         <h3>CROSS-FUNCTIONAL — BY DESIGN.</h3>
         <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
         <span class="b-bio-strike" aria-hidden="true">04</span>
         <span class="b-bio-arrow">→ KEEP READING</span>
-      </div>
+      </a>
     </div>
     <div class="b-question">
       <span class="marker">→ PICK ONE</span>
       <span class="q">What do you wish to <em>see</em>?</span>
       <span class="arrow" aria-hidden="true">↓</span>
     </div>
-    <div class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
-      {populatedCategories.map((cat, i) => (
+    <div id="cards" class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
+      {allCategoriesOnSplash.map((cat, i) => (
         <DisciplineCard
           category={cat}
           k={DISCIPLINE_K[cat]}
           index={(i + 1) as 1 | 2 | 3 | 4}
+          isEmpty={countByCategory[cat] === 0}
         />
       ))}
     </div>
@@ -122,12 +150,22 @@ void DISCIPLINE_ACCENT;
     font-size: var(--fs-body);
     line-height: var(--lh-tight);
   }
-  .b-name .roles span { padding: 0 8px; }
-  .b-name .roles span:nth-child(odd)  { color: var(--cobalt); font-weight: 500; font-family: var(--sans); }
-  .b-name .roles span:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); font-weight: 400; }
+  .b-name .roles a.role-link { padding: 0 8px; text-decoration: none; cursor: pointer; transition: opacity 120ms ease; }
+  /* Role labels: odd children (analyst, designer) = taupe; even (brand strategist, marketer) = olive-khaki.
+     Decoupled from Finance/Design discipline accents — the role labels are decorative typography on the
+     splash, not a discipline-identity statement. */
+  .b-name .roles a.role-link:nth-child(odd)  { color: var(--teal); font-weight: 500; font-family: var(--sans); }
+  .b-name .roles a.role-link:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); font-weight: 400; }
+  .b-name .roles a.role-link:hover,
+  .b-name .roles a.role-link:focus-visible { opacity: 0.7; text-decoration: underline; text-underline-offset: 3px; }
+  .b-name .roles a.role-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
 
-  /* BIO STICKER */
+  /* Cards get scroll-margin so they don't kiss the viewport edge when scrolled into view */
+  :global(.b-card) { scroll-margin-top: var(--sp-6); }
+
+  /* BIO STICKER — clickable card pattern, mirrors discipline cards */
   .b-bio {
+    display: block;
     background: var(--acid);
     color: var(--ink); /* acid is now turmeric (light) — ink reads */
     border-radius: 10px;
@@ -135,7 +173,12 @@ void DISCIPLINE_ACCENT;
     position: relative;
     overflow: hidden;
     transform: rotate(0.5deg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
   }
+  .b-bio:hover { transform: rotate(0.5deg) translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.06); }
+  .b-bio:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
   .b-bio-tag {
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -248,3 +291,23 @@ void DISCIPLINE_ACCENT;
     .b-question { flex-direction: column; align-items: flex-start; }
   }
 </style>
+
+<script>
+  // Smooth-scroll the role-label anchors to their target discipline card.
+  // Reduced-motion users get an instant jump (no animation).
+  // Falls back to native anchor-jump on unsupported browsers (no event listener attached).
+  const links = document.querySelectorAll<HTMLAnchorElement>('.roles a.role-link');
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  links.forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const target = document.querySelector(href);
+      if (!target) return; // unknown anchor → let the browser handle (no-op)
+      e.preventDefault();
+      target.scrollIntoView({ behavior: prefersReduced.matches ? 'auto' : 'smooth', block: 'start' });
+      // Update the URL hash without triggering an extra scroll
+      history.replaceState(null, '', href);
+    });
+  });
+</script>

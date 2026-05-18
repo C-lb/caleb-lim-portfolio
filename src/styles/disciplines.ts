@@ -2,12 +2,13 @@
 // NEVER hard-code these hexes elsewhere — always import.
 import type { Category } from '../content/categories';
 
-// Hexes mirror tokens.css; rustic-vibrant palette (Mexican-folk + ochre override).
+// Hexes mirror tokens.css; earthy-muted palette refresh 2026-05-18.
+// Design got its own dedicated token (was sharing --terracotta).
 export const DISCIPLINE_ACCENT: Record<Category, string> = {
-  design:    '#cc7722',  // ochre              — k1
-  finance:   '#2e6e8f',  // weathered cerulean — k2
-  personal:  '#e8a82a',  // turmeric           — k3
-  marketing: '#6a8a5a',  // deep sage          — k4
+  design:    '#8c6326',  // deep ochre/umber       — k1 (NEW dedicated token --design)
+  finance:   '#8ba1a9',  // silvered blue-gray     — k2 (--cobalt)
+  personal:  '#dc972a',  // deep gold              — k3 (--acid)
+  marketing: '#536644',  // dark forest sage       — k4 (--plum)
 } as const;
 
 // D-03: decorative-geometry variant per discipline. k1=outline circle,

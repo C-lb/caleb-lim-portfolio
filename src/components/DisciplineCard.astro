@@ -2,14 +2,20 @@
 // Phase 3 DisciplineCard — single source of truth for the four discipline cards
 // on splash + 404. CSS verbatim from sketch lines 456-516. Decoration per
 // D-03 k1-k4 mapping. Used in <a> form so the entire card is the click target.
+//
+// 2026-05-18 (UAT-driven): added isEmpty prop. When isEmpty=true the card renders
+// as a non-clickable <div> with a "coming soon" cue — reverses Phase 3's SPLASH-04
+// "drop empty cards" rule. Gate 18 still passes because placeholder cards emit
+// no href and Gate 18 counts splash hrefs, not card divs.
 import type { Category } from '../content/categories';
 
 interface Props {
   category: Category;
   k: 1 | 2 | 3 | 4;
   index: 1 | 2 | 3 | 4;
+  isEmpty?: boolean;
 }
-const { category, k, index } = Astro.props;
+const { category, k, index, isEmpty = false } = Astro.props;
 
 // UI-SPEC Copywriting Contract overridden by user during phase-exit walk:
 // drop slash separator for parallel reading at recruiter skim-speed.
@@ -22,15 +28,28 @@ const cardLabel: Record<Category, string> = {
 
 // k2 deco contains a Fraunces italic numeral; the rest are CSS-only (empty span).
 const k2Numeral = '2';
+const cueText = isEmpty ? 'in the works — coming soon' : 'View the work →';
+const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 ---
-<a href={`/${category}`} class={`b-card k${k}`}>
-  <span class="b-card-no">0{index} / 04</span>
-  <div>
-    <span class="b-card-name">{cardLabel[category]}</span>
+{isEmpty ? (
+  <div id={`card-${category}`} class={cls} aria-label={`${cardLabel[category]} — coming soon`}>
+    <span class="b-card-no">0{index} / 04</span>
+    <div>
+      <span class="b-card-name">{cardLabel[category]}</span>
+    </div>
+    <span class="b-card-cue">{cueText}</span>
+    <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
   </div>
-  <span class="b-card-cue">View the work →</span>
-  <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
-</a>
+) : (
+  <a href={`/${category}`} id={`card-${category}`} class={cls}>
+    <span class="b-card-no">0{index} / 04</span>
+    <div>
+      <span class="b-card-name">{cardLabel[category]}</span>
+    </div>
+    <span class="b-card-cue">{cueText}</span>
+    <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
+  </a>
+)}
 
 <style>
   .b-card {
@@ -56,6 +75,23 @@ const k2Numeral = '2';
     outline-offset: 4px;
   }
   /* k3 (turmeric) — default ink outline reads clearly; no override needed */
+
+  /* Empty/placeholder cards: card is rendered (so all 4 disciplines read as a
+     thesis even when not yet populated) but visually marked as "not yet" — no
+     hover lift, no cursor pointer, slightly reduced contrast on the cue. Background
+     and decoration stay so the discipline color identity is preserved. */
+  .b-card.is-empty {
+    cursor: default;
+    opacity: 0.85;
+  }
+  .b-card.is-empty:hover {
+    transform: none;
+    box-shadow: 0 1px 0 rgba(15, 13, 12, 0.15);
+  }
+  .b-card.is-empty .b-card-cue {
+    font-style: italic;
+    opacity: 0.78;
+  }
 
   .b-card-no {
     font-family: var(--mono);
@@ -85,9 +121,9 @@ const k2Numeral = '2';
     opacity: 0.85;
   }
 
-  /* k1 = Design (terracotta) — outline circle top-right (sketch lines 495-497) */
+  /* k1 = Design (umber #8c6326) — outline circle top-right (sketch lines 495-497) */
   .b-card.k1 {
-    background: var(--terracotta);
+    background: var(--design);
     color: var(--paper);
     transform: rotate(-1deg);
   }
@@ -119,7 +155,11 @@ const k2Numeral = '2';
     line-height: 0.8;
   }
 
-  /* k3 = Personal (turmeric, light) — horizontal dotted line */
+  /* k3 = Personal (deep gold) — 4-pointed editorial sparkle (replaces 2026-05-18
+     the prior horizontal dotted-line motif). Built from two crossed bars with
+     tapered ends via radial-gradients, giving a "burst / star / asterisk" feel
+     that matches the rustic-editorial palette. Distinct from k1 circle,
+     k2 numeral, k4 triangle. */
   .b-card.k3 {
     background: var(--acid);
     color: var(--ink); /* turmeric bg → ink */
@@ -127,12 +167,15 @@ const k2Numeral = '2';
   }
   .b-card.k3 .deco {
     position: absolute;
-    left: 16px;
-    right: 16px;
-    top: 50%;
-    height: 24px;
-    background-image: repeating-linear-gradient(90deg, var(--ink) 0, var(--ink) 2px, transparent 2px, transparent 10px);
-    opacity: 0.55;
+    top: 20px;
+    right: 20px;
+    width: 84px;
+    height: 84px;
+    background:
+      radial-gradient(ellipse 5px 40px at center, var(--ink) 70%, transparent 100%),
+      radial-gradient(ellipse 40px 5px at center, var(--ink) 70%, transparent 100%);
+    opacity: 0.78;
+    transform: rotate(12deg);
   }
 
   /* k4 = Marketing (olive lime, dark) — accent triangle */
