@@ -844,6 +844,94 @@ for cat in design finance personal marketing; do
   fi
 done
 
+echo
+echo "Phase 5 gates"
+echo "============="
+
+# Gate 23 — topbar ≤700px collapse present (SC1, D-01/D-02/D-03).
+# Astro inlines scoped CSS into each page bundle, so each built HTML where Base.astro is
+# rendered MUST contain the @media (max-width: 700px) breakpoint declaration AND the icon-row
+# aria-labels per 05-UI-SPEC §"Accessible naming for icon glyphs". Pages checked: splash,
+# design gallery, about — covers all three primary surfaces a recruiter lands on.
+# Expected RED until Plan 05-03 lands the topbar collapse — that is correct.
+gate23_fail=0
+for page in "$DIST/index.html" "$DIST/design/index.html" "$DIST/about/index.html"; do
+  if [[ ! -f "$page" ]]; then
+    echo "  FAIL: Gate 23 — $page missing (cannot verify topbar collapse)"
+    gate23_fail=1
+    continue
+  fi
+  if ! grep -qF '@media (max-width: 700px)' "$page"; then
+    echo "  FAIL: Gate 23 — $page missing @media (max-width: 700px) topbar-collapse breakpoint (SC1, D-03 — expected RED until Plan 05-03 lands)"
+    gate23_fail=1
+  fi
+  # Icon-row aria-labels: at least one of the three mobile icon-glyph aria-labels must be wired.
+  if ! grep -qE 'aria-label="(Email Caleb|Caleb on LinkedIn|Download Caleb&#x27;s resume|Download Caleb'"'"'s resume)"' "$page"; then
+    echo "  FAIL: Gate 23 — $page missing icon-row aria-label (Email Caleb / Caleb on LinkedIn / Download Caleb's resume per 05-UI-SPEC §ARIA contract — expected RED until Plan 05-03)"
+    gate23_fail=1
+  fi
+done
+if [[ $gate23_fail -eq 0 ]]; then
+  echo "  OK: Gate 23 — topbar ≤700px collapse + icon-row aria-labels present on splash, design, about"
+else
+  fail=1
+fi
+
+# Gate 24 — populated gallery emits <img> (SC5, D-09–D-12).
+# Mirror Gate 4 / Gate 16 piece-count logic: count non-draft pieces per category from
+# src/content/pieces, then assert dist/<cat>/index.html emits at least that many <img>
+# elements. Populated disciplines under D-12 are design + marketing; empty disciplines
+# (finance, personal) are skipped here — D-12 keeps their "coming soon" treatment which
+# emits no images.
+# Expected RED until Plan 05-04 lands the hero-promotion in the gallery tile — that is correct.
+gate24_fail=0
+for cat in design marketing; do
+  # Count non-draft pieces for this category.
+  piece_count=0
+  for md in src/content/pieces/${cat}-*/index.md; do
+    [[ -f "$md" ]] || continue
+    grep -q '^draft: true' "$md" 2>/dev/null && continue
+    piece_count=$((piece_count + 1))
+  done
+  if [[ "$piece_count" -eq 0 ]]; then
+    echo "  OK: Gate 24 — $cat has 0 non-draft pieces; gallery-image check vacuously satisfied"
+    continue
+  fi
+  gallery="$DIST/$cat/index.html"
+  if [[ ! -f "$gallery" ]]; then
+    echo "  FAIL: Gate 24 — $cat has $piece_count non-draft piece(s) but $gallery is missing"
+    gate24_fail=1
+    continue
+  fi
+  img_count=$(grep -oE '<img\b' "$gallery" 2>/dev/null | wc -l | tr -d ' ')
+  if (( img_count < piece_count )); then
+    echo "  FAIL: Gate 24 — $gallery has $img_count <img> element(s); expected >=$piece_count (BLOCKER-2 fix — expected RED until Plan 05-04 lands hero promotion)"
+    gate24_fail=1
+  else
+    echo "  OK: Gate 24 — $cat gallery emits $img_count <img>(s) for $piece_count piece(s)"
+  fi
+done
+if [[ $gate24_fail -ne 0 ]]; then
+  fail=1
+fi
+
+# Gate 25: px font-size literals only. rem/em allowed when relative-to-line-height is intentional (e.g. .92rem on about values-pill, 1.7em on bio-arrow). See 05-UI-SPEC §Typography "Relative units are legitimate." Do NOT widen this regex to rem/em without a UI-SPEC amendment first — the asymmetry vs 05-TOKEN-MAP.md is deliberate.
+# Locks SC6 / D-17(c): zero raw `font-size: Npx` literals outside src/styles/tokens.css.
+# Tokens.css itself is allowed to declare px font-sizes — it's the canonical scale.
+# Expected RED until Plan 05-05 sweeps the ~25 literals — that is correct.
+gate25_hits=$(grep -rnE 'font-size:\s*[0-9]+(\.[0-9]+)?px' src/components/ src/pages/ src/layouts/ 2>/dev/null || true)
+if [[ -n "$gate25_hits" ]]; then
+  hit_count=$(echo "$gate25_hits" | wc -l | tr -d ' ')
+  echo "  FAIL: Gate 25 — $hit_count raw \`font-size: Npx\` literal(s) found outside src/styles/tokens.css (SC6, D-17(c) — expected RED until Plan 05-05 sweeps):"
+  echo "$gate25_hits" | head -10 | sed 's/^/    /'
+  if (( hit_count > 10 )); then
+    echo "    ... ($((hit_count - 10)) more)"
+  fi
+  fail=1
+else
+  echo "  OK: Gate 25 — zero raw \`font-size: Npx\` literals outside tokens.css"
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
