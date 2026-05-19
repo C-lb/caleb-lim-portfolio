@@ -119,21 +119,22 @@ Plans:
   4. Recruiter on iPhone Safari can complete the full critical path — land on splash, click Graphic Design, see the gallery, click into a piece, scroll the detail page, return to gallery, switch to a different discipline, download the resume — without hitting a broken state, layout shift, or scroll-jacked section
   5. **Gallery tiles render the piece hero/thumbnail** (not empty colored slabs) on `/design`, `/marketing`, and any other populated discipline — recruiter arriving from the splash sees image-led tiles, not text-only placeholders. Piece `hero` asset already exists; gallery card just needs wiring (mirror the detail page's image use). Carries Phase 4 UI-REVIEW BLOCKER-2.
   6. **Design-token hygiene pass**: (a) `--lime` and any other Phase-4 UAT-added tokens registered in `tokens.css` with documented contrast/use rationale (or removed if redundant against `--acid`); (b) `--terracotta` use audited — either re-scoped as load-bearing (drop the "decorative only" comment) or replaced where it carries semantic weight; (c) raw `font-size` and spacing literals in `src/pages/index.astro`, `src/pages/about.astro`, `src/components/*.astro` replaced with `--fs-*` and `--sp-*` tokens (target: zero raw `px` font-sizes outside `tokens.css`). Carries Phase 4 UI-REVIEW WARNING-1.
-**Plans**: 8 plans
+**Plans**: 9 plans (8 original + 05-09 gap-closure added Wave 2 after Plan 05-08 Lighthouse audit surfaced an SC2 splash-a11y blocker)
 Plans:
 **Wave 0**
-- [ ] 05-01-PLAN.md — Validation harness (lighthouse-audit.sh + verify-build.sh Gates 23/24/25 + 05-VERIFICATION.md template + 05-TOKEN-MAP.md)
+- [x] 05-01-PLAN.md — Validation harness (lighthouse-audit.sh + verify-build.sh Gates 23/24/25 + 05-VERIFICATION.md template + 05-TOKEN-MAP.md)
 
 **Wave 1** *(DAG inside the wave — files_modified overlap is gated via depends_on rather than partitioned)*
 - [x] 05-02-PLAN.md — Vercel project import + push-trigger verification (D-13 amended) — depends_on: [01]
-- [ ] 05-03-PLAN.md — Topbar mobile collapse ≤700px (D-01–D-03) + desktop tap-target floor + .visually-hidden utility — closes BLOCKER-1 — depends_on: [01]
-- [ ] 05-04-PLAN.md — Gallery tile recomposition (D-09–D-12) + LCP priority/sizes on splash carousel + detail hero — closes BLOCKER-2 — depends_on: [01]
-- [ ] 05-05-PLAN.md — Token sweep (D-17, D-18) + --sp-3 add + --terracotta/--lime comments + Gate 25 closes — closes WARNING-1 — depends_on: [01, 03, 04] (sweeps the final versions of Base.astro/tokens.css/index.astro/[slug].astro after 03 + 04 land)
+- [x] 05-03-PLAN.md — Topbar mobile collapse ≤700px (D-01–D-03) + desktop tap-target floor + .visually-hidden utility — closes BLOCKER-1 — depends_on: [01]
+- [x] 05-04-PLAN.md — Gallery tile recomposition (D-09–D-12) + LCP priority/sizes on splash carousel + detail hero — closes BLOCKER-2 — depends_on: [01]
+- [x] 05-05-PLAN.md — Token sweep (D-17, D-18) + --sp-3 add + --terracotta/--lime comments + Gate 25 closes — closes WARNING-1 — depends_on: [01, 03, 04] (sweeps the final versions of Base.astro/tokens.css/index.astro/[slug].astro after 03 + 04 land)
 
 **Wave 2** *(after Wave 1 — transitive deps named explicitly)*
 - [x] 05-06-PLAN.md — Reduced-motion surgical pass (D-08): remove global * clamp from tokens.css + per-source disables for entrance shakes — depends_on: [03, 04, 05]
-- [ ] 05-07-PLAN.md — Touch-hover gating (D-06, 13 surfaces) + touch entrance shimmer (D-07) + StatusPill mobile shrink (D-04) — depends_on: [03, 04, 05, 06]
-- [ ] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview + real-iPhone walk + reduced-motion walk + record in 05-VERIFICATION.md — depends_on: [02, 03, 04, 05, 06, 07]
+- [x] 05-07-PLAN.md — Touch-hover gating (D-06, 13 surfaces) + touch entrance shimmer (D-07) + StatusPill mobile shrink (D-04) — depends_on: [03, 04, 05, 06]
+- [~] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview (DONE) + real-iPhone walk (pending Caleb's iPhone) + reduced-motion walk (pending) + record in 05-VERIFICATION.md — depends_on: [02, 03, 04, 05, 06, 07]
+- [x] 05-09-PLAN.md — Splash a11y gap closure (SC2) — Plan 05-08's Lighthouse audit surfaced splash a11y 79 (5 audits failing); 05-09 closed 6 audit categories on `/` and lifted splash to 100 — depends_on: [01..07]
 
 
 **Carry-over from Phase 4 UI Review** (`.planning/phases/04-navigation-secondary-surfaces/04-UI-REVIEW.md`, 13/24 overall):

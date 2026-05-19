@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 Wave 2 — Plan 05-07 complete (7 of 8 phase-5 plans done; only 05-08 phase-exit walk remains)
-last_updated: "2026-05-19T12:30:00.000Z"
-last_activity: 2026-05-19 -- Plan 05-07 SUMMARY committed (SC1 + SC3 touch behavior closed — all 13 hover surfaces wrapped in @media (hover: hover) and (pointer: fine); D-07 entrance shimmer wired via IntersectionObserver on .b-card and .b-bio; D-04 StatusPill mobile shrink lands at ≤700px; bio-shake hover-gated per planner discretion to avoid shimmer overlap)
+stopped_at: Phase 5 Wave 2 — Plan 05-09 (gap-closure for splash a11y) complete; 8 of 9 phase-5 plans done; only 05-08 manual real-iPhone + reduced-motion walks remain
+last_updated: "2026-05-19T08:00:00.000Z"
+last_activity: 2026-05-19 -- Plan 05-09 SUMMARY committed (SC2 splash a11y 79 → 100; closed 6 audit categories: aria-allowed-attr, aria-required-children, target-size, color-contrast, heading-order, label-content-name-mismatch; added --role-link-odd/--role-link-even tokens; bp-dot 24×24 hit-target via ::before pseudo; .b-question .marker bg --terracotta → --ink). All 5 routes Lighthouse a11y ≥95 with no perf regressions.
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 27
-  completed_plans: 24
-  percent: 89
+  total_plans: 28
+  completed_plans: 26
+  percent: 93
 ---
 
 # Project State
@@ -25,15 +25,15 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 ## Current Position
 
-Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 7 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 + 05-06 + 05-07 Wave 2 complete; only 05-08 phase-exit walk remains)
-Status: Plan 05-07 closes SC1 (mobile critical path) and SC3 touch-behavior leg. All 13 hover surfaces are wrapped in `@media (hover: hover) and (pointer: fine)` across 10 files (DisciplineCard, StatusPill, GalleryA12/B35/C68, index.astro, about.astro, [category].astro, [category]/[slug].astro, Base.astro). `:focus-visible` rules stay outside the gate. D-07 touch entrance shimmer added: IntersectionObserver in DisciplineCard.astro adds `.is-entered` to `.b-card` and `.b-bio` on first viewport hit, gated by `(hover: none) && !prefers-reduced-motion`; `@keyframes card-shimmer` pulses a 600ms currentColor ring; reduced-motion CSS fallback overrides to `animation: none`. D-04 StatusPill mobile shrink lands `padding: 8px 12px` at ≤700px. Planner-discretion call: `.b-bio { animation: bio-shake ... }` hover-gated to avoid the ~1150ms overlap with shimmer on touch (D-08 invariant preserved — reduced-motion override stays outside the hover gate). Rule 2 deviation: `.contact-list a:hover` (not in 13-surface inventory) also gated per "D-06 no exceptions" authority. Rule 3 deviation: plan's verify regex targeted `.statuspill` but actual selector is `.pill` — behavioral contract met. All 25 verify-build gates GREEN.
-Last activity: 2026-05-19 -- Plan 05-07 SUMMARY committed (f35201b Task 1 hover-gate sweep, abd3442 Task 2 D-07 shimmer + bio-shake gate, 6f70da2 Task 3 D-04 StatusPill mobile shrink)
+Phase: 05 — IN PROGRESS (9 plans across 3 waves; +1 gap-closure plan 05-09 added in Wave 2)
+Plan: 8 of 9 (05-01..05-07 + 05-08 Lighthouse leg + 05-09 gap-closure complete; only 05-08 manual real-iPhone + reduced-motion walks remain — pending Caleb's iPhone test rig)
+Status: Plan 05-09 closes the SC2 numerical a11y gate. Plan 05-08's Lighthouse re-audit on the production URL (`https://caleb-lim-portfolio.vercel.app`) landed splash a11y at 79 (5 failing audits, ~27 weighted points). Plan 05-09 swept the failures in 4 tasks + 1 deviation pass: bp-dot hit-target redesigned to 24×24 shell + 8×8 ::before pseudo (target-size), `role="tablist"` dropped → `role="group"` (aria-required-children + aria-allowed-attr), `aria-selected` → `aria-current` on active dot only, new `--role-link-odd` (#4a6e5d, 5.20:1) / `--role-link-even` (#6b4a3a, 6.79:1) tokens for WCAG AA on `--paper` (color-contrast), `.b-question .marker` bg `--terracotta` → `--ink` (>15:1, closes a non-enumerated contrast residual), `<h3>` → `<h2>` on `.b-bio` (heading-order), `.role-link` aria-label prefixed with visible role text and `.b-bio` aria-label dropped (label-content-name-mismatch). Final scores: `/` 99/100/1671 LCP, `/design` 100/95/1671, `/marketing` 98/95/1689, `/about` 98/95/1369, `/design/design-real-piece` 94/100/3121 (detail-page LCP out-of-scope for SC2 — splash-only gate; surfaced for Phase 6 polish per plan §Deferred). All 25 verify-build gates GREEN. Plan 05-08 manual walks (Critical-Path + Reduced-Motion) still pending — require Caleb's iPhone.
+Last activity: 2026-05-19 -- Plan 05-09 SUMMARY committed (5a2e2ac Task 1 carousel dot semantics + hit target, 97818e8 Task 2 role-link tokens, f26de60 Task 3 heading order, db2c851 deviation fix marker contrast + role-link target-size + name mismatch, 30c0595 Task 4 re-audit evidence)
 
-Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
+Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08 ← 09
 - Wave 0: 05-01 (validation harness)
 - Wave 1: 05-02 (Vercel), 05-03 (topbar), 05-04 (gallery + LCP), 05-05 (token sweep — runs after 03+04)
-- Wave 2: 05-06 (reduced-motion surgical), 05-07 (touch/hover/shimmer), 05-08 (phase-exit verification)
+- Wave 2: 05-06 (reduced-motion surgical), 05-07 (touch/hover/shimmer), 05-08 (phase-exit verification — Lighthouse leg done; manual iPhone + reduced-motion walks pending), 05-09 (gap-closure for splash a11y blocker surfaced by 05-08)
 
 ## Performance Metrics
 
@@ -103,4 +103,5 @@ Resume file: .planning/phases/05-mobile-performance-accessibility/05-07-PLAN.md 
 | 05-05 | 1 | [01, 03, 04] | SC6 / WARNING-1 (token sweep, D-17–D-18) |
 | 05-06 | 2 | [03, 04, 05] | SC3 architecture (D-08, loosen global reduced-motion clamp) |
 | 05-07 | 2 | [03, 04, 05, 06] | SC1+SC3 touch behaviour (D-04/06/07 gating + shimmer + StatusPill shrink) |
-| 05-08 | 2 | [02, 03, 04, 05, 06, 07] | Phase-exit: Lighthouse audit + real-iPhone walk + reduced-motion walk |
+| 05-08 | 2 | [02, 03, 04, 05, 06, 07] | Phase-exit: Lighthouse audit (DONE) + real-iPhone walk (pending) + reduced-motion walk (pending) |
+| 05-09 | 2 | [01..07] | Gap-closure for SC2 splash a11y (Lighthouse audit in 05-08 surfaced 79 vs ≥95 floor; closed 79 → 100) |
