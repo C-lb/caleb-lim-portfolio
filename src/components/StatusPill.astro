@@ -83,4 +83,18 @@
     .pill { transition: none; }
     .pill:hover { transform: none; }
   }
+  /* D-04 StatusPill mobile shrink (Plan 05-07 Task 3). At ≤700px the pill
+     padding shrinks from 9px 20px to 8px 12px so it doesn't crowd the brand
+     text on narrow viewports. Effective pill height (~27px) is below the
+     WCAG 2.5.8 AAA 44×44 floor — accepted per 05-UI-SPEC §"StatusPill mobile
+     shrink" rationale: the pill is fixed top-center with no neighbouring tap
+     targets within thumb-radius, the 44×44 contract from D-02 covers the
+     topbar icon row, and the StatusPill's own contract is "comfortably
+     tappable, doesn't crowd the brand." Pulse + dot + hover-gating (Task 1)
+     + slow-scroll click handler all unchanged. */
+  @media (max-width: 700px) {
+    .pill {
+      padding: 8px 12px;
+    }
+  }
 </style>
