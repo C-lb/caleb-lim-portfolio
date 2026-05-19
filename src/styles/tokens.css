@@ -60,15 +60,13 @@ img, picture, svg { display: block; max-width: 100%; }
 h1, h2, h3, h4, h5, h6, p { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 
-/* Reduced-motion global block (UI-SPEC.md lines 511-520, verbatim — D-13) */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  .b-card:hover, .b-piece:hover { transform: none !important; }
-}
+/* Reduced-motion: per-source surgical disables only (D-08, 05-RESEARCH §3.4).
+   The prior global `*, *::before, *::after` clamp was removed in Plan 05-06 because
+   it silently killed the four EXEMPT motions D-08 keeps under reduced-motion:
+   card hover-tilt (380ms), card click-shake (220ms), liquid-glass overlay fade
+   (380ms opacity), and the StatusPill lime-dot pulse. Suppressions for non-exempt
+   motions (entrance shakes, carousel slide-transition, scroll-driven reveals) live
+   in their per-source files. */
 
 /* Phase 5: a11y utility — visually-hidden (clip-path screen-reader hider).
    Canonical WAI-ARIA pattern. Reserved for future use; Plan 05-03 itself uses
