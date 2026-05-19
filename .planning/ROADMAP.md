@@ -131,7 +131,7 @@ Plans:
 - [ ] 05-05-PLAN.md — Token sweep (D-17, D-18) + --sp-3 add + --terracotta/--lime comments + Gate 25 closes — closes WARNING-1 — depends_on: [01, 03, 04] (sweeps the final versions of Base.astro/tokens.css/index.astro/[slug].astro after 03 + 04 land)
 
 **Wave 2** *(after Wave 1 — transitive deps named explicitly)*
-- [ ] 05-06-PLAN.md — Reduced-motion surgical pass (D-08): remove global * clamp from tokens.css + per-source disables for entrance shakes — depends_on: [03, 04, 05]
+- [x] 05-06-PLAN.md — Reduced-motion surgical pass (D-08): remove global * clamp from tokens.css + per-source disables for entrance shakes — depends_on: [03, 04, 05]
 - [ ] 05-07-PLAN.md — Touch-hover gating (D-06, 13 surfaces) + touch entrance shimmer (D-07) + StatusPill mobile shrink (D-04) — depends_on: [03, 04, 05, 06]
 - [ ] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview + real-iPhone walk + reduced-motion walk + record in 05-VERIFICATION.md — depends_on: [02, 03, 04, 05, 06, 07]
 

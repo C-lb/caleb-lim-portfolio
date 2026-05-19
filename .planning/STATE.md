@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 Wave 1 — Plan 05-02 complete (5 of 8 phase-5 plans done; Wave 1 closed)
-last_updated: "2026-05-19T01:00:00.000Z"
-last_activity: 2026-05-19 -- Plan 05-02 SUMMARY committed (Vercel production URL live + push-trigger verified ~17s end-to-end; SC2 instrumentation closed)
+stopped_at: Phase 5 Wave 2 — Plan 05-06 complete (6 of 8 phase-5 plans done; Wave 2 entered)
+last_updated: "2026-05-19T10:45:00.000Z"
+last_activity: 2026-05-19 -- Plan 05-06 SUMMARY committed (SC3 architecture closed — global reduced-motion clamp deleted from tokens.css; surgical per-source disables added to DisciplineCard.astro + index.astro; D-08 exempt motions now correctly fire under prefers-reduced-motion)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 27
-  completed_plans: 22
-  percent: 81
+  completed_plans: 23
+  percent: 85
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 ## Current Position
 
 Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 5 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 complete; Wave 1 fully closed. 05-06, 05-07, 05-08 pending in Wave 2)
-Status: Plan 05-02 closes SC2 instrumentation — Vercel production deploy live at https://caleb-lim-portfolio.vercel.app (Astro auto-detect, no vercel.json, Deployment Protection disabled). Push-to-main → auto-deploy verified end-to-end in ~17s. Lighthouse target for Plan 05-08 = production URL (deviated from planned branch-alias preview — all Wave-1 work landed on main; documented in 05-02-SUMMARY.md).
-Last activity: 2026-05-19 -- Plan 05-02 SUMMARY committed (14fb499 Task 3 record, 254cc74 empty trigger, cfa1e17 push verification)
+Plan: 6 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 + 05-06 Wave 2 complete; 05-07, 05-08 pending in Wave 2)
+Status: Plan 05-06 closes SC3 architecture — the global `*, *::before, *::after` reduced-motion clamp is removed from `tokens.css`; surgical `.b-card { animation: none }` and `.b-bio { animation: none }` disables added in DisciplineCard.astro and index.astro. D-08's four exempt motions (card hover-tilt, click-shake, liquid-glass overlay fade, lime-dot pulse) now correctly fire under `prefers-reduced-motion: reduce`; the four disabled motions (carousel auto-advance, carousel slide-transition, card entrance shake, bio entrance shake) stay suppressed via per-source guards. Rule 1 deviation: two `::before { transition: none }` mini-hammers (one in DisciplineCard, one in index.astro) removed for the same reason as the global hammer — they were suppressing the exempt liquid-glass overlay fade. All 25 verify-build gates GREEN.
+Last activity: 2026-05-19 -- Plan 05-06 SUMMARY committed (ca27d7e Task 1 tokens.css, 5c723c5 Task 2 DisciplineCard, 4ca12f7 Task 3 index.astro)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
@@ -87,10 +87,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-19T01:00:00.000Z
-Stopped at: Phase 5 Wave 1 closed — 05-02 complete (Vercel live; SC2 instrumentation gate cleared). Wave 2 (05-06, 05-07, 05-08) ready to enter.
+Last session: 2026-05-19T10:45:00.000Z
+Stopped at: Phase 5 Wave 2 partial — 05-06 complete (SC3 architecture closed; D-08 surgical reduced-motion policy implemented). 05-07 (touch/hover gating + entrance shimmer + StatusPill mobile shrink) and 05-08 (phase-exit verification) still pending.
 Resume command: `/gsd-execute-phase 5`
-Resume file: .planning/phases/05-mobile-performance-accessibility/05-06-PLAN.md (Wave 2 entry point — reduced-motion surgical pass)
+Resume file: .planning/phases/05-mobile-performance-accessibility/05-07-PLAN.md (Wave 2 next plan — D-06 touch/hover gating + D-07 entrance shimmer)
 
 **Phase 5 plan inventory:**
 
