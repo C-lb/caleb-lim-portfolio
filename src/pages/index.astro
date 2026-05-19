@@ -421,9 +421,13 @@ void DISCIPLINE_ACCENT;
     animation-play-state: paused;
   }
   .b-bio:hover::before { opacity: 1; }
-  @media (prefers-reduced-motion: reduce) {
-    .b-bio::before { transition: none; }
-  }
+  /* No reduced-motion override on `.b-bio::before`: the liquid-glass overlay's
+     380ms opacity fade is EXEMPT per D-08 #9 (user-initiated hover feedback).
+     A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1
+     deviation — it contradicted the plan's truth #4 ("liquid-glass overlay fade
+     still fires under reduced-motion") in the same way the global hammer did.
+     The surgical `.b-bio { animation: none }` for the entrance shake lives
+     after the `@keyframes bio-shake` definition below. */
   .b-bio:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
   /* Same gentle shape as .b-card's card-shake — separate keyframes name because
      the bio card lives outside the DisciplineCard scoped style block. */
@@ -435,6 +439,16 @@ void DISCIPLINE_ACCENT;
     60%      { transform: rotate(calc(var(--rest-rotate) + 0.8deg)) translateX(0.6px); }
     75%      { transform: rotate(calc(var(--rest-rotate) - 0.4deg)); }
     90%      { transform: rotate(calc(var(--rest-rotate) + 0.4deg)); }
+  }
+  /* Surgical reduced-motion disable for the 750ms bio entrance shake (D-08 #4,
+     05-RESEARCH §3.4 step 2). Hover-tilt, liquid-glass fade, and the static rest
+     tilt (rotate 0.5deg) remain exempt — they are not animations and are not
+     touched here. The carousel slide-transition guard for `.b-portrait .bp-slide`
+     stays at its existing position (~line 204). */
+  @media (prefers-reduced-motion: reduce) {
+    .b-bio {
+      animation: none;
+    }
   }
   .b-bio-tag {
     font-family: var(--mono);
