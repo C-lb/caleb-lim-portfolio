@@ -191,9 +191,13 @@ const backLabel: Record<Category, string> = {
     border: 1px solid var(--ink);
     transition: background 0.2s ease, color 0.2s ease;
   }
-  .b-cat-back:hover {
-    background: var(--accent);
-    color: var(--paper);
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Back-pill hover color/bg only on
+     devices with a real hover mechanism. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-cat-back:hover {
+      background: var(--accent);
+      color: var(--paper);
+    }
   }
   .b-cat-back:focus-visible {
     outline: 3px solid var(--ink);
@@ -265,8 +269,12 @@ const backLabel: Record<Category, string> = {
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;
   }
-  .full-pdf-link a:hover {
-    color: var(--accent);
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Color-only hover gated; the
+     :focus-visible outline rule stays outside. */
+  @media (hover: hover) and (pointer: fine) {
+    .full-pdf-link a:hover {
+      color: var(--accent);
+    }
   }
   .full-pdf-link a:focus-visible {
     outline: 2px solid var(--accent);
@@ -312,7 +320,11 @@ const backLabel: Record<Category, string> = {
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;
   }
-  .pager-link:hover .pager-title { color: var(--accent); }
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Pager-link descendant color
+     change gated; :focus-visible outline stays outside. */
+  @media (hover: hover) and (pointer: fine) {
+    .pager-link:hover .pager-title { color: var(--accent); }
+  }
   .pager-link:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;

@@ -350,7 +350,14 @@ void DISCIPLINE_ACCENT;
      splash, not a discipline-identity statement. */
   .b-name .roles a.role-link:nth-child(odd)  { color: var(--teal); font-weight: 500; font-family: var(--sans); }
   .b-name .roles a.role-link:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); font-weight: 400; }
-  .b-name .roles a.role-link:hover,
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Role-link hover styles only fire
+     on devices with a real hover mechanism — the original combined rule split
+     into a gated :hover and an UNGATED :focus-visible so keyboard focus on a
+     touch device with attached keyboard still produces the underline+opacity
+     feedback (and the outline rule that follows). */
+  @media (hover: hover) and (pointer: fine) {
+    .b-name .roles a.role-link:hover { opacity: 0.7; text-decoration: underline; text-underline-offset: 3px; }
+  }
   .b-name .roles a.role-link:focus-visible { opacity: 0.7; text-decoration: underline; text-underline-offset: 3px; }
   .b-name .roles a.role-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
 
@@ -409,18 +416,24 @@ void DISCIPLINE_ACCENT;
   .b-bio > :not(.b-bio-mark):not(.b-bio-arrow) { position: relative; z-index: 2; }
   .b-bio > .b-bio-mark,
   .b-bio > .b-bio-arrow { z-index: 2; }
-  .b-bio:hover {
-    /* Same tilt/lift reduction as DisciplineCard hover — keeps the card's
-       projected geometry from spilling into the portrait/name neighbour grid
-       cells. z-index bump ensures clean paint order if any shadow drifts. */
-    transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
-    box-shadow:
-      0 14px 28px rgba(15, 13, 12, 0.24),
-      0 4px 10px rgba(15, 13, 12, 0.14);
-    z-index: 10;
-    animation-play-state: paused;
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Bio-card 3D tilt + glass overlay
+     + entrance-shake pause only fire on devices with a real hover mechanism.
+     On touch, the entrance shimmer (added in Task 2) is the substitute
+     micro-interaction; first tap navigates to /about. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-bio:hover {
+      /* Same tilt/lift reduction as DisciplineCard hover — keeps the card's
+         projected geometry from spilling into the portrait/name neighbour grid
+         cells. z-index bump ensures clean paint order if any shadow drifts. */
+      transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
+      box-shadow:
+        0 14px 28px rgba(15, 13, 12, 0.24),
+        0 4px 10px rgba(15, 13, 12, 0.14);
+      z-index: 10;
+      animation-play-state: paused;
+    }
+    .b-bio:hover::before { opacity: 1; }
   }
-  .b-bio:hover::before { opacity: 1; }
   /* No reduced-motion override on `.b-bio::before`: the liquid-glass overlay's
      380ms opacity fade is EXEMPT per D-08 #9 (user-initiated hover feedback).
      A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1

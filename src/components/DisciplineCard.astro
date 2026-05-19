@@ -278,21 +278,28 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
      neighbouring cells. Deeper perspective (900 → 1200) flattens the tilt
      further. z-index bump guarantees the hovered card paints above neighbours
      if any residual shadow does spill across. */
-  .b-card:hover {
-    transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
-    box-shadow:
-      0 14px 28px rgba(15, 13, 12, 0.24),
-      0 4px 10px rgba(15, 13, 12, 0.14);
-    z-index: 10;
+  /* D-06 Touch-hover gate: hover-tilt + glass-overlay reveal are suppressed on
+     touch devices (where hover:hover is false). First tap navigates instead of
+     surfacing a phantom hover state. Desktop with a fine pointer still gets the
+     full tilt + glass effect. Plan 05-07 Task 1 — see 05-UI-SPEC §Interaction
+     Contract — Touch-Hover Gating. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-card:hover {
+      transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
+      box-shadow:
+        0 14px 28px rgba(15, 13, 12, 0.24),
+        0 4px 10px rgba(15, 13, 12, 0.14);
+      z-index: 10;
+    }
+    /* k2 (Financial Models) and k3 (Personal Projects) get the mirror-inverted
+       tilt — both rotateX and rotateY signs flipped — so they lean the opposite
+       way on hover. Pairs symmetrically with k1 / k4 across the grid. */
+    .b-card.k2:hover,
+    .b-card.k3:hover {
+      transform: perspective(1200px) translateY(-3px) rotateX(-2deg) rotateY(3deg);
+    }
+    .b-card:hover::before { opacity: 1; }
   }
-  /* k2 (Financial Models) and k3 (Personal Projects) get the mirror-inverted
-     tilt — both rotateX and rotateY signs flipped — so they lean the opposite
-     way on hover. Pairs symmetrically with k1 / k4 across the grid. */
-  .b-card.k2:hover,
-  .b-card.k3:hover {
-    transform: perspective(1200px) translateY(-3px) rotateX(-2deg) rotateY(3deg);
-  }
-  .b-card:hover::before { opacity: 1; }
   /* No reduced-motion override on `.b-card::before`: the liquid-glass overlay's
      380ms opacity fade is EXEMPT per D-08 #7 (user-initiated hover feedback).
      A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1
@@ -329,8 +336,11 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     }
   }
   /* Pause the entrance shake the moment a user hovers — they've found the card,
-     no need to keep waving at them. */
-  .b-card:hover { animation-play-state: paused; }
+     no need to keep waving at them. Gated to (hover: hover) per D-06 so touch
+     devices don't trigger an :hover state on first tap. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-card:hover { animation-play-state: paused; }
+  }
   /* Suppress the entrance animation after the first role-link click so that
      removing .is-shaking doesn't cause animation-name to flip back to
      card-shake and visibly re-trigger. Placed BEFORE .is-shaking so the
@@ -346,8 +356,11 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   .b-card.is-shaking {
     animation: card-shake-click 220ms ease-out 0ms 1 !important;
   }
-  /* Allow the on-demand shake to play even if hover is engaged. */
-  .b-card.is-shaking:hover { animation-play-state: running; }
+  /* Allow the on-demand shake to play even if hover is engaged. Inside the same
+     hover-gate as the pause rule above (only relevant when hover is real). */
+  @media (hover: hover) and (pointer: fine) {
+    .b-card.is-shaking:hover { animation-play-state: running; }
+  }
 
   /* Mobile (≤900px): shrink + push the decorations so they corner-anchor rather
      than wash across the text. Card-name + cue stay the primary read; the deco

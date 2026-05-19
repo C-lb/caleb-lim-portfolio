@@ -67,9 +67,13 @@ const total = pieces.length;
     transition: transform 0.25s ease;
     text-decoration: none;
   }
-  .b-piece:hover {
-    transform: scale(1.02) rotate(-0.3deg);
-    z-index: 2;
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Tile scale+rotate only fires on
+     devices with a real hover mechanism — on touch, first tap navigates. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-piece:hover {
+      transform: scale(1.02) rotate(-0.3deg);
+      z-index: 2;
+    }
   }
   .b-piece:focus-visible {
     outline: 3px solid var(--paper);

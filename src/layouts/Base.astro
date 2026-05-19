@@ -99,7 +99,13 @@ const isHome = Astro.url.pathname === '/';
     gap: 18px;
     min-width: 1px; /* reserves the grid slot for Phase 4 */
   }
-  .topbar nav a:hover { color: var(--terracotta); }
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Nav-link color change on hover
+     only on devices with a real hover mechanism. The ≤700px topbar collapse
+     block below (Plan 05-03) is NOT touched — only this hover color rule moves
+     into the gate. */
+  @media (hover: hover) and (pointer: fine) {
+    .topbar nav a:hover { color: var(--terracotta); }
+  }
 
   /* Phase 4 — header chrome links. Inherit .topbar typography; override text-transform to lowercase to match .brand.
      Phase 5 (Plan 05-03): padding bumped 4px 0 -> 12px 8px to clear WCAG 2.5.8 AA (≥24x24 tap floor). */

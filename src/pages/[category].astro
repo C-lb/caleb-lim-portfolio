@@ -91,9 +91,13 @@ const countStr = String(n).padStart(2, '0');
     transition: background 0.2s ease;
     text-decoration: none;
   }
-  .b-cat-back:hover {
-    background: var(--accent);
-    color: var(--paper);
+  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Back-pill hover color/bg only
+     fires on devices with a real hover mechanism. */
+  @media (hover: hover) and (pointer: fine) {
+    .b-cat-back:hover {
+      background: var(--accent);
+      color: var(--paper);
+    }
   }
   .b-cat-back:focus-visible {
     outline: 3px solid var(--paper);
