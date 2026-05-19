@@ -1,6 +1,9 @@
 ---
 // Phase 3 D-05 Bucket A (1-2 pieces) — full-bleed hero + one wide tile.
 // Subset of Bucket B: p1 + p2 widened to span 6 columns each.
+// Phase 5 Plan 05-04: tile internals rewritten — hero promoted to 60% LEFT
+// grid cell (was opacity-0.55 watermark); .deco dropped; .tag moved inside
+// .meta; p1 carries `priority` so it's eligible as the route's LCP candidate.
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { Category } from '../content/categories';
@@ -17,13 +20,19 @@ const total = pieces.length;
     const slot = i + 1;
     return (
       <a href={`/${category}/${piece.id}`} class={`b-piece p${slot}`}>
-        <span class="tag">0{slot} / 0{total}</span>
-        <Image src={piece.data.hero} alt={piece.data.title} class="cover" />
+        <Image
+          src={piece.data.hero}
+          alt={piece.data.title}
+          class="cover"
+          priority={slot === 1}
+          widths={[280, 560]}
+          sizes="(max-width: 900px) 50vw, 240px"
+        />
         <div class="meta">
+          <span class="tag">0{slot} / 0{total}</span>
           <span class="ttl">{piece.data.title}</span>
           <span class="role">{piece.data.role}</span>
         </div>
-        <span class="deco" aria-hidden="true"></span>
       </a>
     );
   })}
@@ -38,16 +47,19 @@ const total = pieces.length;
     grid-auto-rows: 240px;
     gap: 12px;
   }
+  /* Plan 05-04: .b-piece is now a 60/40 grid — hero in column 1, text column 2.
+     Aspect 4:5 enforces a portrait tile so the hero half reads as a vertical strip
+     (~12:25). Padding/flex-column from the watermark era dropped; the meta column
+     owns its own padding inside the grid cell. */
   .b-piece {
-    position: relative;
+    display: grid;
+    grid-template-columns: 60% 40%;
+    aspect-ratio: 4 / 5;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
     cursor: pointer;
     transition: transform 0.25s ease;
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     text-decoration: none;
   }
   .b-piece:hover {
@@ -58,30 +70,33 @@ const total = pieces.length;
     outline: 3px solid var(--paper);
     outline-offset: 3px;
   }
+  /* Plan 05-04: hero is now a grid child at full opacity (was opacity 0.55 watermark — BLOCKER-2). */
   .b-piece .cover {
-    position: absolute;
-    inset: 0;
+    grid-column: 1;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 0;
-    opacity: 0.55;
+    object-position: center;
+    opacity: 1;
+  }
+  /* Plan 05-04: meta is the right 40% column, with the per-slot accent
+     background applied (preserves discipline color rhythm per Q3). The tag is
+     now the first child of meta, no longer absolute-positioned. */
+  .b-piece .meta {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--sp-4);
+    gap: var(--sp-2);
+    background: var(--accent-bg, transparent);
   }
   .b-piece .tag {
-    position: relative;
-    z-index: 1;
     font-family: var(--mono);
     font-size: var(--fs-mono);
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-  }
-  .b-piece .meta {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
   }
   .b-piece .ttl {
     font-family: var(--sans);
@@ -97,48 +112,30 @@ const total = pieces.length;
     line-height: 1.2;
   }
 
-  /* Bucket A overrides — p1 and p2 widen to span 6 */
+  /* Bucket A overrides — p1 and p2 widen to span 6. The per-slot bg becomes
+     the --accent-bg consumed by .meta above (text column tint); the .b-piece
+     itself no longer needs a color since the hero fills 60%. */
   .b-piece.p1 {
     grid-column: span 6;
     grid-row: span 2;
-    background: var(--terracotta);
+    --accent-bg: var(--terracotta);
     color: var(--paper);
     transform: rotate(-0.6deg);
   }
-  .b-piece.p1 .deco {
-    position: absolute;
-    right: -30px;
-    top: 30%;
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 240px;
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.12);
-    letter-spacing: -0.05em;
-    z-index: 0;
-  }
   .b-piece.p2 {
     grid-column: span 6;
-    background: var(--cobalt);
+    --accent-bg: var(--cobalt);
     color: var(--paper);
   }
-  .b-piece.p2 .deco {
-    position: absolute;
-    right: 20px;
-    bottom: 20px;
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 90px;
-    line-height: 0.85;
-    color: var(--acid);
-    z-index: 0;
-  }
 
-  /* Reduced-motion (D-13) */
-  @media (prefers-reduced-motion: reduce) {
-    .b-piece { transition: none; }
-    .b-piece:hover { transform: none; }
+  /* Mobile (≤540px): flatten to hero TOP / text BOTTOM 60/40 split */
+  @media (max-width: 540px) {
+    .b-piece {
+      grid-template-columns: 1fr;
+      grid-template-rows: 60% 40%;
+    }
+    .b-piece .cover { grid-column: 1; grid-row: 1; }
+    .b-piece .meta  { grid-column: 1; grid-row: 2; }
   }
 
   @media (max-width: 900px) {
