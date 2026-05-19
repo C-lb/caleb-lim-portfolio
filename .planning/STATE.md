@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 Wave 1 — Plan 05-03 complete
+stopped_at: Phase 5 Wave 1 — Plan 05-04 complete
 last_updated: "2026-05-19T08:30:00.000Z"
-last_activity: 2026-05-19 -- Plan 05-03 SUMMARY committed (Gate 23 GREEN; BLOCKER-1 closed)
+last_activity: 2026-05-19 -- Plan 05-04 SUMMARY committed (Gate 24 GREEN; BLOCKER-2 closed; LCP priority/sizes wired on splash + detail)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 27
-  completed_plans: 19
-  percent: 70
+  completed_plans: 20
+  percent: 74
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 ## Current Position
 
 Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 2 of 8 (05-01 Wave 0 + 05-03 Wave 1 complete; 05-02 / 05-04 pending in Wave 1)
-Status: Plan 05-03 closes BLOCKER-1 (topbar ≤700px collapse, D-01–D-03). Gate 23 GREEN; Gates 1–22 unchanged; Gate 25 remains RED-by-design until Plan 05-05.
-Last activity: 2026-05-19 -- Plan 05-03 SUMMARY committed (169f61c Task 1, 848a7c4 Task 2)
+Plan: 3 of 8 (05-01 Wave 0 + 05-03 + 05-04 Wave 1 complete; 05-02 / 05-05 pending in Wave 1)
+Status: Plan 05-04 closes BLOCKER-2 (gallery hero promoted 60/40, opacity 0.55 → 1) + ships LCP priority/sizes on splash carousel + detail hero. Gates 1-24 GREEN; Gate 25 RED-by-design until Plan 05-05 (count dropped 21 → 17 from .deco deletion).
+Last activity: 2026-05-19 -- Plan 05-04 SUMMARY committed (145fabe Task 1, 4786892 Task 2, 131b41c Task 3)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
