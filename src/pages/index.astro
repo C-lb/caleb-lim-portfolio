@@ -104,11 +104,11 @@ void DISCIPLINE_ACCENT;
         <h1>CALEB<br /><span class="lim">LIM</span></h1>
         <div class="roles">
           {ROLE_TO_CATEGORY.map(({ role, category }) => (
-            <a href={roleHref(category)} class="role-link" aria-label={`Jump to ${roleAria(category)} work`}>{role}</a>
+            <a href={roleHref(category)} class="role-link" aria-label={`${role} — jump to ${roleAria(category)} work`}>{role}</a>
           ))}
         </div>
       </div>
-      <a href="/about" class="b-bio" aria-label="Read the full bio on the About page">
+      <a href="/about" class="b-bio">
         <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
         <h2>why choose caleb?</h2>
         <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
@@ -353,12 +353,26 @@ void DISCIPLINE_ACCENT;
   .b-name .roles {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-1);
+    /* 10px gap — combined with role-link vertical padding below this puts safe
+       target-spacing diameter ≥24px (WCAG 2.5.5 Lighthouse target-size). */
+    gap: 10px;
     margin-top: var(--sp-5);
     font-size: var(--fs-body);
     line-height: var(--lh-tight);
   }
-  .b-name .roles a.role-link { padding: 0 8px; text-decoration: none; cursor: pointer; transition: opacity 120ms ease; }
+  /* Role-link tap target: ≥24×24. Vertical padding 5px on a 15.5px font (1.0 line-height)
+     gives ~25.5px height; horizontal stays 8px so the visible "analyst" / "marketer"
+     surface isn't visually inflated. Plan 05-09 Task 2 deviation (target-size on
+     role-links was not enumerated in the plan but surfaced in the post-Task-3 re-audit). */
+  .b-name .roles a.role-link {
+    padding: 5px 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 120ms ease;
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
   /* Role labels: odd children (analyst, designer) = deeper teal-sage; even (brand
      strategist, marketer) = deeper terracotta-brown. Plan 05-09 Task 2 (SC2 a11y
      closure): role-link colors MUST meet WCAG AA 4.5:1 on --paper, so they pull
@@ -591,9 +605,14 @@ void DISCIPLINE_ACCENT;
     align-items: center;
     gap: var(--sp-5);
   }
+  /* Plan 05-09 Task 2 deviation: the post-Task-3 re-audit caught --terracotta bg
+     (#82785d) + --paper fg (#f2ebdb) at 3.68:1 — under WCAG AA 4.5:1 for 13px bold
+     text. Swap to --ink bg + --paper fg (>=15:1) — black-pill tag stays in the
+     magazine-maximalist vocabulary and is a familiar pattern alongside the existing
+     ABOUT / KEEP READING tags below. The 13px bold uppercase silhouette is preserved. */
   .b-question .marker {
-    background: var(--terracotta);
-    color: var(--paper); /* taupe bg → paper text for AA contrast on the deeper terracotta */
+    background: var(--ink);
+    color: var(--paper);
     font-family: var(--sans);
     font-weight: 800;
     font-size: var(--fs-tile-role); /* was 13px; exact match per 05-TOKEN-MAP */
