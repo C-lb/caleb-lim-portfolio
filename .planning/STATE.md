@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 plans approved
-last_updated: "2026-05-19T00:00:00.000Z"
-last_activity: 2026-05-19 -- Phase 05 plans approved (8 plans, 3 waves)
+stopped_at: Phase 5 Wave 1 — Plan 05-03 complete
+last_updated: "2026-05-19T08:30:00.000Z"
+last_activity: 2026-05-19 -- Plan 05-03 SUMMARY committed (Gate 23 GREEN; BLOCKER-1 closed)
 progress:
   total_phases: 6
   completed_phases: 4
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 ## Current Position
 
 Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 1 of 8 (05-01 Wave 0 complete; Wave 1 dispatch next)
-Status: Wave 0 validation harness landed; downstream gates 23/25 RED as designed; Plan 05-02 (Vercel) + 05-03 (topbar) + 05-04 (gallery+LCP) ready for Wave 1 dispatch
-Last activity: 2026-05-19 -- Plan 05-01 SUMMARY committed (b381e2b, 4c9a944, cf80a18)
+Plan: 2 of 8 (05-01 Wave 0 + 05-03 Wave 1 complete; 05-02 / 05-04 pending in Wave 1)
+Status: Plan 05-03 closes BLOCKER-1 (topbar ≤700px collapse, D-01–D-03). Gate 23 GREEN; Gates 1–22 unchanged; Gate 25 remains RED-by-design until Plan 05-05.
+Last activity: 2026-05-19 -- Plan 05-03 SUMMARY committed (169f61c Task 1, 848a7c4 Task 2)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
