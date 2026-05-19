@@ -392,4 +392,65 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     .b-card.k3 .deco { opacity: 0.55; }
     .b-card-name { font-size: clamp(22px, 7vw, 30px); }
   }
+
+  /* D-07 Touch entrance shimmer (Plan 05-07 Task 2). On touch devices (where
+     (hover: none) is true) the splash discipline cards + bio sticker have no
+     hover micro-interaction to surface "this is interactive." The shimmer fires
+     once when a card scrolls into view (IntersectionObserver below adds
+     .is-entered) — a brief lime/currentColor ring pulses out and back,
+     compensating for the missing hover state. Fires ONLY on touch (the gate
+     below); reduced-motion override at the end of this block ensures it never
+     plays for users with the preference. */
+  @keyframes card-shimmer {
+    0%   { box-shadow: 0 0 0 0 currentColor; }
+    50%  { box-shadow: 0 0 0 6px color-mix(in oklab, currentColor 8%, transparent); }
+    100% { box-shadow: 0 0 0 0 currentColor; }
+  }
+  @media (hover: none) {
+    .b-card.is-entered,
+    .b-bio.is-entered {
+      animation: card-shimmer 600ms ease-out 1;
+    }
+  }
+  /* Belt-and-suspenders: even if JS gate misses (e.g. user toggles Reduce
+     Motion AFTER page load but BEFORE first viewport intersection), CSS
+     refuses to play the keyframe. */
+  @media (prefers-reduced-motion: reduce) {
+    .b-card.is-entered,
+    .b-bio.is-entered {
+      animation: none;
+    }
+  }
 </style>
+
+<script>
+  // D-07 Touch entrance shimmer (Plan 05-07 Task 2). Add .is-entered to each
+  // .b-card / .b-bio on first viewport intersection so the @keyframes
+  // card-shimmer rule above can fire — but only when (hover: none) is true
+  // AND the user hasn't asked for reduced motion. Each element is unobserved
+  // after its first hit so the shimmer doesn't replay on scroll-up/scroll-down.
+  // The runtime change listener re-evaluates if Reduce Motion is toggled mid-
+  // session and the user is still on a touch device.
+  const isTouchDevice = window.matchMedia('(hover: none)').matches;
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function enableEntranceShimmer() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-entered');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('.b-card, .b-bio').forEach((el) => observer.observe(el));
+  }
+
+  if (isTouchDevice && !prefersReduced.matches) {
+    enableEntranceShimmer();
+  }
+
+  prefersReduced.addEventListener?.('change', (e) => {
+    if (!e.matches && isTouchDevice) enableEntranceShimmer();
+  });
+</script>
