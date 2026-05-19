@@ -19,6 +19,27 @@ recorded_at: TBD
 | Test date | TBD |
 | Tester | Caleb Lim |
 
+## Vercel Project Bootstrap (SC2, D-13 amended)
+
+Plan 05-02 (Wave 1) — Vercel import completed by Caleb via vercel.com/new on 2026-05-19. GitHub `C-lb/caleb-lim-portfolio` is the source repo; Astro framework preset auto-detected; production branch = `main`. No `vercel.json` shipped (default static build).
+
+| Field | Value |
+|-------|-------|
+| Production URL | https://caleb-lim-portfolio.vercel.app |
+| Branch-alias URL pattern | `caleb-lim-portfolio-git-<branch>-<scope>.vercel.app` (exact `<scope>` slug TBD — common candidates `c-lb`, `clb` returned 404 on `main`; will be confirmed on next non-`main` branch push) |
+| First-deploy commit | `0dd79a2` (HEAD of `main` at time of Vercel import; 18 commits 0690fb9..0dd79a2 pushed in Plan 05-02 Task 1) |
+| Import date | 2026-05-19 |
+| Deployment Protection | DISABLED (production URL serves 200 OK to unauthenticated requests — verified via `HEAD` probe returning `server: Vercel`, `x-vercel-cache: HIT`, `content-type: text/html`, no `www-authenticate` header) |
+| Plan-vs-reality drift | Plan 05-02 assumed a separate `phase-5` working branch; actual execution landed all Wave-1 work on `main` directly. Production deploys from `main`; no preview branch was created. Lighthouse audit in Plan 05-08 therefore targets the **production URL**, not a branch alias. SC2 is still gated on the same numerical thresholds. |
+| Push-trigger verification | Empty commit pushed to `main` 2026-05-19 to confirm push → deploy pipeline. See "Push-trigger verification" subsection below. |
+
+### Push-trigger verification (Plan 05-02 Task 3)
+
+Cmd: `git commit --allow-empty -m "chore(phase-5/05-02): trigger Vercel push verification" && git push origin main`
+
+Pre-push prod `x-vercel-id`: `sin1::65gs4-1779151855946-36b01e4d6ab9` (cache HIT, age 159s)
+Post-push prod `x-vercel-id`: TBD — recorded inline below after push.
+
 ## Critical-Path Walk (SC1, SC4)
 
 Mirrors 05-UI-SPEC §"Critical-path accessibility walk" — iPhone Safari, real device.
@@ -40,7 +61,7 @@ Mirrors 05-UI-SPEC §"Critical-path accessibility walk" — iPhone Safari, real 
 
 ## Lighthouse Scores (SC2, D-13/D-15)
 
-Source: `bash scripts/lighthouse-audit.sh <vercel-preview-url>` — preview URL TBD (Plan 05-02 ships Vercel import). Default expected pattern per 05-RESEARCH §4.4: `https://caleb-lim-portfolio-git-phase-5-c-lb.vercel.app`.
+Source: `bash scripts/lighthouse-audit.sh https://caleb-lim-portfolio.vercel.app` — production URL recorded by Plan 05-02 (Vercel import 2026-05-19). Plan 05-02 amended target from a branch-alias preview to the **production URL** because all Wave-1 work landed on `main` (no `phase-5` working branch was ever cut). The numerical SC2 thresholds are unchanged.
 
 Thresholds per 05-UI-SPEC §"Lighthouse budget":
 - All routes: Performance ≥85, Accessibility ≥95
@@ -142,5 +163,6 @@ Filled by Plan 05-05 (2026-05-19). Line numbers re-grounded against current `src
 - [ ] Real-iPhone critical-path walk recorded (Section: Critical-Path Walk)
 - [ ] Reduced-motion walk recorded (Section: Reduced-Motion Walk)
 - [x] --terracotta audit complete (Verdict column filled for every row)
+- [x] Vercel import verified (Plan 05-02, 2026-05-19; production URL `https://caleb-lim-portfolio.vercel.app` returns 200 OK; Deployment Protection disabled)
 - [ ] `lighthouse/<slug>-summary.json` files committed (one per route)
 - [ ] iPhone model + iOS version recorded in Real-Device Test Rig
