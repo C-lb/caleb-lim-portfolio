@@ -37,8 +37,16 @@ Plan 05-02 (Wave 1) — Vercel import completed by Caleb via vercel.com/new on 2
 
 Cmd: `git commit --allow-empty -m "chore(phase-5/05-02): trigger Vercel push verification" && git push origin main`
 
-Pre-push prod `x-vercel-id`: `sin1::65gs4-1779151855946-36b01e4d6ab9` (cache HIT, age 159s)
-Post-push prod `x-vercel-id`: TBD — recorded inline below after push.
+Pushed commit: `254cc74` (range `0dd79a2..254cc74` on `origin/main`).
+
+Probe timeline (HEAD requests against `https://caleb-lim-portfolio.vercel.app` with cache-buster):
+
+| t (UTC) | status | x-vercel-id | x-vercel-cache | age |
+|---------|--------|-------------|----------------|-----|
+| 2026-05-19T00:58:00.475Z (pre-deploy edge) | 200 | sin1::g9jhm-1779152280443-d96985ae0a47 | HIT | 583 |
+| 2026-05-19T00:58:17.157Z (post-deploy) | 200 | sin1::4mspc-1779152296187-2f12dccf9ccb | HIT | 0 |
+
+`age:0` + new `x-vercel-id` between probes confirms Vercel served a fresh build within ~17s of the push. Push → auto-deploy pipeline verified live.
 
 ## Critical-Path Walk (SC1, SC4)
 
