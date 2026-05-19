@@ -88,14 +88,14 @@ void DISCIPLINE_ACCENT;
         </div>
         <button class="bp-arrow bp-arrow-prev" data-bp-prev type="button" aria-label="Previous photo">‹</button>
         <button class="bp-arrow bp-arrow-next" data-bp-next type="button" aria-label="Next photo">›</button>
-        <div class="bp-dots" data-bp-dots role="tablist" aria-label="Portrait photo selector">
+        <div class="bp-dots" data-bp-dots role="group" aria-label="Portrait photo selector">
           {portraits.map((_, i) => (
             <button
               class={`bp-dot${i === 0 ? ' is-active' : ''}`}
               data-bp-dot={i}
               type="button"
               aria-label={`Photo ${i + 1}`}
-              aria-selected={i === 0 ? 'true' : 'false'}
+              {...(i === 0 ? { 'aria-current': 'true' } : {})}
             ></button>
           ))}
         </div>
@@ -305,17 +305,31 @@ void DISCIPLINE_ACCENT;
     gap: 6px;
     z-index: 2;
   }
+  /* Tap target: 24×24 button shell (WCAG 2.5.5 / Lighthouse target-size). Visible
+     8×8 dot rendered via ::before pseudo so the surface remains identical but the
+     hit area doubles. Active state animates the pseudo, not the button. */
   .b-portrait .bp-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .b-portrait .bp-dot::before {
+    content: '';
+    display: block;
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    border: none;
     background: rgba(242, 235, 219, 0.45);
-    cursor: pointer;
-    padding: 0;
     transition: background-color 180ms ease, transform 180ms ease;
   }
-  .b-portrait .bp-dot.is-active {
+  .b-portrait .bp-dot.is-active::before {
     background: var(--paper);
     transform: scale(1.25);
   }
@@ -739,7 +753,11 @@ void DISCIPLINE_ACCENT;
       index = nextIndex;
       dots.forEach((d, n) => {
         d.classList.toggle('is-active', n === index);
-        d.setAttribute('aria-selected', n === index ? 'true' : 'false');
+        if (n === index) {
+          d.setAttribute('aria-current', 'true');
+        } else {
+          d.removeAttribute('aria-current');
+        }
       });
 
       const onDone = (e: TransitionEvent) => {
