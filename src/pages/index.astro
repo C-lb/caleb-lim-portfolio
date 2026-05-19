@@ -75,7 +75,13 @@ void DISCIPLINE_ACCENT;
         <div class="bp-track" data-bp-track>
           {portraits.map((src, i) => (
             <div class={`bp-slide${i === 0 ? ' is-active' : ''}`} data-bp-slide>
-              <Image src={src} alt={`Portrait of Caleb Lim, photo ${i + 1}`} widths={[280, 560]} sizes="280px" />
+              <Image
+                src={src}
+                alt={`Portrait of Caleb Lim, photo ${i + 1}`}
+                widths={[280, 560]}
+                sizes="(max-width: 900px) 100vw, 280px"
+                priority={i === 0}
+              />
               {portraitCaptions[i] && <span class="bp-caption">{portraitCaptions[i]}</span>}
             </div>
           ))}

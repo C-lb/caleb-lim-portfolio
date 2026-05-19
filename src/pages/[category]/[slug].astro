@@ -92,7 +92,15 @@ const backLabel: Record<Category, string> = {
     </header>
 
     {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
-    <Image src={hero} alt={title} class="detail-hero" />
+    {/* Phase 5 Plan 05-04: priority + sizes — this is the detail-page LCP element,
+        always above the fold. The paginated PDF slides below stay lazy (FOUND-02). */}
+    <Image
+      src={hero}
+      alt={title}
+      class="detail-hero"
+      priority
+      sizes="(max-width: 960px) 100vw, 960px"
+    />
 
     {/* PIECE-02: three blurb blocks — Context / Role / Outcome with uppercase mono labels */}
     <section class="cro">
