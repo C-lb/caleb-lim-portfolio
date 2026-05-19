@@ -10,3 +10,8 @@ pdf-poc-out.png
 # real PDFs stay local; only the directory shape ships via .gitkeep).
 samples/*
 !samples/.gitkeep
+
+# Phase 5: gitignore raw Lighthouse reports, but commit per-route summary.json (SC2 durable evidence per 05-08 Task 1 step 7)
+/.planning/phases/05-mobile-performance-accessibility/lighthouse/*.html
+/.planning/phases/05-mobile-performance-accessibility/lighthouse/*.json
+!/.planning/phases/05-mobile-performance-accessibility/lighthouse/*-summary.json
