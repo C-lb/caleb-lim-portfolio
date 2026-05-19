@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 Wave 2 — Plan 05-06 complete (6 of 8 phase-5 plans done; Wave 2 entered)
-last_updated: "2026-05-19T10:45:00.000Z"
-last_activity: 2026-05-19 -- Plan 05-06 SUMMARY committed (SC3 architecture closed — global reduced-motion clamp deleted from tokens.css; surgical per-source disables added to DisciplineCard.astro + index.astro; D-08 exempt motions now correctly fire under prefers-reduced-motion)
+stopped_at: Phase 5 Wave 2 — Plan 05-07 complete (7 of 8 phase-5 plans done; only 05-08 phase-exit walk remains)
+last_updated: "2026-05-19T12:30:00.000Z"
+last_activity: 2026-05-19 -- Plan 05-07 SUMMARY committed (SC1 + SC3 touch behavior closed — all 13 hover surfaces wrapped in @media (hover: hover) and (pointer: fine); D-07 entrance shimmer wired via IntersectionObserver on .b-card and .b-bio; D-04 StatusPill mobile shrink lands at ≤700px; bio-shake hover-gated per planner discretion to avoid shimmer overlap)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 27
-  completed_plans: 23
-  percent: 85
+  completed_plans: 24
+  percent: 89
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 ## Current Position
 
 Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 6 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 + 05-06 Wave 2 complete; 05-07, 05-08 pending in Wave 2)
-Status: Plan 05-06 closes SC3 architecture — the global `*, *::before, *::after` reduced-motion clamp is removed from `tokens.css`; surgical `.b-card { animation: none }` and `.b-bio { animation: none }` disables added in DisciplineCard.astro and index.astro. D-08's four exempt motions (card hover-tilt, click-shake, liquid-glass overlay fade, lime-dot pulse) now correctly fire under `prefers-reduced-motion: reduce`; the four disabled motions (carousel auto-advance, carousel slide-transition, card entrance shake, bio entrance shake) stay suppressed via per-source guards. Rule 1 deviation: two `::before { transition: none }` mini-hammers (one in DisciplineCard, one in index.astro) removed for the same reason as the global hammer — they were suppressing the exempt liquid-glass overlay fade. All 25 verify-build gates GREEN.
-Last activity: 2026-05-19 -- Plan 05-06 SUMMARY committed (ca27d7e Task 1 tokens.css, 5c723c5 Task 2 DisciplineCard, 4ca12f7 Task 3 index.astro)
+Plan: 7 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 + 05-06 + 05-07 Wave 2 complete; only 05-08 phase-exit walk remains)
+Status: Plan 05-07 closes SC1 (mobile critical path) and SC3 touch-behavior leg. All 13 hover surfaces are wrapped in `@media (hover: hover) and (pointer: fine)` across 10 files (DisciplineCard, StatusPill, GalleryA12/B35/C68, index.astro, about.astro, [category].astro, [category]/[slug].astro, Base.astro). `:focus-visible` rules stay outside the gate. D-07 touch entrance shimmer added: IntersectionObserver in DisciplineCard.astro adds `.is-entered` to `.b-card` and `.b-bio` on first viewport hit, gated by `(hover: none) && !prefers-reduced-motion`; `@keyframes card-shimmer` pulses a 600ms currentColor ring; reduced-motion CSS fallback overrides to `animation: none`. D-04 StatusPill mobile shrink lands `padding: 8px 12px` at ≤700px. Planner-discretion call: `.b-bio { animation: bio-shake ... }` hover-gated to avoid the ~1150ms overlap with shimmer on touch (D-08 invariant preserved — reduced-motion override stays outside the hover gate). Rule 2 deviation: `.contact-list a:hover` (not in 13-surface inventory) also gated per "D-06 no exceptions" authority. Rule 3 deviation: plan's verify regex targeted `.statuspill` but actual selector is `.pill` — behavioral contract met. All 25 verify-build gates GREEN.
+Last activity: 2026-05-19 -- Plan 05-07 SUMMARY committed (f35201b Task 1 hover-gate sweep, abd3442 Task 2 D-07 shimmer + bio-shake gate, 6f70da2 Task 3 D-04 StatusPill mobile shrink)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
