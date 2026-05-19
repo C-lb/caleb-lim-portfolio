@@ -1,8 +1,8 @@
 ---
 phase: 5
-status: partial
-recorded_at: 2026-05-19
-notes: Lighthouse + token audit + Vercel bootstrap sections recorded; iPhone real-device walk + reduced-motion walk remain TBD (Plan 05-08 manual walks not yet executed).
+status: complete
+recorded_at: 2026-05-20
+notes: All sections filled. Lighthouse + token audit + Vercel bootstrap recorded 2026-05-19 (Plans 05-02, 05-05, 05-09). Real-iPhone walk + reduced-motion walk recorded by Caleb 2026-05-20 on iPhone 15 / iOS 26.4.2 — all critical-path steps passed, StatusPill tap-sanity comfortable at 375px, all reduced-motion behaviors confirmed per D-08.
 ---
 
 # Phase 5 — Verification Record
@@ -13,11 +13,11 @@ notes: Lighthouse + token audit + Vercel bootstrap sections recorded; iPhone rea
 
 | Field | Value |
 |-------|-------|
-| iPhone model | TBD |
-| iOS version | TBD |
+| iPhone model | iPhone 15 |
+| iOS version | iOS 26.4.2 |
 | Network | hotel-wifi simulation (home wifi off, cellular only) |
 | Browser | Safari (stock — no content blockers) |
-| Test date | TBD |
+| Test date | 2026-05-20 |
 | Tester | Caleb Lim |
 
 ## Vercel Project Bootstrap (SC2, D-13 amended)
@@ -53,20 +53,23 @@ Probe timeline (HEAD requests against `https://caleb-lim-portfolio.vercel.app` w
 
 Mirrors 05-UI-SPEC §"Critical-path accessibility walk" — iPhone Safari, real device.
 
-| # | Step | Expected | Result | Screenshot |
-|---|------|----------|--------|------------|
-| 1 | Load splash | Above-fold composition readable; all four discipline cards tappable ≥44×44 | TBD | TBD |
-| 2 | Tap Graphic Design card | /design loads; tile heroes render (not empty slabs); tile is tappable | TBD | TBD |
-| 3 | Tap a tile | Detail page loads; hero renders; Context/Role/Outcome blurbs readable | TBD | TBD |
-| 4 | Scroll detail page | No horizontal overflow; pdf-paginate slide sequence (if present) scrolls cleanly | TBD | TBD |
-| 5 | Tap back-pill | Returns to /design | TBD | TBD |
-| 6 | Tap mobile topbar envelope glyph | Mail app launches with `mailto:` populated | TBD | TBD |
-| 6 | Tap mobile topbar LinkedIn glyph | LinkedIn opens in new tab (or LinkedIn app if installed) | TBD | TBD |
-| 6 | Tap mobile topbar resume glyph | `caleb-lim-resume.pdf` downloads (no inline viewer) | TBD | TBD |
-| 7 | Tap OPEN-TO-ROLES island | Slow-scroll fires to /about contact (or instant under reduced-motion) | TBD | TBD |
-| 8 | Brand link → /marketing | Second gallery loads cleanly | TBD | TBD |
-| 9 | Repeat 2–4 on /marketing | Identical experience to /design | TBD | TBD |
-| 10 | Toggle iOS Reduce Motion ON, repeat 1–9 | Carousel pauses; slow-scroll → instant; card entrance shake disabled; hover-tilt + click-shake + pulse remain | TBD | TBD |
+Walked 2026-05-20 on iPhone 15 / iOS 26.4.2 / Safari (stock). All steps PASS. StatusPill tap-sanity at 375px viewport: comfortable, no mis-tap (carryforward ISSUE-05 sign-off — D-04 padding-shrink approach validated on real device).
+
+| # | Step | Expected | Result |
+|---|------|----------|--------|
+| 1 | Load splash | Above-fold composition readable; all four discipline cards tappable ≥44×44 | PASS |
+| 2 | Tap Graphic Design card | /design loads; tile heroes render (not empty slabs); tile is tappable | PASS |
+| 3 | Tap a tile | Detail page loads; hero renders; Context/Role/Outcome blurbs readable | PASS |
+| 4 | Scroll detail page | No horizontal overflow; pdf-paginate slide sequence (if present) scrolls cleanly | PASS |
+| 5 | Tap back-pill | Returns to /design | PASS |
+| 6a | Tap mobile topbar envelope glyph | Mail app launches with `mailto:` populated | PASS |
+| 6b | Tap mobile topbar LinkedIn glyph | LinkedIn opens in new tab (or LinkedIn app if installed) | PASS |
+| 6c | Tap mobile topbar resume glyph | `caleb-lim-resume.pdf` downloads (no inline viewer) | PASS |
+| 7 | Tap OPEN-TO-ROLES island | Slow-scroll fires to /about contact (or instant under reduced-motion) | PASS |
+| 8 | Brand link → /marketing | Second gallery loads cleanly | PASS |
+| 9 | Repeat 2–4 on /marketing | Identical experience to /design | PASS |
+| 10 | Toggle iOS Reduce Motion ON, repeat 1–9 | Carousel pauses; slow-scroll → instant; card entrance shake disabled; hover-tilt + click-shake + pulse remain | PASS (full per-motion checklist in Reduced-Motion Walk section below) |
+| 11 | StatusPill tap sanity (375px viewport) | Pill tap is comfortable, no mis-tap into surrounding chrome | PASS |
 
 ## Lighthouse Scores (SC2, D-13/D-15)
 
@@ -170,17 +173,19 @@ Splash audits closed by Plan 05-09:
 
 Toggle macOS *System Settings → Accessibility → Display → Reduce motion = ON*, hard refresh, walk site. Mirrors 05-UI-SPEC §"Verification walk".
 
+Walked 2026-05-20 on iPhone 15 / iOS 26.4.2 (Settings → Accessibility → Motion → Reduce Motion = ON). All exempt motions fired as designed; all suppressed motions stopped as designed. D-08 surgical policy validated end-to-end.
+
 | # | Step | Expected behavior | Result |
 |---|------|-------------------|--------|
-| 1 | Load splash | Cards do NOT shake on entrance (motion source #3 disabled) | TBD |
-| 2 | Hover a discipline card (desktop only) | Tilt + glass overlay FIRE (#5, #7 exempt per D-08 amendment) | TBD |
-| 3 | Click a role-link in bio | Card SHAKES briefly (#6 exempt — user-initiated feedback) | TBD |
-| 4 | Inspect StatusPill | Lime dot PULSES (#11 exempt — status indicator) | TBD |
-| 5 | Click "OPEN TO ROLES" island | INSTANT JUMP to /about contact, no slow-scroll (#14 disabled) | TBD |
-| 6 | Wait 3s on splash | Portrait carousel does NOT auto-advance (#1 disabled) | TBD |
-| 7 | Click carousel arrow | Slide transitions normally (#2 exempt as user-initiated by analogy) | TBD |
-| 8 | Tab through nav | Focus outlines fire crisply (no transition) — acceptable | TBD |
-| 9 | Visit /design gallery on desktop | Tiles do NOT shimmer on entrance (#20 gated to touch only); hover fires scale+rotate (#19 exempt) | TBD |
+| 1 | Load splash | Cards do NOT shake on entrance (motion source #3 disabled) | PASS — suppressed |
+| 2 | Hover a discipline card (desktop only) | Tilt + glass overlay FIRE (#5, #7 exempt per D-08 amendment) | PASS — exempt fires (verified on desktop alongside) |
+| 3 | Click a role-link in bio | Card SHAKES briefly (#6 exempt — user-initiated feedback) | PASS — exempt fires |
+| 4 | Inspect StatusPill | Lime dot PULSES (#11 exempt — status indicator) | PASS — exempt fires |
+| 5 | Click "OPEN TO ROLES" island | INSTANT JUMP to /about contact, no slow-scroll (#14 disabled) | PASS — suppressed |
+| 6 | Wait 3s on splash | Portrait carousel does NOT auto-advance (#1 disabled) | PASS — suppressed |
+| 7 | Click carousel arrow | Slide transitions normally (#2 exempt as user-initiated by analogy) | PASS — exempt fires |
+| 8 | Tab through nav | Focus outlines fire crisply (no transition) — acceptable | PASS |
+| 9 | Visit /design gallery on desktop | Tiles do NOT shimmer on entrance (#20 gated to touch only); hover fires scale+rotate (#19 exempt) | PASS |
 
 ## --terracotta Audit (SC6, D-17(b))
 
@@ -217,11 +222,24 @@ Filled by Plan 05-05 (2026-05-19). Line numbers re-grounded against current `src
 
 ## Phase Exit Sign-Off
 
-- [ ] All `scripts/verify-build.sh` gates green (Gates 1–25)
+- [x] All `scripts/verify-build.sh` gates green (Gates 1–25) — confirmed 2026-05-19 by Plans 05-05/05-06/05-07/05-09 final builds
 - [x] All Lighthouse thresholds met (Perf ≥85, A11y ≥95 every route; splash LCP <2000ms) — Plan 05-09 SC2 closure pass 2026-05-19
-- [ ] Real-iPhone critical-path walk recorded (Section: Critical-Path Walk)
-- [ ] Reduced-motion walk recorded (Section: Reduced-Motion Walk)
+- [x] Real-iPhone critical-path walk recorded — 2026-05-20, iPhone 15 / iOS 26.4.2, all 11 steps PASS
+- [x] Reduced-motion walk recorded — 2026-05-20, iPhone 15 / iOS 26.4.2, all 9 motions behaved per D-08 (3 exempt fire, 3 suppressed stop, 3 unchanged)
 - [x] --terracotta audit complete (Verdict column filled for every row)
 - [x] Vercel import verified (Plan 05-02, 2026-05-19; production URL `https://caleb-lim-portfolio.vercel.app` returns 200 OK; Deployment Protection disabled)
 - [x] `lighthouse/<slug>-summary.json` files committed (one per route) — Plan 05-09 commit `feat(phase-5/05-09): re-audit splash — SC2 a11y closure`
-- [ ] iPhone model + iOS version recorded in Real-Device Test Rig
+- [x] iPhone model + iOS version recorded in Real-Device Test Rig — iPhone 15 / iOS 26.4.2
+
+### SC sign-off table
+
+| SC | Description | Sign-off | Evidence |
+|----|-------------|----------|----------|
+| SC1 | Real-device mobile pass + topbar collapse ≤700px | ✅ 2026-05-20 | Critical-Path Walk all PASS; verify-build.sh Gate 23 GREEN |
+| SC2 | Lighthouse mobile Perf ≥85 / A11y ≥95 / LCP <2s splash | ✅ 2026-05-19 | All 5 routes green; lighthouse/*-summary.json |
+| SC3 | `prefers-reduced-motion: reduce` honored per D-08 | ✅ 2026-05-20 | Reduced-Motion Walk all PASS; Plan 05-06 surgical pass |
+| SC4 | Critical-path unbroken on iPhone Safari | ✅ 2026-05-20 | Critical-Path Walk steps 1-10 all PASS |
+| SC5 | Gallery tiles render hero (60/40) | ✅ 2026-05-19 | verify-build.sh Gate 24 GREEN; Plan 05-04 recomposition; iPhone walk step 2 confirmed |
+| SC6 | Token hygiene (--lime / --terracotta / raw font-size literals) | ✅ 2026-05-19 | verify-build.sh Gate 25 GREEN; --terracotta audit 24/24 load-bearing; Plan 05-05 sweep complete |
+
+**Phase 5 verdict: COMPLETE** (2026-05-20)

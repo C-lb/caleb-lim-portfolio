@@ -21,9 +21,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Walking Skeleton** - Astro project, content schema, one piece per category routes end-to-end (ugly is fine)
 - [x] **Phase 2: Asset Pipeline + Real Content** - Build-time PDF rasterization productionized, all 5–15 pieces with real CRO blurbs, About + resume live
 - [x] **Phase 3: Visual Design System** - Magazine-maximalist direction applied across splash, galleries, detail pages; AI-tell verification
-- [ ] **Phase 4: Navigation & Secondary Surfaces** - Header chrome (mailto, LinkedIn), prev/next within discipline, About contact block
-- [ ] **Phase 5: Mobile, Performance, Accessibility** - Real-device iPhone Safari pass, Lighthouse mobile ≥85 / a11y ≥95, prefers-reduced-motion verified
-- [ ] **Phase 6: Deploy & Maintenance Handoff** - caleblim.com live on Cloudflare Pages, Caleb-adds-a-piece dry run passes
+- [x] **Phase 4: Navigation & Secondary Surfaces** - Header chrome (mailto, LinkedIn), prev/next within discipline, About contact block
+- [x] **Phase 5: Mobile, Performance, Accessibility** - Real-device iPhone Safari pass, Lighthouse mobile ≥85 / a11y ≥95, prefers-reduced-motion verified
+- [ ] **Phase 6: Deploy & Maintenance Handoff** - caleblim.com live on Vercel, Caleb-adds-a-piece dry run passes
 
 ## Phase Details
 
@@ -133,7 +133,7 @@ Plans:
 **Wave 2** *(after Wave 1 — transitive deps named explicitly)*
 - [x] 05-06-PLAN.md — Reduced-motion surgical pass (D-08): remove global * clamp from tokens.css + per-source disables for entrance shakes — depends_on: [03, 04, 05]
 - [x] 05-07-PLAN.md — Touch-hover gating (D-06, 13 surfaces) + touch entrance shimmer (D-07) + StatusPill mobile shrink (D-04) — depends_on: [03, 04, 05, 06]
-- [~] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview (DONE) + real-iPhone walk (pending Caleb's iPhone) + reduced-motion walk (pending) + record in 05-VERIFICATION.md — depends_on: [02, 03, 04, 05, 06, 07]
+- [x] 05-08-PLAN.md — Phase-exit verification: Lighthouse audit on Vercel preview + real-iPhone walk (iPhone 15 / iOS 26.4.2, 2026-05-20) + reduced-motion walk (all 9 D-08 motions per spec) + 05-VERIFICATION.md signed off — depends_on: [02, 03, 04, 05, 06, 07]
 - [x] 05-09-PLAN.md — Splash a11y gap closure (SC2) — Plan 05-08's Lighthouse audit surfaced splash a11y 79 (5 audits failing); 05-09 closed 6 audit categories on `/` and lifted splash to 100 — depends_on: [01..07]
 
 
