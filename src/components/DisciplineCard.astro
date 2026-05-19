@@ -293,9 +293,11 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     transform: perspective(1200px) translateY(-3px) rotateX(-2deg) rotateY(3deg);
   }
   .b-card:hover::before { opacity: 1; }
-  @media (prefers-reduced-motion: reduce) {
-    .b-card::before { transition: none; }
-  }
+  /* No reduced-motion override on `.b-card::before`: the liquid-glass overlay's
+     380ms opacity fade is EXEMPT per D-08 #7 (user-initiated hover feedback).
+     A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1
+     deviation — it contradicted the plan's truth #4 ("liquid-glass overlay fade
+     still fires under reduced-motion") in the same way the global hammer did. */
 
   /* Entrance shake — runs once on page load to cue that the cards are interactable.
      Composes the shake on top of each card's per-k --rest-rotate via calc() so the
@@ -317,6 +319,14 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   }
   .b-card {
     animation: card-shake 750ms ease-in-out 400ms 1;
+  }
+  /* Surgical reduced-motion disable for the 750ms entrance shake (D-08 #3,
+     05-RESEARCH §3.4 step 2). Hover-tilt, click-shake, liquid-glass, and rest
+     tilts remain exempt — they are not animations and are not touched here. */
+  @media (prefers-reduced-motion: reduce) {
+    .b-card {
+      animation: none;
+    }
   }
   /* Pause the entrance shake the moment a user hovers — they've found the card,
      no need to keep waving at them. */
