@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 ## Current Position
 
-Phase: 05 — PLANNED (8 plans across 3 waves)
-Plan: 0 of 8
-Status: Plans approved by gsd-plan-checker iteration 2; ready for `/gsd-execute-phase 5`
-Last activity: 2026-05-19 -- Phase 05 plans approved
+Phase: 05 — IN PROGRESS (8 plans across 3 waves)
+Plan: 1 of 8 (05-01 Wave 0 complete; Wave 1 dispatch next)
+Status: Wave 0 validation harness landed; downstream gates 23/25 RED as designed; Plan 05-02 (Vercel) + 05-03 (topbar) + 05-04 (gallery+LCP) ready for Wave 1 dispatch
+Last activity: 2026-05-19 -- Plan 05-01 SUMMARY committed (b381e2b, 4c9a944, cf80a18)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
