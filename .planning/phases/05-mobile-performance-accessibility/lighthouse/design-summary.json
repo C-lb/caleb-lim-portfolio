@@ -1,7 +1,7 @@
 {
   "route": "/design",
-  "perf": 98,
+  "perf": 100,
   "a11y": 95,
-  "lcp_ms": 1829,
-  "recorded_at": "2026-05-19T06:26:59.376Z"
+  "lcp_ms": 1671,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
 }

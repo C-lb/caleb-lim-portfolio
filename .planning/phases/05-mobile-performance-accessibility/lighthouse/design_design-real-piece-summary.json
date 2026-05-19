@@ -1,7 +1,7 @@
 {
   "route": "/design/design-real-piece",
-  "perf": 91,
+  "perf": 94,
   "a11y": 100,
-  "lcp_ms": 3144,
-  "recorded_at": "2026-05-19T06:26:59.376Z"
+  "lcp_ms": 3121,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
 }

@@ -1,7 +1,8 @@
 ---
 phase: 5
-status: pending
-recorded_at: TBD
+status: partial
+recorded_at: 2026-05-19
+notes: Lighthouse + token audit + Vercel bootstrap sections recorded; iPhone real-device walk + reduced-motion walk remain TBD (Plan 05-08 manual walks not yet executed).
 ---
 
 # Phase 5 — Verification Record
@@ -75,44 +76,94 @@ Thresholds per 05-UI-SPEC §"Lighthouse budget":
 - All routes: Performance ≥85, Accessibility ≥95
 - Splash only: LCP < 2000ms (hard gate)
 
-| Route | Perf | A11y | LCP (ms) | Pass? |
-|-------|------|------|----------|-------|
-| `/` (splash) | TBD | TBD | TBD | TBD |
-| `/design` | TBD | TBD | TBD | TBD |
-| `/marketing` | TBD | TBD | TBD | TBD |
-| `/about` | TBD | TBD | TBD | TBD |
-| `/design/<slug>` | TBD | TBD | TBD | TBD |
+Recorded 2026-05-19 via `scripts/lighthouse-audit.sh https://caleb-lim-portfolio.vercel.app`. Initial Plan 05-08 audit landed splash a11y at 79 (5 audits failing); Plan 05-09 gap-closure pass restored compliance.
 
-Per-route summary JSON pull-quotes (auto-emitted by `lighthouse-audit.sh` to `lighthouse/<slug>-summary.json`):
+| Route | Perf | A11y | LCP (ms) | Pass? | Summary file |
+|-------|------|------|----------|-------|--------------|
+| `/` (splash) | 99 | 100 | 1671 | PASS | [lighthouse/splash-summary.json](lighthouse/splash-summary.json) |
+| `/design` | 100 | 95 | 1671 | PASS | [lighthouse/design-summary.json](lighthouse/design-summary.json) |
+| `/marketing` | 98 | 95 | 1689 | PASS | [lighthouse/marketing-summary.json](lighthouse/marketing-summary.json) |
+| `/about` | 98 | 95 | 1369 | PASS | [lighthouse/about-summary.json](lighthouse/about-summary.json) |
+| `/design/design-real-piece` | 94 | 100 | 3121 | PASS\* | [lighthouse/design_design-real-piece-summary.json](lighthouse/design_design-real-piece-summary.json) |
+
+\*Detail-page LCP 3121ms exceeds the 2000ms hard gate that applies to splash only. Detail-page LCP is OUT of SC2 scope (only splash gates LCP); surfaced for Phase 6 polish consideration per Plan 05-09 §Deferred.
+
+### Plan 05-09 SC2 closure (before/after)
+
+| Route | A11y (Plan 05-08 baseline) | A11y (Plan 05-09 final) | Delta |
+|-------|---------------------------|-------------------------|-------|
+| `/` (splash) | 79 | 100 | +21 |
+| `/design` | 95 | 95 | 0 |
+| `/marketing` | 95 | 95 | 0 |
+| `/about` | 95 | 95 | 0 |
+| `/design/design-real-piece` | 100 | 100 | 0 |
+
+Splash audits closed by Plan 05-09:
+- `aria-allowed-attr` (5 → 0) — dropped `aria-selected` on `.bp-dot` (Task 1)
+- `aria-required-children` (1 → 0) — dropped `role="tablist"` on `.bp-dots` (Task 1)
+- `target-size` (7 → 0) — `.bp-dot` 8×8 → 24×24 shell with ::before pseudo; `.role-link` ≥24×24 via padding + min-height; gap 4px → 10px (Task 1 + Task 2 deviation)
+- `color-contrast` (5 → 0) — `.role-link` colors migrated to `--role-link-odd` (5.20:1) / `--role-link-even` (6.79:1); `.b-question .marker` bg `--terracotta` → `--ink` (15+ :1) (Task 2 + Task 2 deviation)
+- `heading-order` (1 → 0) — `<h3>` → `<h2>` on `.b-bio` (Task 3)
+- `label-content-name-mismatch` (5 → 0) — `.role-link` aria-label prefixed with visible role text; `.b-bio` aria-label dropped (Task 2 deviation)
 
 ### `/` (splash)
 
 ```json
-TBD
+{
+  "route": "/",
+  "perf": 99,
+  "a11y": 100,
+  "lcp_ms": 1671,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
+}
 ```
 
 ### `/design`
 
 ```json
-TBD
+{
+  "route": "/design",
+  "perf": 100,
+  "a11y": 95,
+  "lcp_ms": 1671,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
+}
 ```
 
 ### `/marketing`
 
 ```json
-TBD
+{
+  "route": "/marketing",
+  "perf": 98,
+  "a11y": 95,
+  "lcp_ms": 1689,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
+}
 ```
 
 ### `/about`
 
 ```json
-TBD
+{
+  "route": "/about",
+  "perf": 98,
+  "a11y": 95,
+  "lcp_ms": 1369,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
+}
 ```
 
-### `/design/<slug>`
+### `/design/design-real-piece`
 
 ```json
-TBD
+{
+  "route": "/design/design-real-piece",
+  "perf": 94,
+  "a11y": 100,
+  "lcp_ms": 3121,
+  "recorded_at": "2026-05-19T07:45:59.879Z"
+}
 ```
 
 ## Reduced-Motion Walk (SC3, D-08)
@@ -167,10 +218,10 @@ Filled by Plan 05-05 (2026-05-19). Line numbers re-grounded against current `src
 ## Phase Exit Sign-Off
 
 - [ ] All `scripts/verify-build.sh` gates green (Gates 1–25)
-- [ ] All Lighthouse thresholds met (Perf ≥85, A11y ≥95 every route; splash LCP <2000ms)
+- [x] All Lighthouse thresholds met (Perf ≥85, A11y ≥95 every route; splash LCP <2000ms) — Plan 05-09 SC2 closure pass 2026-05-19
 - [ ] Real-iPhone critical-path walk recorded (Section: Critical-Path Walk)
 - [ ] Reduced-motion walk recorded (Section: Reduced-Motion Walk)
 - [x] --terracotta audit complete (Verdict column filled for every row)
 - [x] Vercel import verified (Plan 05-02, 2026-05-19; production URL `https://caleb-lim-portfolio.vercel.app` returns 200 OK; Deployment Protection disabled)
-- [ ] `lighthouse/<slug>-summary.json` files committed (one per route)
+- [x] `lighthouse/<slug>-summary.json` files committed (one per route) — Plan 05-09 commit `feat(phase-5/05-09): re-audit splash — SC2 a11y closure`
 - [ ] iPhone model + iOS version recorded in Real-Device Test Rig
