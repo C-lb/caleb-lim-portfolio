@@ -110,7 +110,7 @@ void DISCIPLINE_ACCENT;
       </div>
       <a href="/about" class="b-bio" aria-label="Read the full bio on the About page">
         <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
-        <h3>why choose caleb?</h3>
+        <h2>why choose caleb?</h2>
         <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
         <span class="b-bio-mark" aria-hidden="true">
           <svg viewBox="0 0 60 60" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -513,7 +513,9 @@ void DISCIPLINE_ACCENT;
     top: -0.22em; /* lift so the star's geometric center sits on the cap-midpoint of ABOUT, not on its x-height */
     margin-right: 0.18em;
   }
-  .b-bio h3 {
+  /* h3 → h2 per Plan 05-09 Task 3 (closes Lighthouse heading-order audit — splash
+     had h1 → h3 skip). Visual contract unchanged: same font / weight / size token. */
+  .b-bio h2 {
     font-family: var(--sans);
     font-weight: 700;
     font-size: var(--fs-h3);
