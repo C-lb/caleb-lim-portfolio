@@ -218,7 +218,7 @@ void DISCIPLINE_ACCENT;
     bottom: 28px; /* sits above the dot indicators */
     color: var(--paper);
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -251,7 +251,7 @@ void DISCIPLINE_ACCENT;
   }
   .b-portrait .bp-tag {
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -261,7 +261,7 @@ void DISCIPLINE_ACCENT;
     font-family: var(--serif);
     font-style: italic;
     font-weight: 300;
-    font-size: 18px;
+    font-size: var(--fs-ttl); /* was 18px; migrated to --fs-ttl (22px) per 05-TOKEN-MAP — nearest existing step */
     opacity: 0.85;
   }
   /* Hover-revealed prev/next arrows. Hidden by default; shown when the carousel
@@ -279,7 +279,7 @@ void DISCIPLINE_ACCENT;
     cursor: pointer;
     opacity: 0;
     transition: opacity 180ms ease, background-color 180ms ease, transform 180ms ease;
-    font-size: 22px;
+    font-size: var(--fs-ttl); /* was 22px; exact match per 05-TOKEN-MAP */
     line-height: 1;
     padding: 0;
     display: flex;
@@ -499,7 +499,7 @@ void DISCIPLINE_ACCENT;
     bottom: 18px;
     font-family: var(--mono);
     font-weight: 700;
-    font-size: 11px;
+    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--ink);
@@ -514,7 +514,7 @@ void DISCIPLINE_ACCENT;
      reading as a separate glyph from the surrounding letterforms. */
   .b-bio-arrow-glyph {
     font-family: var(--sans);
-    font-size: 11px;
+    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
     font-weight: 800;
     line-height: 1;
     letter-spacing: 0;
@@ -535,7 +535,7 @@ void DISCIPLINE_ACCENT;
     color: var(--paper); /* taupe bg → paper text for AA contrast on the deeper terracotta */
     font-family: var(--sans);
     font-weight: 800;
-    font-size: 13px;
+    font-size: var(--fs-tile-role); /* was 13px; exact match per 05-TOKEN-MAP */
     text-transform: uppercase;
     letter-spacing: 0.05em;
     padding: 4px 10px;
@@ -554,7 +554,7 @@ void DISCIPLINE_ACCENT;
   .b-question .arrow {
     color: var(--design); /* umber — terracotta family, deeper than marker bg for two-tone rhythm */
     font-family: var(--sans);
-    font-size: 32px;
+    font-size: var(--fs-h3); /* was 32px; migrated to --fs-h3 (26px) per 05-TOKEN-MAP — 1 use, nearest existing step (6px shrink) */
     font-weight: 700;
     line-height: 1;
     margin-left: auto;

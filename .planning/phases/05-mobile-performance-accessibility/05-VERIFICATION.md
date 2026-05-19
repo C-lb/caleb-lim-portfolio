@@ -104,34 +104,36 @@ Toggle macOS *System Settings → Accessibility → Display → Reduce motion = 
 
 ## --terracotta Audit (SC6, D-17(b))
 
-Seed inventory (16 occurrences via `grep -rn '\-\-terracotta' src/`). Verdict column filled by Plan 05-05.
+Filled by Plan 05-05 (2026-05-19). Line numbers re-grounded against current `src/` state — Plan 05-04 moved several Gallery* uses to `--accent-bg` indirection (so the old `background: var(--terracotta)` direct uses are gone; the indirection rows live at A12:121 / B35:119 / C68:122 / C68:140 now). Verdict distribution: **24 load-bearing / 0 replace** — the D-17(b) re-classification was correct; the original "decorative accent only" comment in `tokens.css` was the actual bug. No source edits required from this audit.
 
-| File | Line | Use | Verdict (load-bearing / replace) |
-|------|------|-----|----------------------------------|
-| `src/styles/disciplines.ts` | 6 | Comment noting Design got a dedicated token (`--design`) | TBD |
-| `src/components/GalleryB35.astro` | 104 | `background: var(--terracotta);` (decoration block) | TBD |
-| `src/components/GalleryB35.astro` | 163 | `background: var(--terracotta);` (text-column bg) | TBD |
-| `src/components/GalleryC68.astro` | 110 | `background: var(--terracotta);` (decoration block) | TBD |
-| `src/components/GalleryC68.astro` | 136 | `background: var(--terracotta);` (rotated square overlay) | TBD |
-| `src/components/GalleryC68.astro` | 156 | `background: var(--terracotta); color: var(--paper);` (caption tile) | TBD |
-| `src/styles/tokens.css` | 13 | Token registration with "decorative accent only" comment (TARGET — amend comment) | TBD |
-| `src/layouts/Base.astro` | 81 | `.topbar nav a:hover { color: var(--terracotta); }` | TBD |
-| `src/components/GalleryA12.astro` | 104 | `background: var(--terracotta);` (decoration block) | TBD |
-| `src/pages/about.astro` | 105 | `scrollbar-color: var(--terracotta) transparent;` | TBD |
-| `src/pages/about.astro` | 109 | `background: var(--terracotta);` (scrollbar thumb) | TBD |
-| `src/pages/about.astro` | 117 | `border: 1.5px dashed var(--terracotta);` | TBD |
-| `src/pages/about.astro` | 119 | `background: color-mix(in oklab, var(--paper) 92%, var(--terracotta) 8%);` | TBD |
-| `src/pages/about.astro` | 135 | `color: var(--terracotta);` (link) | TBD |
-| `src/pages/about.astro` | 172 | `background: var(--terracotta);` (hover fill) | TBD |
-| `src/pages/about.astro` | 203 | `color: var(--terracotta);` (link color) | TBD |
-| `src/pages/about.astro` | 253 | `background: var(--terracotta);` (hover fill) | TBD |
-| `src/pages/about.astro` | 254 | `border-color: var(--terracotta);` | TBD |
-| `src/pages/about.astro` | 312 | `.contact-list a:hover { color: var(--terracotta); }` | TBD |
-| `src/pages/index.astro` | 242 | `border: 2px dashed var(--terracotta);` | TBD |
-| `src/pages/index.astro` | 252 | `color: var(--terracotta);` | TBD |
-| `src/pages/index.astro` | 332 | `.b-name h1 .lim { color: var(--terracotta); }` | TBD |
-| `src/pages/index.astro` | 346 | `.b-name .roles a.role-link:nth-child(even) { color: var(--terracotta); ... }` | TBD |
-| `src/pages/index.astro` | 528 | `background: var(--terracotta);` | TBD |
+| File | Line | Use | Verdict |
+|------|------|-----|---------|
+| `src/styles/disciplines.ts` | 6 | Comment noting Design got a dedicated token (`--design`, was sharing `--terracotta`) | load-bearing (documentation of token system; do not strip) |
+| `src/styles/tokens.css` | 10 | `--design` comment noting it was previously riding `--terracotta` | load-bearing (history pointer) |
+| `src/styles/tokens.css` | 13 | Token registration (comment amended Task 1) | load-bearing |
+| `src/styles/tokens.css` | 15 | `--teal` comment noting it absorbs the prior terracotta hex | load-bearing (history pointer) |
+| `src/layouts/Base.astro` | 102 | `.topbar nav a:hover { color: var(--terracotta); }` | load-bearing (interactive hover feedback — primary D-17(b) anchor) |
+| `src/components/GalleryA12.astro` | 121 | `--accent-bg: var(--terracotta);` (Plan 05-04 indirection — feeds .meta column for slot 2) | load-bearing (per-slot accent rhythm) |
+| `src/components/GalleryB35.astro` | 119 | `--accent-bg: var(--terracotta);` (Plan 05-04 indirection — slot 2) | load-bearing (per-slot accent rhythm) |
+| `src/components/GalleryC68.astro` | 122 | `--accent-bg: var(--terracotta);` (Plan 05-04 indirection — slot 2) | load-bearing (per-slot accent rhythm) |
+| `src/components/GalleryC68.astro` | 140 | `--accent-bg: var(--terracotta); color: var(--paper);` (caption tile p5) | load-bearing (caption tile color pairing) |
+| `src/pages/about.astro` | 105 | `scrollbar-color: var(--terracotta) transparent;` (photos-track) | load-bearing (scrollbar thumb visibility) |
+| `src/pages/about.astro` | 109 | `background: var(--terracotta);` (WebKit scrollbar thumb) | load-bearing (cross-browser pair for line 105) |
+| `src/pages/about.astro` | 117 | `border: 1.5px dashed var(--terracotta);` (photo wireframe) | load-bearing (placeholder slot visible structure) |
+| `src/pages/about.astro` | 119 | `background: color-mix(in oklab, var(--paper) 92%, var(--terracotta) 8%);` | load-bearing (wireframe fill tint) |
+| `src/pages/about.astro` | 135 | `color: var(--terracotta);` (link in bio) | load-bearing (link color) |
+| `src/pages/about.astro` | 172 | `background: var(--terracotta);` (slow-scroll trigger hover fill) | load-bearing (hover state) |
+| `src/pages/about.astro` | 203 | `color: var(--terracotta);` (link color in bio body) | load-bearing (link color) |
+| `src/pages/about.astro` | 212 | Comment naming the palette ("acid turmeric, terracotta taupe, umber design") | load-bearing (palette documentation) |
+| `src/pages/about.astro` | 253 | `background: var(--terracotta);` (values-pill hover fill) | load-bearing (hover state) |
+| `src/pages/about.astro` | 254 | `border-color: var(--terracotta);` (values-pill hover border) | load-bearing (hover state pair) |
+| `src/pages/about.astro` | 312 | `.contact-list a:hover { color: var(--terracotta); }` | load-bearing (hover state) |
+| `src/pages/index.astro` | 248 | `border: 2px dashed var(--terracotta);` (carousel wireframe) | load-bearing (wireframe slot visible structure) |
+| `src/pages/index.astro` | 258 | `color: var(--terracotta);` (carousel wireframe tag) | load-bearing (paired with line 248) |
+| `src/pages/index.astro` | 338 | `.b-name h1 .lim { color: var(--terracotta); }` | load-bearing (brand-name accent on the "lim" surname) |
+| `src/pages/index.astro` | 352 | `.b-name .roles a.role-link:nth-child(even) { color: var(--terracotta); ... }` | load-bearing (alternating-role visual rhythm) |
+| `src/pages/index.astro` | 534 | `background: var(--terracotta);` (`.b-question .marker`) | load-bearing (marker bg paired with `--paper` text per line 535) |
+| `src/pages/index.astro` | 555 | Comment on `--design` arrow noting "terracotta family, deeper than marker bg" | load-bearing (palette documentation) |
 
 ## Phase Exit Sign-Off
 
@@ -139,6 +141,6 @@ Seed inventory (16 occurrences via `grep -rn '\-\-terracotta' src/`). Verdict co
 - [ ] All Lighthouse thresholds met (Perf ≥85, A11y ≥95 every route; splash LCP <2000ms)
 - [ ] Real-iPhone critical-path walk recorded (Section: Critical-Path Walk)
 - [ ] Reduced-motion walk recorded (Section: Reduced-Motion Walk)
-- [ ] --terracotta audit complete (Verdict column filled for every row)
+- [x] --terracotta audit complete (Verdict column filled for every row)
 - [ ] `lighthouse/<slug>-summary.json` files committed (one per route)
 - [ ] iPhone model + iOS version recorded in Real-Device Test Rig
