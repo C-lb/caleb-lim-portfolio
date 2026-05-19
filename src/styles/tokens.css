@@ -10,10 +10,10 @@
   --design:     #8c6326;  /* deep ochre/umber — DEDICATED Graphic Design accent (NEW token; previously Design rode --terracotta) */
   --acid:       #dc972a;  /* deep gold — Personal accent (was #e8a82a turmeric) */
   --cobalt:     #8ba1a9;  /* silvered blue-gray — Finance accent (was #2e6e8f weathered cerulean) */
-  --terracotta: #82785d;  /* olive-khaki — decorative accent only (was #b4a682; deepened to bridge the taupe-to-ink range) */
+  --terracotta: #82785d;  /* olive-khaki — interactive accent: hover/focus/link feedback across about.astro + topbar nav-link hover (re-classified Phase 5 D-17(b) — was 'decorative only'; UI-REVIEW counted 16 load-bearing uses) */
   --plum:       #536644;  /* dark forest sage — Marketing accent (was #6a8a5a deep sage) */
   --teal:       #b4a682;  /* sage-tinted taupe — gallery decoration (was #87a96b sage green; absorbs the prior terracotta hex) */
-  --lime:       #b8c945;  /* chartreuse lime — DEDICATED 'open for roles' availability pill (NEW token 2026-05-18; bright go-signal that pops against the muted earth-tone palette) */
+  --lime:       #b8c945;  /* chartreuse lime — status-indicator pop (StatusPill 'open to roles' dot + focus outline). Distinct from --acid: --acid is the Personal-discipline content accent; --lime is a brighter go-signal reserved for availability/status. Registered Phase 4 UAT, rationale documented Phase 5 D-17(a). */
 
   /* Font family tokens — Fontsource appends 'Variable' to family names */
   --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;
@@ -43,6 +43,7 @@
   /* Spacing tokens (UI-SPEC.md lines 67-78, strict 4-multiple scale) */
   --sp-1:  4px;
   --sp-2:  8px;
+  --sp-3:  12px;  /* closes 8→16 scale gap; consumed by about.astro photo-track gap (silent-failure fix per 05-RESEARCH §5.3) + Gallery* tile gap */
   --sp-4:  16px;
   --sp-5:  24px;
   --sp-6:  32px;
