@@ -125,7 +125,7 @@ Plans:
 - [ ] 05-01-PLAN.md — Validation harness (lighthouse-audit.sh + verify-build.sh Gates 23/24/25 + 05-VERIFICATION.md template + 05-TOKEN-MAP.md)
 
 **Wave 1** *(DAG inside the wave — files_modified overlap is gated via depends_on rather than partitioned)*
-- [ ] 05-02-PLAN.md — Vercel project import + phase-5 preview URL verification (D-13 amended) — depends_on: [01]
+- [x] 05-02-PLAN.md — Vercel project import + push-trigger verification (D-13 amended) — depends_on: [01]
 - [ ] 05-03-PLAN.md — Topbar mobile collapse ≤700px (D-01–D-03) + desktop tap-target floor + .visually-hidden utility — closes BLOCKER-1 — depends_on: [01]
 - [ ] 05-04-PLAN.md — Gallery tile recomposition (D-09–D-12) + LCP priority/sizes on splash carousel + detail hero — closes BLOCKER-2 — depends_on: [01]
 - [ ] 05-05-PLAN.md — Token sweep (D-17, D-18) + --sp-3 add + --terracotta/--lime comments + Gate 25 closes — closes WARNING-1 — depends_on: [01, 03, 04] (sweeps the final versions of Base.astro/tokens.css/index.astro/[slug].astro after 03 + 04 land)

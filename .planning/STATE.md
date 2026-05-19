@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 5 Wave 1 — Plan 05-05 complete (4 of 8 phase-5 plans done)
-last_updated: "2026-05-19T08:35:00.000Z"
-last_activity: 2026-05-19 -- Plan 05-05 SUMMARY committed (Gate 25 GREEN; WARNING-1 closed; SC6 closed; --sp-3 registered)
+stopped_at: Phase 5 Wave 1 — Plan 05-02 complete (5 of 8 phase-5 plans done; Wave 1 closed)
+last_updated: "2026-05-19T01:00:00.000Z"
+last_activity: 2026-05-19 -- Plan 05-02 SUMMARY committed (Vercel production URL live + push-trigger verified ~17s end-to-end; SC2 instrumentation closed)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 27
-  completed_plans: 21
-  percent: 78
+  completed_plans: 22
+  percent: 81
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 ## Current Position
 
 Phase: 05 — IN PROGRESS (8 plans across 3 waves)
-Plan: 4 of 8 (05-01 Wave 0 + 05-03 + 05-04 + 05-05 Wave 1 complete; 05-02 pending in Wave 1)
-Status: Plan 05-05 closes WARNING-1 + SC6 — Gate 25 GREEN (zero raw font-size px literals outside tokens.css), --sp-3 registered (fixes about.astro:98 silent failure), --terracotta audit recorded (24/24 load-bearing). All Gates 1-25 GREEN.
-Last activity: 2026-05-19 -- Plan 05-05 SUMMARY committed (af8952e Task 1, a22538b Task 2, a81d4a6 Task 3)
+Plan: 5 of 8 (05-01 Wave 0 + 05-02 + 05-03 + 05-04 + 05-05 Wave 1 complete; Wave 1 fully closed. 05-06, 05-07, 05-08 pending in Wave 2)
+Status: Plan 05-02 closes SC2 instrumentation — Vercel production deploy live at https://caleb-lim-portfolio.vercel.app (Astro auto-detect, no vercel.json, Deployment Protection disabled). Push-to-main → auto-deploy verified end-to-end in ~17s. Lighthouse target for Plan 05-08 = production URL (deviated from planned branch-alias preview — all Wave-1 work landed on main; documented in 05-02-SUMMARY.md).
+Last activity: 2026-05-19 -- Plan 05-02 SUMMARY committed (14fb499 Task 3 record, 254cc74 empty trigger, cfa1e17 push verification)
 
 Plan DAG: 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08
 - Wave 0: 05-01 (validation harness)
@@ -87,10 +87,10 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-19T00:00:00.000Z
-Stopped at: Phase 5 plans approved (gsd-plan-checker iteration 2 PASSED)
+Last session: 2026-05-19T01:00:00.000Z
+Stopped at: Phase 5 Wave 1 closed — 05-02 complete (Vercel live; SC2 instrumentation gate cleared). Wave 2 (05-06, 05-07, 05-08) ready to enter.
 Resume command: `/gsd-execute-phase 5`
-Resume file: .planning/phases/05-mobile-performance-accessibility/05-01-PLAN.md (Wave 0 entry point)
+Resume file: .planning/phases/05-mobile-performance-accessibility/05-06-PLAN.md (Wave 2 entry point — reduced-motion surgical pass)
 
 **Phase 5 plan inventory:**
 
