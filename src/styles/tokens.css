@@ -15,6 +15,17 @@
   --teal:       #b4a682;  /* sage-tinted taupe — gallery decoration (was #87a96b sage green; absorbs the prior terracotta hex) */
   --lime:       #b8c945;  /* chartreuse lime — status-indicator pop (StatusPill 'open to roles' dot + focus outline). Distinct from --acid: --acid is the Personal-discipline content accent; --lime is a brighter go-signal reserved for availability/status. Registered Phase 4 UAT, rationale documented Phase 5 D-17(a). */
 
+  /* Role-link a11y tokens (Plan 05-09 Task 2, SC2 closure). The splash role-links
+     under "CALEB LIM" must meet WCAG AA 4.5:1 contrast on `--paper` (#f2ebdb).
+     --teal and --terracotta themselves are intentionally pale (gallery decoration /
+     hover-feedback ink) and score 2.02 / ~3.4 — below AA. These darker siblings
+     live in the same hue families so the magazine-maximalist palette feel carries.
+     Verified ratios on https://webaim.org/resources/contrastchecker/:
+       --role-link-odd  #4a6e5d on #f2ebdb → 5.20:1 (deeper teal-sage)
+       --role-link-even #6b4a3a on #f2ebdb → 6.79:1 (deeper terracotta-brown) */
+  --role-link-odd:  #4a6e5d;
+  --role-link-even: #6b4a3a;
+
   /* Font family tokens — Fontsource appends 'Variable' to family names */
   --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;
   --serif: "Fraunces Variable", Georgia, serif;

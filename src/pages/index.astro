@@ -359,11 +359,16 @@ void DISCIPLINE_ACCENT;
     line-height: var(--lh-tight);
   }
   .b-name .roles a.role-link { padding: 0 8px; text-decoration: none; cursor: pointer; transition: opacity 120ms ease; }
-  /* Role labels: odd children (analyst, designer) = taupe; even (brand strategist, marketer) = olive-khaki.
-     Decoupled from Finance/Design discipline accents — the role labels are decorative typography on the
-     splash, not a discipline-identity statement. */
-  .b-name .roles a.role-link:nth-child(odd)  { color: var(--teal); font-weight: 500; font-family: var(--sans); }
-  .b-name .roles a.role-link:nth-child(even) { color: var(--terracotta); font-style: italic; font-family: var(--serif); font-weight: 400; }
+  /* Role labels: odd children (analyst, designer) = deeper teal-sage; even (brand
+     strategist, marketer) = deeper terracotta-brown. Plan 05-09 Task 2 (SC2 a11y
+     closure): role-link colors MUST meet WCAG AA 4.5:1 on --paper, so they pull
+     from --role-link-odd/even (5.20 / 6.79) rather than --teal/--terracotta (2.02 /
+     ~3.4 — those tokens stay for their decorative/hover-feedback roles elsewhere).
+     The visible-difference from the broader palette is intentional for nav legibility.
+     Still decoupled from Finance/Design discipline accents — role labels are
+     decorative typography on the splash, not a discipline-identity statement. */
+  .b-name .roles a.role-link:nth-child(odd)  { color: var(--role-link-odd);  font-weight: 500; font-family: var(--sans); }
+  .b-name .roles a.role-link:nth-child(even) { color: var(--role-link-even); font-style: italic; font-family: var(--serif); font-weight: 400; }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Role-link hover styles only fire
      on devices with a real hover mechanism — the original combined rule split
      into a gated :hover and an UNGATED :focus-visible so keyboard focus on a
