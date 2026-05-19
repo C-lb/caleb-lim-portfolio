@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 5 complete — all 6 SCs PASS; real-iPhone walk + reduced-motion walk signed off 2026-05-20 on iPhone 15 / iOS 26.4.2
-last_updated: "2026-05-20T00:00:00.000Z"
-last_activity: 2026-05-20 -- Phase 5 marked complete; 05-08 manual walks PASS on real iPhone 15 iOS 26.4.2; all 9 plans landed; ready for /gsd-execute-phase 6
+status: discussing
+stopped_at: Phase 6 context gathered (11 decisions locked across 4 areas; 3 user-discussed + 1 defaulted)
+last_updated: "2026-05-20T12:00:00.000Z"
+last_activity: 2026-05-20 -- Phase 6 06-CONTEXT.md written; ROADMAP §Phase 6 + REQUIREMENTS FOUND-04 amended per D-07 (Cloudflare → Vercel)
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 28
   completed_plans: 28
-  percent: 100
+  percent: 83
 ---
 
 # Project State
@@ -21,19 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-09)
 
 **Core value:** A recruiter from any of the analyst / brand / marketing / design worlds can self-select into the work that's relevant to their role in under a minute and walk away convinced Caleb can do that job.
-**Current focus:** Phase 06 — Deploy & Maintenance Handoff (Phase 5 complete 2026-05-20)
+**Current focus:** Phase 06 — Deploy & Maintenance Handoff (CONTEXT gathered; ready for /gsd-plan-phase 6)
 
 ## Current Position
 
-Phase: 05 — COMPLETE (9 plans landed; all 6 SCs PASS)
-Plan: 9 of 9
-Status: All 6 Success Criteria signed off. Lighthouse green on 5 routes (splash 99/100/1671 LCP; gallery + about ≥95 a11y; detail page perf 94 / a11y 100). Real-iPhone walk on iPhone 15 / iOS 26.4.2 — all 11 critical-path steps PASS, StatusPill tap sanity comfortable at 375px. Reduced-motion walk — all 9 D-08 motions behaved as designed (3 exempt fire, 3 suppressed stop, 3 unchanged). All 25 verify-build gates GREEN. Vercel production URL `https://caleb-lim-portfolio.vercel.app` live, no Deployment Protection. Ready for Phase 6 (Deploy & Maintenance Handoff).
-Last activity: 2026-05-20 -- Phase 5 marked complete; 05-08-SUMMARY committed; STATE+ROADMAP updated
+Phase: 06 — DISCUSSING (CONTEXT.md written; 11 decisions locked across 4 areas)
+Plan: 0 of TBD
+Status: Phase 6 discuss complete 2026-05-20. 4 user-presented gray areas, 3 deep-discussed (Caleb-adds-a-piece walkthrough D-01/D-02 → README + numbered screenshots, markdown + image-hero piece only; SEO bundle D-03/D-04 → single static cream-on-ink OG card + @astrojs/sitemap integration, favicon scope clarified mid-session as squid-invader-only; Phase 5 carryovers D-05/D-06/D-07 → fold detail-LCP fix + 3 Plan 05-06 stragglers + amend ROADMAP/REQUIREMENTS docs from Cloudflare to Vercel). Domain + registrar defaulted to Cloudflare Registrar for caleblim.com with fallback chain caleblim.co → caleb.work → caleblimkr.com (D-08). Doc amendments per D-07 applied this commit. Next: /gsd-plan-phase 6.
+Last activity: 2026-05-20 -- 06-CONTEXT.md + 06-DISCUSSION-LOG.md written; ROADMAP §Phase 6 + REQUIREMENTS FOUND-04 amended (Cloudflare → Vercel per D-07)
 
-Plan DAG (final): 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08 ← 09
-- Wave 0: 05-01 (validation harness) ✅
-- Wave 1: 05-02 (Vercel), 05-03 (topbar), 05-04 (gallery + LCP), 05-05 (token sweep) ✅
-- Wave 2: 05-06 (reduced-motion surgical), 05-07 (touch/hover/shimmer), 05-08 (phase-exit verification), 05-09 (gap-closure for splash a11y) ✅
+Phase 5 plan DAG (reference): 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08 ← 09 — ✅ complete 2026-05-20
 
 ## Performance Metrics
 

@@ -145,15 +145,20 @@ Plans:
 These are the only Phase-4 audit findings that must clear before Phase 6 ships; minor recs (14 total) are deferred to post-launch polish unless they surface during Phase 5 testing.
 
 ### Phase 6: Deploy & Maintenance Handoff
-**Goal**: Site is live on caleblim.com (or confirmed fallback domain) on Cloudflare Pages, and Caleb has personally added a new piece end-to-end via GitHub.dev without developer help. The maintenance pitfall is closed by demonstration, not by documentation alone.
+**Goal**: Site is live on caleblim.com (or confirmed fallback domain) on **Vercel** *(amended 2026-05-20 during /gsd-discuss-phase 6 — D-07; was Cloudflare Pages per the original PROJECT.md plan, cascaded from D-13 amendment 2026-05-18)*, and Caleb has personally added a new piece end-to-end via GitHub.dev without developer help. The maintenance pitfall is closed by demonstration, not by documentation alone.
 **Mode:** mvp
 **Depends on**: Phase 5
 **Requirements**: FOUND-04
 **Success Criteria** (what must be TRUE):
-  1. `caleblim.com` is registered via Cloudflare Registrar (or, if unavailable, a confirmed fallback like `caleblim.co` / `caleb.work` after running the availability check) and resolves to the production Cloudflare Pages deployment over HTTPS with no certificate warnings
-  2. Production site loads end-to-end on the custom domain — splash, all four galleries, every piece-detail page, About, resume download, 404 — verified across iPhone Safari, Android Chrome, desktop Safari, and desktop Firefox
-  3. Caleb has personally added one new test piece via GitHub.dev (in-browser editor, no terminal) — created the markdown file, dropped in the asset, committed, and watched Cloudflare Pages auto-deploy the change live — and a 5-step screenshot walkthrough of that flow lives in the repo README
-  4. OG/Twitter card metadata, `robots.txt`, `sitemap.xml`, and a complete favicon set (32, 192, Apple touch 180, .ico) are present and verified via LinkedIn Post Inspector and Twitter Card Validator
+  1. `caleblim.com` is registered via Cloudflare Registrar *(default; Vercel Domains is the alternative path per 06-CONTEXT.md D-08 if Caleb prefers single-vendor DNS during the registrar checkpoint)* (or, if unavailable, a confirmed fallback like `caleblim.co` / `caleb.work` / `caleblimkr.com` after running the availability check) and resolves to the production **Vercel** deployment over HTTPS with no certificate warnings
+  2. Production site loads end-to-end on the custom domain — splash, all four galleries, every piece-detail page, About, resume download, 404 — verified across iPhone Safari (iPhone 15 / iOS 26.4.2 from Phase 5 rig), Android Chrome, desktop Safari, and desktop Firefox
+  3. Caleb has personally added one new test piece (markdown frontmatter + image hero, per 06-CONTEXT.md D-02) via GitHub.dev (in-browser editor, no terminal) — created the markdown file, dropped in the asset, committed, and watched **Vercel** auto-deploy the change live — and a numbered-screenshot walkthrough of that flow lives in the repo `README.md` (per 06-CONTEXT.md D-01)
+  4. OG/Twitter card metadata (single static cream-on-ink 1200×630 at `public/og.png` per 06-CONTEXT.md D-03), `robots.txt`, and `sitemap.xml` (auto-generated via `@astrojs/sitemap` per D-04) are present and verified via LinkedIn Post Inspector and Twitter Card Validator. **Favicon scope:** existing `public/favicon.svg` (squid invader) is canonical; no full PNG/manifest set per Caleb 2026-05-20.
+
+**Folded Phase 5 carryovers** (per 06-CONTEXT.md D-05, D-06):
+  5. Detail-page hero `<Image>` in `src/pages/[category]/[slug].astro` gets `priority` / `sizes` (mirroring Plan 05-04's splash treatment) — detail-page LCP target <2s (was 3121ms in Plan 05-08 baseline).
+  6. Three Plan 05-06 stragglers removed (`StatusPill.astro:77-80`, `[category].astro:136-138`, `[slug].astro:320-322` per-source `transition: none` blocks contradicting D-08 exempt classifications #12, #16, #18) — closes D-08 cleanly before milestone v1.0 ships.
+
 **Plans**: TBD
 
 ## Coverage
