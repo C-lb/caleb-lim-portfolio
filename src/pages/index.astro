@@ -5,7 +5,15 @@ import { CATEGORIES, type Category } from '../content/categories';
 import { DISCIPLINE_ACCENT, DISCIPLINE_K } from '../styles/disciplines';
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
-import portrait from '../assets/portrait.jpg';
+import portrait1 from '../assets/portrait.jpg';
+import portrait2 from '../assets/portrait2.JPG';
+import portrait3 from '../assets/portrait3.jpg';
+import portrait4 from '../assets/portrait4.jpg';
+import portrait5 from '../assets/portrait5.jpeg';
+const portraits = [portrait1, portrait2, portrait3, portrait4, portrait5];
+// Optional per-slide caption. Null = no caption.
+// 2026-05-18 (UAT): captions on 2/3/4 — portraits 1 and 5 caption-less.
+const portraitCaptions: (string | null)[] = [null, 'graphic design', 'event hosting', 'social impact', null];
 
 // SPLASH-04 / D-07: drop cards for empty disciplines. Build-time count of
 // non-draft pieces per category. Personal often empty at launch.
@@ -21,7 +29,11 @@ for (const piece of allPieces) {
 // empty ones render as non-clickable placeholders with a "coming soon" cue. The
 // thesis (4 disciplines, cross-functional) reads clearly even at launch when only
 // 2 are populated.
-const allCategoriesOnSplash = CATEGORIES;
+// Splash render order is intentionally distinct from CATEGORIES (which is the
+// canonical content/route order). 2026-05-18 (UAT): swapped marketing and
+// personal so the populated marketing card sits next to the populated design
+// card in row 1's pair-with-placeholder rhythm.
+const allCategoriesOnSplash: readonly Category[] = ['design', 'finance', 'marketing', 'personal'];
 // UAT-driven splash interaction (2026-05-18): the four role labels under "CALEB LIM"
 // scroll to the discipline card their role-pitch maps to. Now that all 4 cards
 // are always rendered, the role link always targets the discipline-specific card.
@@ -59,8 +71,28 @@ void DISCIPLINE_ACCENT;
 <Base title="Caleb Lim — Portfolio" bg="paper">
   <section class="b-splash">
     <div class="b-hero">
-      <div class="b-portrait">
-        <Image src={portrait} alt="Portrait of Caleb Lim" widths={[280, 560]} sizes="280px" />
+      <div class="b-portrait" data-portrait-carousel data-bp-interval="3000">
+        <div class="bp-track" data-bp-track>
+          {portraits.map((src, i) => (
+            <div class={`bp-slide${i === 0 ? ' is-active' : ''}`} data-bp-slide>
+              <Image src={src} alt={`Portrait of Caleb Lim, photo ${i + 1}`} widths={[280, 560]} sizes="280px" />
+              {portraitCaptions[i] && <span class="bp-caption">{portraitCaptions[i]}</span>}
+            </div>
+          ))}
+        </div>
+        <button class="bp-arrow bp-arrow-prev" data-bp-prev type="button" aria-label="Previous photo">‹</button>
+        <button class="bp-arrow bp-arrow-next" data-bp-next type="button" aria-label="Next photo">›</button>
+        <div class="bp-dots" data-bp-dots role="tablist" aria-label="Portrait photo selector">
+          {portraits.map((_, i) => (
+            <button
+              class={`bp-dot${i === 0 ? ' is-active' : ''}`}
+              data-bp-dot={i}
+              type="button"
+              aria-label={`Photo ${i + 1}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+            ></button>
+          ))}
+        </div>
       </div>
       <div class="b-name">
         <h1>CALEB<br /><span class="lim">LIM</span></h1>
@@ -71,16 +103,21 @@ void DISCIPLINE_ACCENT;
         </div>
       </div>
       <a href="/about" class="b-bio" aria-label="Read the full bio on the About page">
-        <span class="b-bio-tag">→ THE PITCH</span>
-        <h3>CROSS-FUNCTIONAL — BY DESIGN.</h3>
+        <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
+        <h3>why choose caleb?</h3>
         <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
-        <span class="b-bio-strike" aria-hidden="true">04</span>
-        <span class="b-bio-arrow">→ KEEP READING</span>
+        <span class="b-bio-mark" aria-hidden="true">
+          <svg viewBox="0 0 60 60" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="30" cy="22" r="9" />
+            <path d="M12 52 C 14 38, 24 34, 30 34 C 36 34, 46 38, 48 52" />
+          </svg>
+        </span>
+        <span class="b-bio-arrow"><span class="b-bio-arrow-glyph" aria-hidden="true">→</span> KEEP READING</span>
       </a>
     </div>
     <div class="b-question">
       <span class="marker">→ PICK ONE</span>
-      <span class="q">What do you wish to <em>see</em>?</span>
+      <span class="q">What do you wish to <span class="q-tail">see?<svg class="q-smile" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="9" cy="10" r="0.9" fill="currentColor" stroke="none" /><circle cx="15" cy="10" r="0.9" fill="currentColor" stroke="none" /><path d="M8 14 Q 12 18, 16 14" /></svg></span></span>
       <span class="arrow" aria-hidden="true">↓</span>
     </div>
     <div id="cards" class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
@@ -117,15 +154,166 @@ void DISCIPLINE_ACCENT;
   .b-portrait {
     background: var(--ink);
     border-radius: 8px;
-    transform: rotate(-1.2deg);
     overflow: hidden;
     position: relative;
+    aspect-ratio: 4/5; /* keep portrait shape; carousel slides fill this box */
+  }
+  /* 2026-05-18 (UAT v2): slides are absolutely stacked; each transitions
+     independently. JS pre-positions the incoming slide off-screen on the
+     chosen axis, then animates it to (0,0); the outgoing slide exits to
+     the opposite edge. Lets auto-advance pick random directions while
+     keeping click/wrap motion deterministic. */
+  .b-portrait .bp-track {
+    position: absolute;
+    inset: 0;
+  }
+  .b-portrait .bp-slide {
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--sp-2);
+    /* Each slide carries the same corner radius as the outer .b-portrait frame so
+       the photo's curved edge reads even during the slide-in (when it crosses the
+       container midline, the curve preserves the card-shape silhouette). */
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0;
+    /* Only transform animates — opacity is binary (idle slides invisible, in-flight
+       slides fully opaque). Keeping both slides at opacity 1 during the swap means
+       they tile the frame edge-to-edge and the dark .b-portrait backdrop never
+       flashes through. */
+    transition: transform 650ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .b-portrait .bp-slide.is-active,
+  .b-portrait .bp-slide.is-leaving {
+    opacity: 1;
+  }
+  .b-portrait .bp-slide.is-active  { z-index: 2; }
+  .b-portrait .bp-slide.is-leaving { z-index: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .b-portrait .bp-slide { transition: none; }
   }
   .b-portrait :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 8px;
   }
+  /* Per-slide caption overlay. Mono, white, anchored to bottom-left. A soft
+     bottom-gradient sits behind the text so it stays legible against any photo. */
+  .b-portrait .bp-caption {
+    position: absolute;
+    left: 14px;
+    bottom: 28px; /* sits above the dot indicators */
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); /* legibility over varied photo backgrounds */
+    z-index: 1;
+    line-height: 1;
+  }
+  .b-portrait .bp-slide::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 80px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 250ms ease;
+  }
+  /* Only show the bottom gradient on slides that actually carry a caption. */
+  .b-portrait .bp-slide:has(.bp-caption)::after {
+    opacity: 1;
+  }
+  /* Wireframe slides — dashed-border placeholders for future portraits. Mirrors the
+     /about page wireframe pattern (PHOTO · 0X + hint) so the visual language is consistent. */
+  .b-portrait .bp-wireframe {
+    background: rgba(15, 13, 12, 0.92);
+    color: var(--paper);
+    border: 2px dashed var(--terracotta);
+    border-radius: 6px;
+    inset: 6px; /* small inset so the dashed border reads inside the rounded outer frame */
+  }
+  .b-portrait .bp-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--terracotta);
+  }
+  .b-portrait .bp-hint {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 18px;
+    opacity: 0.85;
+  }
+  /* Hover-revealed prev/next arrows. Hidden by default; shown when the carousel
+     is hovered or any of its controls receives keyboard focus. */
+  .b-portrait .bp-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(15, 13, 12, 0.65);
+    color: var(--paper);
+    border: 1.5px solid rgba(242, 235, 219, 0.7);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 180ms ease, background-color 180ms ease, transform 180ms ease;
+    font-size: 22px;
+    line-height: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .b-portrait:hover .bp-arrow,
+  .b-portrait:focus-within .bp-arrow { opacity: 1; }
+  .b-portrait .bp-arrow:hover { background: var(--ink); transform: translateY(-50%) scale(1.08); }
+  .b-portrait .bp-arrow:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+  .b-portrait .bp-arrow-prev { left: 8px; }
+  .b-portrait .bp-arrow-next { right: 8px; }
+  /* Instagram-style dot indicators at the bottom. The active dot is larger and
+     fully opaque paper; inactive dots are semi-transparent paper. */
+  .b-portrait .bp-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    z-index: 2;
+  }
+  .b-portrait .bp-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(242, 235, 219, 0.45);
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 180ms ease, transform 180ms ease;
+  }
+  .b-portrait .bp-dot.is-active {
+    background: var(--paper);
+    transform: scale(1.25);
+  }
+  .b-portrait .bp-dot:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
 
   .b-name {
     position: relative;
@@ -163,22 +351,85 @@ void DISCIPLINE_ACCENT;
   /* Cards get scroll-margin so they don't kiss the viewport edge when scrolled into view */
   :global(.b-card) { scroll-margin-top: var(--sp-6); }
 
-  /* BIO STICKER — clickable card pattern, mirrors discipline cards */
+  /* BIO STICKER — clickable card pattern, mirrors discipline cards.
+     2026-05-18 (UAT): rest tilt extracted into --rest-rotate so the entrance
+     shake @keyframes (defined below, same shape as the discipline-card shake)
+     can compose against it via calc(). */
+  /* 2026-05-18 (UAT): bg reverted to acid (turmeric); text + ink-family glyphs
+     stay ink — same ink-on-light treatment as k2 Finance and k3 Personal so
+     the bio card reads as a peer of the disciplines. */
   .b-bio {
+    --rest-rotate: 0.5deg;
     display: block;
     background: var(--acid);
-    color: var(--ink); /* acid is now turmeric (light) — ink reads */
+    color: var(--ink);
     border-radius: 10px;
     padding: 18px 22px 36px; /* sketch line 387 — UI-SPEC OVERRIDE-03 (tightened for fold) */
     position: relative;
     overflow: hidden;
-    transform: rotate(0.5deg);
+    transform: rotate(var(--rest-rotate));
     text-decoration: none;
     cursor: pointer;
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease;
+    animation: bio-shake 750ms ease-in-out 400ms 1;
   }
-  .b-bio:hover { transform: rotate(0.5deg) translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.06); }
+  /* Liquid-glass overlay — same recipe as the discipline cards. Hidden at rest,
+     fades in on hover. The :not() exclusions keep .b-bio-mark and .b-bio-arrow
+     in their existing absolute positions while still placing them above the glass. */
+  .b-bio::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 380ms ease;
+    background:
+      linear-gradient(135deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.10) 32%,
+        rgba(255, 255, 255, 0.02) 58%,
+        rgba(255, 255, 255, 0.32) 100%);
+    box-shadow:
+      inset 0  1px 1px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.22),
+      inset  1px 0 1px rgba(255, 255, 255, 0.20),
+      inset -1px 0 1px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px) saturate(1.5);
+    -webkit-backdrop-filter: blur(8px) saturate(1.5);
+    z-index: 1;
+  }
+  .b-bio > :not(.b-bio-mark):not(.b-bio-arrow) { position: relative; z-index: 2; }
+  .b-bio > .b-bio-mark,
+  .b-bio > .b-bio-arrow { z-index: 2; }
+  .b-bio:hover {
+    /* Same tilt/lift reduction as DisciplineCard hover — keeps the card's
+       projected geometry from spilling into the portrait/name neighbour grid
+       cells. z-index bump ensures clean paint order if any shadow drifts. */
+    transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
+    box-shadow:
+      0 14px 28px rgba(15, 13, 12, 0.24),
+      0 4px 10px rgba(15, 13, 12, 0.14);
+    z-index: 10;
+    animation-play-state: paused;
+  }
+  .b-bio:hover::before { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .b-bio::before { transition: none; }
+  }
   .b-bio:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  /* Same gentle shape as .b-card's card-shake — separate keyframes name because
+     the bio card lives outside the DisciplineCard scoped style block. */
+  @keyframes bio-shake {
+    0%, 100% { transform: rotate(var(--rest-rotate)); }
+    15%      { transform: rotate(calc(var(--rest-rotate) - 1.2deg)) translateX(-1px); }
+    30%      { transform: rotate(calc(var(--rest-rotate) + 1.2deg)) translateX(1px); }
+    45%      { transform: rotate(calc(var(--rest-rotate) - 0.8deg)) translateX(-0.6px); }
+    60%      { transform: rotate(calc(var(--rest-rotate) + 0.8deg)) translateX(0.6px); }
+    75%      { transform: rotate(calc(var(--rest-rotate) - 0.4deg)); }
+    90%      { transform: rotate(calc(var(--rest-rotate) + 0.4deg)); }
+  }
   .b-bio-tag {
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -187,6 +438,15 @@ void DISCIPLINE_ACCENT;
     text-transform: uppercase;
     display: block;
     margin-bottom: var(--sp-2);
+  }
+  .b-bio-tag-star {
+    display: inline-block;
+    font-size: 1.7em; /* upsize the star vs. the surrounding mono tag text */
+    line-height: 1;
+    vertical-align: middle; /* aligns vertical midpoint with baseline + half x-height of the caps */
+    position: relative;
+    top: -0.22em; /* lift so the star's geometric center sits on the cap-midpoint of ABOUT, not on its x-height */
+    margin-right: 0.18em;
   }
   .b-bio h3 {
     font-family: var(--sans);
@@ -205,28 +465,54 @@ void DISCIPLINE_ACCENT;
     margin: 0;
     max-width: 32ch;
   }
-  .b-bio-strike {
+  /* 2026-05-18 (UAT): profile silhouette enlarged + more prominent. Was 56×56
+     SVG at 0.18 opacity — now 120×120 at 0.4 opacity in ink (bg reverted to
+     acid, so silhouette goes back to ink-on-turmeric to match k2/k3's ink-on-light
+     decoration approach). Anchored to bottom-right with a slight bleed so it
+     crops naturally to the rounded card edge. */
+  .b-bio-mark {
     position: absolute;
-    bottom: 8px;
-    right: 12px;
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 300;
-    font-size: var(--fs-deco-numeral);
-    color: var(--ink); /* turmeric bg → ink strike at low opacity */
-    opacity: 0.1;
-    line-height: 1;
+    bottom: 8px; /* 2026-05-18 (UAT): nudged right + up so the silhouette sits cleanly inside the card edge instead of bleeding into the corner */
+    left: 8px;
+    color: var(--ink);
+    opacity: 0.4;
+    line-height: 0;
     pointer-events: none;
+    display: block;
   }
+  .b-bio-mark :global(svg) {
+    width: 120px;
+    height: 120px;
+  }
+  /* 2026-05-18 (UAT): KEEP READING CTA switched sans → mono. Stacked above the
+     enlarged silhouette via z-index so the text always reads even though it sits
+     within the silhouette's bottom-right footprint. */
   .b-bio-arrow {
     position: absolute;
     right: 18px;
     bottom: 18px;
-    font-family: var(--sans);
+    font-family: var(--mono);
     font-weight: 700;
-    font-size: 13px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    line-height: 1;
+  }
+  /* 2026-05-18 (UAT): arrow glyph trimmed 50% — was 22px (visually overpowered
+     the KEEP READING caps); now 11px to match the body text weight while still
+     reading as a separate glyph from the surrounding letterforms. */
+  .b-bio-arrow-glyph {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--ink);
   }
 
   /* QUESTION BAR */
@@ -239,8 +525,8 @@ void DISCIPLINE_ACCENT;
     gap: var(--sp-5);
   }
   .b-question .marker {
-    background: var(--acid);
-    color: var(--ink); /* turmeric bg → ink */
+    background: var(--terracotta);
+    color: var(--paper); /* taupe bg → paper text for AA contrast on the deeper terracotta */
     font-family: var(--sans);
     font-weight: 800;
     font-size: 13px;
@@ -254,23 +540,29 @@ void DISCIPLINE_ACCENT;
     flex: 1;
     font-family: var(--sans);
     font-size: var(--fs-q);
-    font-weight: 600;
+    font-weight: 800;
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: -0.02em;
   }
-  .b-question .q em {
-    font-family: var(--serif);
-    font-style: italic;
-    font-weight: 300;
-    color: var(--terracotta);
-    text-transform: none;
-  }
   .b-question .arrow {
-    color: var(--cobalt);
+    color: var(--design); /* umber — terracotta family, deeper than marker bg for two-tone rhythm */
     font-family: var(--sans);
     font-size: 32px;
     font-weight: 700;
+    line-height: 1;
+    margin-left: auto;
+  }
+  .b-question .q-tail {
+    white-space: nowrap;
+  }
+  .b-question .q-smile {
+    display: inline-block;
+    margin-left: 0.5em;
+    vertical-align: middle;
+    position: relative;
+    top: -0.1em;
+    color: var(--design);
   }
 
   /* CARDS ROW */
@@ -288,7 +580,26 @@ void DISCIPLINE_ACCENT;
     }
     .b-portrait { aspect-ratio: 4/3; transform: none; }
     .b-cards { grid-template-columns: 1fr 1fr !important; }
-    .b-question { flex-direction: column; align-items: flex-start; }
+    /* 2026-05-18 (UAT): keep the question + arrow on the same flex row even on
+       mobile so the down-arrow rides the right edge of the same line as
+       "What do you wish to see?", instead of dropping below it. The .marker
+       still stacks above via grid below. */
+    .b-question { flex-direction: row; align-items: center; flex-wrap: wrap; }
+    .b-question .marker { order: -1; flex-basis: 100%; }
+    .b-question .q { flex: 1 1 0; min-width: 0; }
+    /* Bio card silhouette pushed off the text on narrow screens: shrunk so it
+       sits as a small corner glyph instead of a half-card watermark. */
+    .b-bio-mark :global(svg) { width: 72px; height: 72px; }
+    .b-bio-mark { bottom: 4px; left: 4px; opacity: 0.3; }
+    .b-bio p { max-width: 100%; }
+  }
+  /* Tighter mobile @ ≤520px — single-column cards + further-shrunk decorations
+     so the card-name and meta text dominate the read instead of competing with
+     the deco glyphs. */
+  @media (max-width: 520px) {
+    .b-cards { grid-template-columns: 1fr !important; }
+    .b-bio-mark :global(svg) { width: 56px; height: 56px; }
+    .b-bio-mark { opacity: 0.25; }
   }
 </style>
 
@@ -306,8 +617,163 @@ void DISCIPLINE_ACCENT;
       if (!target) return; // unknown anchor → let the browser handle (no-op)
       e.preventDefault();
       target.scrollIntoView({ behavior: prefersReduced.matches ? 'auto' : 'smooth', block: 'start' });
-      // Update the URL hash without triggering an extra scroll
       history.replaceState(null, '', href);
+      // Fire the shake instantly on click — no waiting for scroll to land.
+      // Mark every card .entrance-done first so that when .is-shaking is
+      // removed later, the base entrance animation can't re-trigger and
+      // produce a second visible motion.
+      if (target instanceof HTMLElement && target.classList.contains('b-card')) {
+        document.querySelectorAll('.b-card').forEach((c) => c.classList.add('entrance-done'));
+        target.classList.remove('is-shaking');
+        void target.offsetWidth;
+        target.classList.add('is-shaking');
+        target.addEventListener('animationend', () => target.classList.remove('is-shaking'), { once: true });
+      }
     });
+  });
+
+  // Portrait carousel — Instagram-style slide cycler with prev/next arrows, dot
+  // indicators, and auto-advance every data-bp-interval ms (default 5000). One
+  // root supported per page (the splash hero portrait), but the selector loop
+  // tolerates any future instances.
+  const portraitCarousels = document.querySelectorAll<HTMLDivElement>('[data-portrait-carousel]');
+  portraitCarousels.forEach((root) => {
+    const track = root.querySelector<HTMLElement>('[data-bp-track]');
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-bp-slide]'));
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-bp-dot]'));
+    const prev = root.querySelector<HTMLButtonElement>('[data-bp-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-bp-next]');
+    if (!track || slides.length === 0) return;
+    const intervalMs = Number(root.dataset.bpInterval ?? '5000');
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let index = 0;
+    let timerId: number | null = null;
+    let isAnimating = false;
+
+    type Dir = 'left' | 'right' | 'top' | 'bottom';
+    const DIRS: Dir[] = ['left', 'right', 'top', 'bottom'];
+    const OPP: Record<Dir, Dir> = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
+    const vec = (d: Dir): string => {
+      switch (d) {
+        case 'left':   return 'translate3d(-100%, 0, 0)';
+        case 'right':  return 'translate3d(100%, 0, 0)';
+        case 'top':    return 'translate3d(0, -100%, 0)';
+        case 'bottom': return 'translate3d(0, 100%, 0)';
+      }
+    };
+
+    // Slide 0 and dot 0 are rendered .is-active by the Astro template above —
+    // no JS-side init needed.
+
+    const transitionTo = (nextIndex: number, dir: Dir) => {
+      if (isAnimating || nextIndex === index) return;
+      isAnimating = true;
+      const incoming = slides[nextIndex];
+      const outgoing = slides[index];
+
+      // Pre-position incoming off-screen on the chosen axis (no transition so
+      // it doesn't visibly fly to the off-screen spot before animating back in).
+      // .is-active is added in the same frame as the animate-in transform, which
+      // also flips opacity to 1 — so the slide is opaque the whole way across.
+      incoming.style.transition = 'none';
+      incoming.style.transform = vec(dir);
+      // Force reflow so the off-screen transform takes effect before we
+      // re-enable transitions for the animate-in.
+      void incoming.offsetWidth;
+      incoming.style.transition = '';
+      incoming.style.transform = 'translate3d(0, 0, 0)';
+      incoming.classList.add('is-active');
+
+      // Outgoing rides off the opposite edge AT FULL OPACITY (via .is-leaving)
+      // so the two slides tile the frame edge-to-edge with no black gap mid-swap.
+      outgoing.classList.remove('is-active');
+      outgoing.classList.add('is-leaving');
+      outgoing.style.transform = vec(OPP[dir]);
+
+      index = nextIndex;
+      dots.forEach((d, n) => {
+        d.classList.toggle('is-active', n === index);
+        d.setAttribute('aria-selected', n === index ? 'true' : 'false');
+      });
+
+      const onDone = (e: TransitionEvent) => {
+        if (e.target !== incoming || e.propertyName !== 'transform') return;
+        incoming.removeEventListener('transitionend', onDone);
+        // Drop .is-leaving (snaps outgoing back to opacity 0) and reset its
+        // inline transform without animating, so a future turn starts clean.
+        outgoing.classList.remove('is-leaving');
+        outgoing.style.transition = 'none';
+        outgoing.style.transform = '';
+        void outgoing.offsetWidth;
+        outgoing.style.transition = '';
+        isAnimating = false;
+      };
+      incoming.addEventListener('transitionend', onDone);
+    };
+
+    // Direction policy — uses standard carousel convention (next = strip scrolls left):
+    //   - forward (next-button / ArrowRight / dot ahead): incoming from RIGHT, motion leftward
+    //   - backward (prev-button / ArrowLeft / dot behind): incoming from LEFT, motion rightward
+    //   - auto-advance non-wrap tick:                      random of the four
+    //   - auto-advance forward wrap (last → first):        incoming from RIGHT ("left slide")
+    type Motion = 'auto' | 'forward' | 'backward';
+    const go = (target: number, motion: Motion) => {
+      const nextIndex = (target + slides.length) % slides.length;
+      if (nextIndex === index) return;
+      let dir: Dir;
+      if (motion === 'forward')       dir = 'right';
+      else if (motion === 'backward') dir = 'left';
+      else {
+        const isForwardWrap = index === slides.length - 1 && nextIndex === 0;
+        dir = isForwardWrap ? 'right' : DIRS[Math.floor(Math.random() * DIRS.length)];
+      }
+      transitionTo(nextIndex, dir);
+    };
+
+    const stop = () => {
+      if (timerId !== null) { window.clearInterval(timerId); timerId = null; }
+    };
+    const start = () => {
+      stop();
+      // Respect reduced-motion: do not auto-advance for users with the preference.
+      if (prefersReduced.matches) return;
+      // Skip the auto-advance entirely when the tab is hidden — saves work and
+      // avoids stacking advances when the user returns.
+      if (document.hidden) return;
+      if (intervalMs <= 0) return;
+      timerId = window.setInterval(() => go(index + 1, 'auto'), intervalMs);
+    };
+    // Reset the auto-advance countdown each time the user manually interacts —
+    // their action wins, and the next auto-advance fires 5s after that input.
+    prev?.addEventListener('click', () => { go(index - 1, 'backward'); start(); });
+    next?.addEventListener('click', () => { go(index + 1, 'forward');  start(); });
+    dots.forEach((d, n) => d.addEventListener('click', () => {
+      // Jump-to-dot: pick direction by which way the target lies along the strip.
+      go(n, n > index ? 'forward' : 'backward');
+      start();
+    }));
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        go(index + 1, 'forward');
+        start();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        go(index - 1, 'backward');
+        start();
+      }
+    });
+    // Pause cycling while the user is hovering (they're studying a slide); resume
+    // immediately when they leave.
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    // Tab-visibility pause: stop the timer when the tab goes hidden, resume on
+    // return so the user doesn't see a flurry of catch-up advances.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+    // Reduced-motion preference can toggle at runtime (rare but possible) — honor it.
+    prefersReduced.addEventListener?.('change', () => { if (prefersReduced.matches) stop(); else start(); });
+    start();
   });
 </script>

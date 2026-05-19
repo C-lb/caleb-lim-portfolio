@@ -44,7 +44,7 @@
 
 - [ ] **FOUND-01**: Fully mobile-responsive across all pages (≥50% of recruiter first views are on phone; mobile breakage on a design portfolio reads as a craft failure)
 - [ ] **FOUND-02**: First paint <2s on standard mobile / hotel-wifi — assets lazy-loaded below the fold, critical CSS inlined, fonts subsetted
-- [ ] **FOUND-03**: Honors `prefers-reduced-motion` everywhere — non-essential motion (rotations, magnetic effects, scroll-driven reveals) disables under the media query
+- [ ] **FOUND-03**: Honors `prefers-reduced-motion` everywhere — non-essential motion (rotations, magnetic effects, scroll-driven reveals) disables under the media query. **Exception (amended 2026-05-18 during /gsd-discuss-phase 5):** brief user-initiated feedback motion — namely the card hover-tilt (`rotateX/Y` on `.b-card` / `.b-bio`) and the click-shake (`rotate()` on role-link clicks) — is classified as *essential interaction feedback* and remains active under `prefers-reduced-motion`. All other motion still disables (carousel autoplay, scroll-driven animations, magnetic effects, decorative rotations). The lime-dot pulse on the OPEN-TO-ROLES island also remains as a status indicator.
 - [ ] **FOUND-04**: Deployed to **caleblim.com** (subject to availability check at deploy time) on **Cloudflare Pages**, domain registered via **Cloudflare Registrar**
 - [ ] **FOUND-05**: Launches with 5–15 pieces total, asymmetrically distributed across categories (strong: Graphic Design + Marketing; thinner: Financial Models + Personal Projects); per-category gallery design accommodates the imbalance
 

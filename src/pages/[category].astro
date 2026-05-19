@@ -35,13 +35,23 @@ const categoryLabel: Record<Category, string> = {
   personal:  'PERSONAL PROJECTS',
   marketing: 'MARKETING',
 };
+// Tab/<title> form is Title Case — readable in browser tab + bookmark + search results.
+// 2026-05-18 (UAT): replaces the prior label.toLowerCase() which rendered tabs as
+// "graphic design — Caleb Lim" (unprofessional). Tab-title spelling diverges from
+// the on-page h2 (which stays UPPERCASE for the heavy-caps editorial composition).
+const categoryTabTitle: Record<Category, string> = {
+  design:    'Graphic Design',
+  finance:   'Financial Models',
+  personal:  'Personal Projects',
+  marketing: 'Marketing',
+};
 const label = categoryLabel[category];
 const countStr = String(n).padStart(2, '0');
 ---
-<Base title={`${label.toLowerCase()} — Caleb Lim`} bg="ink">
+<Base title={`${categoryTabTitle[category]} — Caleb Lim`} bg="ink">
   <section class="b-category" style={`--accent: ${accent}`}>
     <header class="b-cat-head">
-      <a href="/" class="b-cat-back">← splash</a>
+      <a href="/" class="b-cat-back">← Splash</a>
       <h2>{label} <em>/{countStr}</em></h2>
       <span class="b-cat-meta">{countStr} PIECES · <strong>UPDATED MAY 2026</strong></span>
     </header>

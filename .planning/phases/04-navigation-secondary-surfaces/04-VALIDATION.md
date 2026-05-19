@@ -1,11 +1,11 @@
 ---
 phase: 4
 slug: navigation-secondary-surfaces
-status: planned
+status: verified
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-15
-updated: 2026-05-16
+updated: 2026-05-18
 ---
 
 # Phase 4 — Validation Strategy
@@ -40,14 +40,14 @@ updated: 2026-05-16
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 04-01-T1 | 04-01 | 1 (Wave 0 within plan) | CONTACT-03/04/05 stubs, infra | T-04-01..05 | Gates 19a–f + 20 defined in verify-build.sh; RED state until chrome lands | bash unit (syntax) + grep on script | `bash -n scripts/verify-build.sh; grep -c 'Phase 4 gates' scripts/verify-build.sh` | yes (extending existing) | ⬜ pending |
-| 04-01-T2 | 04-01 | 1 | CONTACT-03, CONTACT-04 | T-04-01, T-04-02, T-04-05 | Header chrome rendered site-wide; skip-link + `<main>` wrap; aria-current omitted on non-splash | static HTML grep | `npm run build && bash scripts/verify-build.sh` — Gates 19a/19b/19c/19d/19f + 20 GREEN; 19e RED | yes | ⬜ pending |
-| 04-01-T3 | 04-01 | 1 | CONTACT-03, CONTACT-04 | n/a | Commit landed; route walk confirms chrome on splash + galleries + detail + about + 404 | bash route walk + git log | `bash scripts/verify-build.sh; rc=$?; [[ $rc -eq 1 ]] && grep -cE '^  FAIL:' /tmp/p4p1.log == 1` | yes | ⬜ pending |
-| 04-02-T1 | 04-02 | 2 | PIECE-05 | T-04-06, T-04-07 | getStaticPaths emits prev/next props; pager rendered with same-discipline-scoped hrefs; back-pill preserved | astro build + grep | `npm run build && grep -qE 'aria-label="other pieces in this discipline"' $(find dist -mindepth 3 -name index.html \| head -1)` | yes | ⬜ pending |
-| 04-02-T2 | 04-02 | 2 | PIECE-05 | T-04-06, T-04-08 | Gates 21a/21b/21c + 22 GREEN; cross-discipline scope locked; gallery-order parity walk passes | bash + grep | `bash scripts/verify-build.sh 2>&1 \| grep -cE 'OK:.*(pager present\|back-pill\|pager href\|pager next-chain)'` returns 4+ | yes | ⬜ pending |
-| 04-02-T3 | 04-02 | 2 | PIECE-05 | n/a | Single Phase 4 FAIL remaining is Gate 19e (Plan 04-03's territory) | bash | `bash scripts/verify-build.sh \| grep -cE '^  FAIL:'` returns 1 | yes | ⬜ pending |
-| 04-03-T1 | 04-03 | 2 | CONTACT-05 | T-04-09, T-04-10, T-04-11 | About contact block renders inside `<article>`; mailto + LinkedIn rows; Calendly absent | static HTML grep | `npm run build && sed -n '/<article/,/<\/article>/p' dist/about/index.html \| grep -qE 'href="mailto:.*caleblimster.*"'` + `! grep -qi calendly dist/about/index.html` | yes | ⬜ pending |
-| 04-03-T2 | 04-03 | 2 | CONTACT-05 | n/a | Gate 19e flips GREEN; full suite ALL GREEN; commit landed | bash | `bash scripts/verify-build.sh; rc=$?; [[ $rc -eq 0 ]] && grep -q 'ALL GREEN' /tmp/p4p3-done.log` | yes | ⬜ pending |
+| 04-01-T1 | 04-01 | 1 (Wave 0 within plan) | CONTACT-03/04/05 stubs, infra | T-04-01..05 | Gates 19a–f + 20 defined in verify-build.sh; RED state until chrome lands | bash unit (syntax) + grep on script | `bash -n scripts/verify-build.sh; grep -c 'Phase 4 gates' scripts/verify-build.sh` | yes (extending existing) | ✅ green |
+| 04-01-T2 | 04-01 | 1 | CONTACT-03, CONTACT-04 | T-04-01, T-04-02, T-04-05 | Header chrome rendered site-wide; skip-link + `<main>` wrap; aria-current omitted on non-splash | static HTML grep | `npm run build && bash scripts/verify-build.sh` — Gates 19a/19b/19c/19d/19f + 20 GREEN; 19e RED | yes | ✅ green |
+| 04-01-T3 | 04-01 | 1 | CONTACT-03, CONTACT-04 | n/a | Commit landed; route walk confirms chrome on splash + galleries + detail + about + 404 | bash route walk + git log | `bash scripts/verify-build.sh; rc=$?; [[ $rc -eq 1 ]] && grep -cE '^  FAIL:' /tmp/p4p1.log == 1` | yes | ✅ green |
+| 04-02-T1 | 04-02 | 2 | PIECE-05 | T-04-06, T-04-07 | getStaticPaths emits prev/next props; pager rendered with same-discipline-scoped hrefs; back-pill preserved | astro build + grep | `npm run build && grep -qE 'aria-label="other pieces in this discipline"' $(find dist -mindepth 3 -name index.html \| head -1)` | yes | ✅ green |
+| 04-02-T2 | 04-02 | 2 | PIECE-05 | T-04-06, T-04-08 | Gates 21a/21b/21c + 22 GREEN; cross-discipline scope locked; gallery-order parity walk passes | bash + grep | `bash scripts/verify-build.sh 2>&1 \| grep -cE 'OK:.*(pager present\|back-pill\|pager href\|pager next-chain)'` returns 4+ | yes | ✅ green |
+| 04-02-T3 | 04-02 | 2 | PIECE-05 | n/a | Single Phase 4 FAIL remaining is Gate 19e (Plan 04-03's territory) | bash | `bash scripts/verify-build.sh \| grep -cE '^  FAIL:'` returns 1 | yes | ✅ green |
+| 04-03-T1 | 04-03 | 2 | CONTACT-05 | T-04-09, T-04-10, T-04-11 | About contact block renders inside `<article>`; mailto + LinkedIn rows; Calendly absent | static HTML grep | `npm run build && sed -n '/<article/,/<\/article>/p' dist/about/index.html \| grep -qE 'href="mailto:.*caleblimster.*"'` + `! grep -qi calendly dist/about/index.html` | yes | ✅ green |
+| 04-03-T2 | 04-03 | 2 | CONTACT-05 | n/a | Gate 19e flips GREEN; full suite ALL GREEN; commit landed | bash | `bash scripts/verify-build.sh; rc=$?; [[ $rc -eq 0 ]] && grep -q 'ALL GREEN' /tmp/p4p3-done.log` | yes | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -55,7 +55,7 @@ updated: 2026-05-16
 
 ## Wave 0 Requirements
 
-- [ ] **scripts/verify-build.sh extension** — folded into Plan 04-01 Task 1 as the FIRST task in the phase (RED-state gate scaffolding before any chrome lands). Gates 19a/19b/19c/19d/19e/19f + 20 land in Plan 04-01 Task 1; Gates 21a/21b/21c + 22 land in Plan 04-02 Task 2 (after Plan 04-02 Task 1 wires the prev/next markup that those gates assert).
+- [x] **scripts/verify-build.sh extension** — folded into Plan 04-01 Task 1 as the FIRST task in the phase (RED-state gate scaffolding before any chrome lands). Gates 19a/19b/19c/19d/19e/19f + 20 land in Plan 04-01 Task 1; Gates 21a/21b/21c + 22 land in Plan 04-02 Task 2 (after Plan 04-02 Task 1 wires the prev/next markup that those gates assert). All gates GREEN at 2026-05-18 audit.
 
 The reason 21+22 live in Plan 04-02 (NOT in 04-01's Wave 0) is that those gates assert specific class names (`detail-pager`, `pager-link`) authored in Plan 04-02 Task 1 — co-locating gate-and-implementation in the same plan keeps the assertion contract readable.
 
@@ -82,3 +82,13 @@ The reason 21+22 live in Plan 04-02 (NOT in 04-01's Wave 0) is that those gates 
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** planner-approved 2026-05-16 — ready for `/gsd-execute-phase 4`
+
+---
+
+## Audit (2026-05-18)
+
+Ran `bash scripts/verify-build.sh` post-phase-4 implementation: **ALL GREEN** (all 13 Phase-4 gate lines pass — 19a/b/c/d/e/f, 20, 21a×2, 21b, 21c, 22×2). Per-task verification statuses updated from `⬜ pending` to `✅ green`. Wave 0 (verify-build.sh extension) complete.
+
+**Manual-only UAT** (per 04-UAT.md): all 11 tests passing including Test 8 (mailto deliverability walk) — see 04-UAT.md final summary.
+
+No coverage gaps. nyquist_compliant: true confirmed. Status → verified.

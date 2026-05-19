@@ -13,6 +13,7 @@
   --terracotta: #82785d;  /* olive-khaki — decorative accent only (was #b4a682; deepened to bridge the taupe-to-ink range) */
   --plum:       #536644;  /* dark forest sage — Marketing accent (was #6a8a5a deep sage) */
   --teal:       #b4a682;  /* sage-tinted taupe — gallery decoration (was #87a96b sage green; absorbs the prior terracotta hex) */
+  --lime:       #b8c945;  /* chartreuse lime — DEDICATED 'open for roles' availability pill (NEW token 2026-05-18; bright go-signal that pops against the muted earth-tone palette) */
 
   /* Font family tokens — Fontsource appends 'Variable' to family names */
   --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;

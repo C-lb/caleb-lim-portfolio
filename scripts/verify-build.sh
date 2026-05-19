@@ -19,10 +19,12 @@ fi
 echo "  OK: splash exists ($DIST/index.html)"
 
 # Gate 2: splash contains the SPLASH-01 prompt text (placeholder fidelity)
-# Phase 3 D-07 update: the splash now wraps "see" in an italic <em> per UI-SPEC.md line 284.
+# Phase 3 D-07 update: the splash wrapped "see" in an italic <em> per UI-SPEC.md line 284.
+# 2026-05-18 (UAT): em removed; "see?" now wraps in a <span class="q-tail"> for nowrap
+# pairing with the inline eye SVG glyph. Pattern accepts all three historical forms.
 # Astro injects data-astro-cid-* attributes on scoped elements, so accept any attribute payload
-# inside the em tag. Pattern matches BOTH the legacy bare form and the Phase 3 spec form.
-if ! grep -qE 'What do you wish to (see|<em[^>]*>see)' "$DIST/index.html"; then
+# inside the wrapper tag.
+if ! grep -qE 'What do you wish to (see|<em[^>]*>see|<span[^>]*class="q-tail[^>]*>see)' "$DIST/index.html"; then
   echo "  FAIL: splash missing 'What do you wish to see?' prompt"
   fail=1
 else

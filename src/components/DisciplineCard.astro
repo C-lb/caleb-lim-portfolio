@@ -26,8 +26,8 @@ const cardLabel: Record<Category, string> = {
   marketing: 'Marketing',
 };
 
-// k2 deco contains a Fraunces italic numeral; the rest are CSS-only (empty span).
-const k2Numeral = '2';
+// All four deco glyphs are CSS-only — k1 circle, k2 bar-chart, k3 sparkle, k4
+// broadcast-ripple. No text content emitted into the .deco span.
 const cueText = isEmpty ? 'in the works — coming soon' : 'View the work →';
 const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 ---
@@ -38,7 +38,7 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
       <span class="b-card-name">{cardLabel[category]}</span>
     </div>
     <span class="b-card-cue">{cueText}</span>
-    <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
+    <span class="deco" aria-hidden="true"></span>
   </div>
 ) : (
   <a href={`/${category}`} id={`card-${category}`} class={cls}>
@@ -47,7 +47,7 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
       <span class="b-card-name">{cardLabel[category]}</span>
     </div>
     <span class="b-card-cue">{cueText}</span>
-    <span class="deco" aria-hidden="true">{k === 2 ? k2Numeral : ''}</span>
+    <span class="deco" aria-hidden="true"></span>
   </a>
 )}
 
@@ -58,7 +58,8 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     padding: 22px 22px 24px; /* phase-exit walk: beefed for primary-nav weight */
     cursor: pointer;
     overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease;
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 4px;
@@ -66,10 +67,37 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     text-decoration: none;
     box-shadow: 0 1px 0 rgba(15, 13, 12, 0.15);
   }
-  .b-card:hover {
-    transform: translateY(-4px) rotate(-0.3deg);
-    box-shadow: 0 10px 22px rgba(15, 13, 12, 0.22);
+  /* Liquid-glass overlay — invisible at rest, fades in on hover. The diagonal
+     white-sheen gradient + inset edge highlights mimic Apple's glass material;
+     backdrop-filter blurs whatever sits behind the card so the discipline color
+     reads as a tinted lens rather than a flat fill. */
+  .b-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 380ms ease;
+    background:
+      linear-gradient(135deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.10) 32%,
+        rgba(255, 255, 255, 0.02) 58%,
+        rgba(255, 255, 255, 0.32) 100%);
+    box-shadow:
+      inset 0  1px 1px rgba(255, 255, 255, 0.55),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.22),
+      inset  1px 0 1px rgba(255, 255, 255, 0.20),
+      inset -1px 0 1px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px) saturate(1.5);
+    -webkit-backdrop-filter: blur(8px) saturate(1.5);
+    z-index: 1;
   }
+  /* Keep card content above the glass overlay. .deco stays absolute (per the
+     per-k rules below) — we only bump its z-index, not its position. */
+  .b-card > :not(.deco) { position: relative; z-index: 2; }
+  .b-card .deco { z-index: 2; }
   .b-card:focus-visible {
     outline: 3px solid var(--ink);
     outline-offset: 4px;
@@ -77,16 +105,13 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   /* k3 (turmeric) — default ink outline reads clearly; no override needed */
 
   /* Empty/placeholder cards: card is rendered (so all 4 disciplines read as a
-     thesis even when not yet populated) but visually marked as "not yet" — no
-     hover lift, no cursor pointer, slightly reduced contrast on the cue. Background
-     and decoration stay so the discipline color identity is preserved. */
+     thesis even when not yet populated) but visually marked as "not yet" via
+     reduced opacity and an italicised cue. They still receive the full hover
+     treatment (3D tilt + liquid-glass overlay) so all four disciplines feel
+     equally interactive on the splash. */
   .b-card.is-empty {
     cursor: default;
     opacity: 0.85;
-  }
-  .b-card.is-empty:hover {
-    transform: none;
-    box-shadow: 0 1px 0 rgba(15, 13, 12, 0.15);
   }
   .b-card.is-empty .b-card-cue {
     font-style: italic;
@@ -121,11 +146,14 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     opacity: 0.85;
   }
 
-  /* k1 = Design (umber #8c6326) — outline circle top-right (sketch lines 495-497) */
+  /* k1 = Design (umber #8c6326) — outline circle top-right (sketch lines 495-497).
+     Rest-rotate stored in a custom property so the entrance-shake @keyframes can
+     compose against it via calc(). Same pattern applied to k2/k3/k4 below. */
   .b-card.k1 {
+    --rest-rotate: -1deg;
     background: var(--design);
     color: var(--paper);
-    transform: rotate(-1deg);
+    transform: rotate(var(--rest-rotate));
   }
   .b-card.k1 .deco {
     position: absolute;
@@ -137,22 +165,32 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     border-radius: 50%;
   }
 
-  /* k2 = Finance (cobalt) — oversized italic Fraunces numeral in lime (sketch lines 498-503) */
+  /* k2 = Finance (cobalt). 2026-05-18 (UAT): decoration rewritten — was an
+     oversized italic Fraunces "2" numeral in --acid (deep gold). User flagged
+     the orange and asked for a motif tied to financial models. New design: a
+     four-bar mini bar-chart drawn with stacked linear-gradients in --paper.
+     Each bar is 12px wide; the four heights (28%, 60%, 44%, 80%) sketch an
+     ascending-then-mixed performance chart. */
+  /* 2026-05-18 (UAT): text + deco color flipped from --paper → --ink for
+     readability on the lighter silvered-cobalt bg, matching k3 (Personal)'s
+     ink-on-acid treatment. */
   .b-card.k2 {
+    --rest-rotate: 1deg;
     background: var(--cobalt);
-    color: var(--paper);
-    transform: rotate(1deg);
+    color: var(--ink);
+    transform: rotate(var(--rest-rotate));
   }
   .b-card.k2 .deco {
     position: absolute;
-    top: 18px;
-    right: 16px;
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 64px;
-    font-weight: 300;
-    color: var(--acid);
-    line-height: 0.8;
+    top: 22px;
+    right: 22px;
+    width: 76px;
+    height: 56px;
+    background:
+      linear-gradient(to top, var(--ink) 28%, transparent 28%) left   bottom / 12px 100% no-repeat,
+      linear-gradient(to top, var(--ink) 60%, transparent 60%) 22px   bottom / 12px 100% no-repeat,
+      linear-gradient(to top, var(--ink) 44%, transparent 44%) 44px   bottom / 12px 100% no-repeat,
+      linear-gradient(to top, var(--ink) 80%, transparent 80%) right  bottom / 12px 100% no-repeat;
   }
 
   /* k3 = Personal (deep gold) — 4-pointed editorial sparkle (replaces 2026-05-18
@@ -160,37 +198,175 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
      tapered ends via radial-gradients, giving a "burst / star / asterisk" feel
      that matches the rustic-editorial palette. Distinct from k1 circle,
      k2 numeral, k4 triangle. */
+  /* k3 rest tilt was -0.5deg; updated 2026-05-18 to +1deg so it matches k2's
+     direction. Splash render order is design-finance-marketing-personal, which
+     puts k3 in the bottom-right slot (position 4) — same column as k2 (position 2),
+     so they should lean the same way. */
   .b-card.k3 {
+    --rest-rotate: 1deg;
     background: var(--acid);
     color: var(--ink); /* turmeric bg → ink */
-    transform: rotate(-0.5deg);
+    transform: rotate(var(--rest-rotate));
   }
   .b-card.k3 .deco {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 84px;
-    height: 84px;
+    top: 16px;
+    right: 16px;
+    width: 120px; /* 2026-05-18 (UAT): enlarged star — was 84×84 */
+    height: 120px;
     background:
-      radial-gradient(ellipse 5px 40px at center, var(--ink) 70%, transparent 100%),
-      radial-gradient(ellipse 40px 5px at center, var(--ink) 70%, transparent 100%);
+      radial-gradient(ellipse 7px 58px at center, var(--ink) 70%, transparent 100%),
+      radial-gradient(ellipse 58px 7px at center, var(--ink) 70%, transparent 100%);
     opacity: 0.78;
     transform: rotate(12deg);
   }
 
   /* k4 = Marketing (olive lime, dark) — accent triangle */
+  /* k4 rest tilt was +0.7deg; updated 2026-05-18 to -1deg so it matches k1's
+     direction. Splash render order puts k4 in the bottom-left slot (position 3) —
+     same column as k1 (position 1), so they should lean the same way.
+     2026-05-18 (UAT): decoration rewritten — was an acid (deep gold) triangle.
+     User flagged the orange and asked for a motif tied to marketing. New design:
+     a "broadcast / signal ripple" — a paper solid dot at the deco's bottom-left
+     origin plus three concentric arc rings expanding outward (drawn with stacked
+     radial-gradients). Reads as reach / signal / megaphone wave. */
   .b-card.k4 {
+    --rest-rotate: -1deg;
     background: var(--plum);
     color: var(--paper); /* olive lime bg → paper */
-    transform: rotate(0.7deg);
+    transform: rotate(var(--rest-rotate));
   }
+  /* 2026-05-18 (UAT): broadcast-ripple swapped for an 8-point starburst — edgier
+     mark, family-related to k3 (Personal)'s 4-point sparkle but distinct in
+     count, size, rotation, and color (paper on plum vs ink on acid). Built from
+     two crossed-pair radial-gradients: the .deco itself draws the long primary
+     cross (horizontal + vertical), and ::before overlays the shorter diagonal
+     cross rotated 45deg to land at the 1.5/4.5/7.5/10.5 o'clock positions. */
   .b-card.k4 .deco {
     position: absolute;
-    top: 36px;
-    right: 18px;
-    width: 56px;
-    height: 56px;
-    background: var(--acid);
-    clip-path: polygon(50% 0%, 100% 100%, 0 100%);
+    top: 16px;
+    right: 16px;
+    width: 96px;
+    height: 96px;
+    background:
+      radial-gradient(ellipse 6px 48px at center, var(--paper) 70%, transparent 100%),
+      radial-gradient(ellipse 48px 6px at center, var(--paper) 70%, transparent 100%);
+    opacity: 0.92;
+    transform: rotate(8deg);
+  }
+  .b-card.k4 .deco::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 4px 34px at center, var(--paper) 70%, transparent 100%),
+      radial-gradient(ellipse 34px 4px at center, var(--paper) 70%, transparent 100%);
+    transform: rotate(45deg);
+  }
+
+  /* Hover lifts + 3D-tilts the card and reveals the liquid-glass overlay.
+     perspective() in the transform list applies depth to this element directly
+     (no parent perspective needed). The rotateX/Y tilt gives the card a
+     subtle "leaning towards you" motion that pairs with the glass sheen.
+     The translateY + amplified shadow read as elevation. Placed AFTER all
+     per-k rest-tilt blocks so the hover transform wins on equal-specificity
+     source-order tiebreak. .b-card.is-empty:hover (specificity 0,3,0)
+     still wins for placeholders and keeps them inert. */
+  /* Hover transforms tuned to stay within the 10px grid gap — angles and lift
+     reduced from the prior pass (rotateY ±5° → ±3°, rotateX ±3° → ±2°,
+     translateY -6px → -3px) so the projected geometry doesn't bleed into
+     neighbouring cells. Deeper perspective (900 → 1200) flattens the tilt
+     further. z-index bump guarantees the hovered card paints above neighbours
+     if any residual shadow does spill across. */
+  .b-card:hover {
+    transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
+    box-shadow:
+      0 14px 28px rgba(15, 13, 12, 0.24),
+      0 4px 10px rgba(15, 13, 12, 0.14);
+    z-index: 10;
+  }
+  /* k2 (Financial Models) and k3 (Personal Projects) get the mirror-inverted
+     tilt — both rotateX and rotateY signs flipped — so they lean the opposite
+     way on hover. Pairs symmetrically with k1 / k4 across the grid. */
+  .b-card.k2:hover,
+  .b-card.k3:hover {
+    transform: perspective(1200px) translateY(-3px) rotateX(-2deg) rotateY(3deg);
+  }
+  .b-card:hover::before { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .b-card::before { transition: none; }
+  }
+
+  /* Entrance shake — runs once on page load to cue that the cards are interactable.
+     Composes the shake on top of each card's per-k --rest-rotate via calc() so the
+     animation lands back on the correct rest tilt. The global prefers-reduced-motion
+     block in tokens.css clamps animation-duration to 0.01ms so users with the
+     reduced-motion preference skip the shake automatically.
+     2026-05-18 (UAT): softened — rotation amplitude dropped from ±3deg/±2deg/±1deg
+     to ±1.2deg/±0.8deg/±0.4deg, translateX from ±3px to ±1px. Reads as a polite
+     'hey, I'm here' nudge instead of a dramatic wiggle. Scope widened to ALL cards
+     including empty placeholders (was :not(.is-empty)) per user request. */
+  @keyframes card-shake {
+    0%, 100% { transform: rotate(var(--rest-rotate)); }
+    15%      { transform: rotate(calc(var(--rest-rotate) - 1.2deg)) translateX(-1px); }
+    30%      { transform: rotate(calc(var(--rest-rotate) + 1.2deg)) translateX(1px); }
+    45%      { transform: rotate(calc(var(--rest-rotate) - 0.8deg)) translateX(-0.6px); }
+    60%      { transform: rotate(calc(var(--rest-rotate) + 0.8deg)) translateX(0.6px); }
+    75%      { transform: rotate(calc(var(--rest-rotate) - 0.4deg)); }
+    90%      { transform: rotate(calc(var(--rest-rotate) + 0.4deg)); }
+  }
+  .b-card {
+    animation: card-shake 750ms ease-in-out 400ms 1;
+  }
+  /* Pause the entrance shake the moment a user hovers — they've found the card,
+     no need to keep waving at them. */
+  .b-card:hover { animation-play-state: paused; }
+  /* Suppress the entrance animation after the first role-link click so that
+     removing .is-shaking doesn't cause animation-name to flip back to
+     card-shake and visibly re-trigger. Placed BEFORE .is-shaking so the
+     click rule (also !important) wins via source order. */
+  .b-card.entrance-done { animation: none !important; }
+  /* Replay shake on demand (role-label click). Fast single nudge — snap
+     out to a small offset, drift back to rest. */
+  @keyframes card-shake-click {
+    0%   { transform: rotate(var(--rest-rotate)); }
+    40%  { transform: rotate(calc(var(--rest-rotate) - 1.6deg)) translateX(-1.4px); }
+    100% { transform: rotate(var(--rest-rotate)); }
+  }
+  .b-card.is-shaking {
+    animation: card-shake-click 220ms ease-out 0ms 1 !important;
+  }
+  /* Allow the on-demand shake to play even if hover is engaged. */
+  .b-card.is-shaking:hover { animation-play-state: running; }
+
+  /* Mobile (≤900px): shrink + push the decorations so they corner-anchor rather
+     than wash across the text. Card-name + cue stay the primary read; the deco
+     glyphs become small corner marks. */
+  @media (max-width: 900px) {
+    .b-card { padding: 18px 18px 20px; min-height: 152px; }
+    .b-card.k1 .deco { width: 70px; height: 70px; right: -16px; top: -16px; border-width: 6px; }
+    .b-card.k2 .deco { width: 60px; height: 44px; top: 16px; right: 16px; }
+    .b-card.k3 .deco { width: 80px; height: 80px; top: 12px; right: 12px;
+      background:
+        radial-gradient(ellipse 5px 38px at center, var(--ink) 70%, transparent 100%),
+        radial-gradient(ellipse 38px 5px at center, var(--ink) 70%, transparent 100%);
+    }
+    .b-card.k4 .deco { width: 64px; height: 64px; top: 12px; right: 12px;
+      background:
+        radial-gradient(ellipse 4px 32px at center, var(--paper) 70%, transparent 100%),
+        radial-gradient(ellipse 32px 4px at center, var(--paper) 70%, transparent 100%);
+    }
+    .b-card.k4 .deco::before {
+      background:
+        radial-gradient(ellipse 3px 22px at center, var(--paper) 70%, transparent 100%),
+        radial-gradient(ellipse 22px 3px at center, var(--paper) 70%, transparent 100%);
+    }
+  }
+  /* Tighter mobile (≤520px): drop deco opacity slightly so the card-name reads
+     cleanly even when the title runs into the deco zone on very small phones. */
+  @media (max-width: 520px) {
+    .b-card .deco { opacity: 0.65; }
+    .b-card.k3 .deco { opacity: 0.55; }
+    .b-card-name { font-size: clamp(22px, 7vw, 30px); }
   }
 </style>

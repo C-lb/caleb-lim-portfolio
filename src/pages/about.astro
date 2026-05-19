@@ -8,7 +8,7 @@ import Base from '../layouts/Base.astro';
 ---
 <Base title="About — Caleb Lim" bg="paper">
   <article class="about">
-    <a href="/" class="b-cat-back">← splash</a>
+    <a href="/" class="b-cat-back">← Splash</a>
     <h1>Caleb Lim</h1>
     <p class="bio">
       I'm Caleb, and I don't pick a lane. I sit between financial models,
@@ -21,6 +21,22 @@ import Base from '../layouts/Base.astro';
       and rotated card. Pick the room that fits your role; the work in it
       is the case. If you want the full story, the resume's one click below.
     </p>
+
+    {/* Values pills — six attribute chips sourced from the bio's voice (owner mentality,
+        cross-functional, etc.). Each pill subtly rotated for editorial rhythm matching the
+        splash card tilt language; mono uppercase to read as taxonomy markers, not labels. */}
+    <section class="values" aria-labelledby="values-h">
+      <h2 id="values-h" class="values-h">Values</h2>
+      <ul class="values-list">
+        <li class="values-pill">Curious</li>
+        <li class="values-pill">Challenges Processes</li>
+        <li class="values-pill">AI Agency &amp; Stewardship</li>
+        <li class="values-pill">Leverages on AI</li>
+        <li class="values-pill">Thrives in Ambiguity</li>
+        <li class="values-pill">Adaptive</li>
+      </ul>
+    </section>
+
     {/* Photo wireframes — placeholders for personality photos. Replace with real images
         from src/assets/about/ when available. Wireframes are intentional scaffolding
         (dashed border + caption hint) so the layout reads as "photos coming" rather
@@ -46,7 +62,7 @@ import Base from '../layouts/Base.astro';
     {/* CONTACT-05 — slightly larger contact surface for recruiters who already read the bio.
         Calendly intentionally skipped (researcher + user lock; CONTACT-05 text reads "optional Calendly").
         External LinkedIn anchor establishes the Phase 4 SECOND target=_blank in codebase (first: header in Base.astro). */}
-    <section class="contact" aria-labelledby="contact-h">
+    <section id="contact" class="contact" aria-labelledby="contact-h">
       <h2 id="contact-h">Get in touch</h2>
       <ul class="contact-list">
         <li>
@@ -190,6 +206,57 @@ import Base from '../layouts/Base.astro';
     outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
+
+  /* Values pills — six attribute chips between the bio paragraph and the photo
+     wireframes. Outlined chips alternate with filled chips drawn from the new
+     earth-tone palette (acid turmeric, terracotta taupe, umber design). Subtle
+     ±1deg rotation per chip echoes the splash discipline-card tilt language. */
+  .values {
+    margin: var(--sp-4) 0 var(--sp-4); /* 2026-05-18 (UAT): tightened top margin so values sits closer to the bio paragraph above */
+  }
+  .values-h {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.7;
+    margin: 0 0 var(--sp-2); /* 2026-05-18 (UAT): tightened bottom margin so heading sits closer to its pills */
+  }
+  .values-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 12px;
+  }
+  .values-pill {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    padding: 7px 16px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: transparent;
+    white-space: nowrap;
+    line-height: 1.2;
+    cursor: default; /* 2026-05-18 (UAT): pills are non-interactive labels, not links — kill the I-beam text cursor */
+    transition: transform 180ms ease, background-color 180ms ease,
+                border-color 180ms ease, color 180ms ease,
+                box-shadow 180ms ease;
+  }
+  .values-pill:hover {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+    color: var(--paper);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(15, 13, 12, 0.15);
+  }
+
   .resume-link a {
     font-family: var(--serif);
     font-style: italic;
@@ -264,5 +331,47 @@ import Base from '../layouts/Base.astro';
   const track = document.querySelector<HTMLElement>('.about-photos-track');
   if (track && track.scrollWidth > track.clientWidth) {
     track.scrollLeft = (track.scrollWidth - track.clientWidth) / 2;
+  }
+
+  // OPEN-TO-ROLES island hand-off: when arrived via /about?to=contact, force the
+  // page to the top first, then auto-scroll DELIBERATELY SLOWLY to the contact
+  // section so the user reads the bio on the way down. We can't use
+  // scrollIntoView({behavior:'smooth'}) — browsers cap that at ~500ms regardless
+  // of distance. RAF + easeInOutQuad over 1800ms gives a readable pace.
+  // The query-param flag (not #contact hash) is what lets us animate — hashes
+  // cause an instant browser snap. We strip the param after triggering so a
+  // refresh doesn't replay the scroll.
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('to') === 'contact') {
+    const target = document.getElementById('contact');
+    if (target) {
+      window.scrollTo(0, 0);
+      history.replaceState({}, '', window.location.pathname);
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        // Reduced-motion: just jump to the section after a tick.
+        window.setTimeout(() => target.scrollIntoView({ block: 'start' }), 150);
+      } else {
+        const slowScrollTo = (endY: number, duration: number) => {
+          const startY = window.scrollY;
+          const distance = endY - startY;
+          const startTime = performance.now();
+          const ease = (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          const tick = (now: number) => {
+            const elapsed = now - startTime;
+            const t = Math.min(elapsed / duration, 1);
+            window.scrollTo(0, startY + distance * ease(t));
+            if (t < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        };
+        // Brief settle delay so the page paints at top first.
+        window.setTimeout(() => {
+          const endY = target.getBoundingClientRect().top + window.scrollY;
+          slowScrollTo(endY, 1800);
+        }, 350);
+      }
+    }
   }
 </script>

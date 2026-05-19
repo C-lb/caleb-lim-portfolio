@@ -75,12 +75,13 @@ const paginatedPages = pdfPaginate && thumbCache
 
 const accent = DISCIPLINE_ACCENT[category as Category];
 
-// UI-SPEC.md "Detail page copy" line 303 — back-pill label per discipline
+// UI-SPEC.md "Detail page copy" line 303 — back-pill label per discipline.
+// 2026-05-18 (UAT): Title-cased to match the rest of the site's chrome — was lowercase.
 const backLabel: Record<Category, string> = {
-  design:    '← graphic / design',
-  finance:   '← financial / models',
-  personal:  '← personal / projects',
-  marketing: '← marketing',
+  design:    '← Graphic / Design',
+  finance:   '← Financial / Models',
+  personal:  '← Personal / Projects',
+  marketing: '← Marketing',
 };
 ---
 <Base title={`${title} — Caleb Lim`} bg="paper">
