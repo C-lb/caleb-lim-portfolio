@@ -849,11 +849,17 @@ echo "Phase 5 gates"
 echo "============="
 
 # Gate 23 — topbar ≤700px collapse present (SC1, D-01/D-02/D-03).
-# Astro inlines scoped CSS into each page bundle, so each built HTML where Base.astro is
-# rendered MUST contain the @media (max-width: 700px) breakpoint declaration AND the icon-row
-# aria-labels per 05-UI-SPEC §"Accessible naming for icon glyphs". Pages checked: splash,
-# design gallery, about — covers all three primary surfaces a recruiter lands on.
-# Expected RED until Plan 05-03 lands the topbar collapse — that is correct.
+# Each built HTML where Base.astro is rendered MUST carry the topbar collapse breakpoint
+# AND the icon-row aria-labels per 05-UI-SPEC §"Accessible naming for icon glyphs". Pages
+# checked: splash, design gallery, about — covers all three primary surfaces a recruiter
+# lands on. Expected RED until Plan 05-03 lands the topbar collapse — that is correct.
+#
+# Plan 05-03 deviation (Rule 1, bug-fix vs Plan 05-01 authoring): Astro emits scoped
+# CSS from Base.astro to an EXTERNAL bundle under dist/_astro/*.css (not inlined into the
+# HTML) once total CSS exceeds Astro's inline threshold. Plan 05-01 Task 2 authored Gate
+# 23 assuming inline-only, which never matched what Astro actually emits. The gate is
+# now repaired to grep both the page HTML and every linked stylesheet, and accepts the
+# minified form `@media(max-width:700px)` (Astro/Lightning CSS strips the space).
 gate23_fail=0
 for page in "$DIST/index.html" "$DIST/design/index.html" "$DIST/about/index.html"; do
   if [[ ! -f "$page" ]]; then
@@ -861,8 +867,18 @@ for page in "$DIST/index.html" "$DIST/design/index.html" "$DIST/about/index.html
     gate23_fail=1
     continue
   fi
-  if ! grep -qF '@media (max-width: 700px)' "$page"; then
-    echo "  FAIL: Gate 23 — $page missing @media (max-width: 700px) topbar-collapse breakpoint (SC1, D-03 — expected RED until Plan 05-03 lands)"
+  # Build the set of files to grep: the page HTML + every linked stylesheet href under /_astro/.
+  search_files=("$page")
+  while IFS= read -r css_href; do
+    [[ -z "$css_href" ]] && continue
+    # Resolve href ("/_astro/foo.css") to a dist-relative path ("dist/_astro/foo.css").
+    css_path="$DIST${css_href}"
+    [[ -f "$css_path" ]] && search_files+=("$css_path")
+  done < <(grep -oE 'href="/_astro/[^"]+\.css"' "$page" 2>/dev/null | sed -E 's/href="([^"]+)"/\1/')
+
+  # Accept both spaced and minified forms.
+  if ! grep -qE '@media[[:space:]]*\([[:space:]]*max-width:[[:space:]]*700px[[:space:]]*\)' "${search_files[@]}"; then
+    echo "  FAIL: Gate 23 — $page (and ${#search_files[@]} linked stylesheet(s)) missing @media (max-width: 700px) topbar-collapse breakpoint (SC1, D-03 — expected RED until Plan 05-03 lands)"
     gate23_fail=1
   fi
   # Icon-row aria-labels: at least one of the three mobile icon-glyph aria-labels must be wired.
