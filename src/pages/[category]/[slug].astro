@@ -259,7 +259,7 @@ const backLabel: Record<Category, string> = {
   .full-pdf-link a {
     font-family: var(--serif);
     font-style: italic;
-    font-size: 16px;
+    font-size: var(--fs-body); /* was 16px; migrated to --fs-body (15.5px) per 05-TOKEN-MAP */
     color: var(--ink);
     text-decoration: underline;
     text-decoration-thickness: 1px;
@@ -305,7 +305,7 @@ const backLabel: Record<Category, string> = {
   .pager-title {
     font-family: var(--serif);
     font-style: italic;
-    font-size: 16px;
+    font-size: var(--fs-body); /* was 16px; migrated to --fs-body (15.5px) per 05-TOKEN-MAP */
     line-height: var(--lh-bio);
     color: var(--ink);
     text-decoration: underline;

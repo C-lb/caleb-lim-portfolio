@@ -120,7 +120,7 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 
   .b-card-no {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: var(--fs-card-no); /* was 10px; migrated to --fs-card-no (9px) per 05-TOKEN-MAP — 1px shrink acceptable */
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -137,7 +137,7 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   }
   .b-card-cue {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: var(--fs-card-no); /* was 10px; migrated to --fs-card-no (9px) per 05-TOKEN-MAP */
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;

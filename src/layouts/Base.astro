@@ -169,7 +169,7 @@ const isHome = Astro.url.pathname === '/';
     text-align: center;
     font-family: var(--serif);
     font-style: italic;
-    font-size: 14px;
+    font-size: var(--fs-tile-role); /* was 14px; migrated to --fs-tile-role (13px) per 05-TOKEN-MAP — 1-use, 1px shrink acceptable */
     text-transform: none;
     letter-spacing: 0;
     font-weight: 400;
