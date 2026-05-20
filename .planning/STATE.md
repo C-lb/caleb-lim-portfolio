@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: discussing
-stopped_at: Phase 6 context gathered (11 decisions locked across 4 areas; 3 user-discussed + 1 defaulted)
-last_updated: "2026-05-20T12:00:00.000Z"
-last_activity: 2026-05-20 -- Phase 6 06-CONTEXT.md written; ROADMAP §Phase 6 + REQUIREMENTS FOUND-04 amended per D-07 (Cloudflare → Vercel)
+status: executing
+stopped_at: Phase 5 Wave 2 partial — 05-06 complete (SC3 architecture closed; D-08 surgical reduced-motion policy implemented). 05-07 (touch/hover gating + entrance shimmer + StatusPill mobile shrink) and 05-08 (phase-exit verification) still pending.
+last_updated: "2026-05-20T01:32:15.615Z"
+last_activity: 2026-05-20 -- Phase 6 planning complete
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 28
+  total_plans: 36
   completed_plans: 28
-  percent: 83
+  percent: 78
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-09)
 
 Phase: 06 — DISCUSSING (CONTEXT.md written; 11 decisions locked across 4 areas)
 Plan: 0 of TBD
-Status: Phase 6 discuss complete 2026-05-20. 4 user-presented gray areas, 3 deep-discussed (Caleb-adds-a-piece walkthrough D-01/D-02 → README + numbered screenshots, markdown + image-hero piece only; SEO bundle D-03/D-04 → single static cream-on-ink OG card + @astrojs/sitemap integration, favicon scope clarified mid-session as squid-invader-only; Phase 5 carryovers D-05/D-06/D-07 → fold detail-LCP fix + 3 Plan 05-06 stragglers + amend ROADMAP/REQUIREMENTS docs from Cloudflare to Vercel). Domain + registrar defaulted to Cloudflare Registrar for caleblim.com with fallback chain caleblim.co → caleb.work → caleblimkr.com (D-08). Doc amendments per D-07 applied this commit. Next: /gsd-plan-phase 6.
-Last activity: 2026-05-20 -- 06-CONTEXT.md + 06-DISCUSSION-LOG.md written; ROADMAP §Phase 6 + REQUIREMENTS FOUND-04 amended (Cloudflare → Vercel per D-07)
+Status: Ready to execute
+Last activity: 2026-05-20 -- Phase 6 planning complete
 
 Phase 5 plan DAG (reference): 01 ← {02, 03, 04} ← 05 ← 06 ← 07 ← 08 ← 09 — ✅ complete 2026-05-20
 

@@ -159,7 +159,25 @@ These are the only Phase-4 audit findings that must clear before Phase 6 ships; 
   5. Detail-page hero `<Image>` in `src/pages/[category]/[slug].astro` gets `priority` / `sizes` (mirroring Plan 05-04's splash treatment) — detail-page LCP target <2s (was 3121ms in Plan 05-08 baseline).
   6. Three Plan 05-06 stragglers removed (`StatusPill.astro:77-80`, `[category].astro:136-138`, `[slug].astro:320-322` per-source `transition: none` blocks contradicting D-08 exempt classifications #12, #16, #18) — closes D-08 cleanly before milestone v1.0 ships.
 
-**Plans**: TBD
+**Plans**: 8 plans
+Plans:
+**Wave 0**
+- [ ] 06-01-PLAN.md — Verification scaffolding: 06-VERIFICATION.md + Gates 26a/b/c + Gate 27 + README scaffold
+
+**Wave 1** *(parallel slices; all depends_on [06-01])*
+- [ ] 06-02-PLAN.md — Sitemap + robots.txt slice (@astrojs/sitemap install + astro.config.mjs site URL + public/robots.txt) — closes Gates 26b + 26c (SC4 half)
+- [ ] 06-04-PLAN.md — Detail-page LCP fix slice (D-05 widths={[480,768,960,1280]} on [slug].astro hero <Image>) — closes SC5 build-side
+- [ ] 06-06-PLAN.md — D-07 doc-rot amendments slice (CLAUDE.md + .planning/PROJECT.md Cloudflare→Vercel inline annotations)
+
+**Wave 2** *(sequential after Wave 1 — file-conflict-resolved deps)*
+- [ ] 06-03-PLAN.md — OG card + meta block slice (depends_on [06-01, 06-02] — needs Astro.site defined; also touches package.json so sequenced after 06-02) — closes Gate 26a (SC4 half; D-03 + D-11) — has Caleb visual checkpoint
+- [ ] 06-05-PLAN.md — D-06 straggler removal slice (depends_on [06-01, 06-04] — also touches [slug].astro so sequenced after 06-04) — closes Gate 27 + SC6 build-side
+
+**Wave 3** *(depends_on [06-02, 06-03])*
+- [ ] 06-07-PLAN.md — Domain registration + DNS + HTTPS + 2-step site flip — closes FOUND-04 + SC1 — has decision + 3 human-verify checkpoints
+
+**Wave 4** *(depends_on [06-04, 06-05, 06-06, 06-07])*
+- [ ] 06-08-PLAN.md — Caleb dry run + README population + cross-browser matrix + Lighthouse re-audit + reduced-motion walk + phase-exit sign-off — closes SC2 + SC3 + SC5 + SC6 phenomenologically — has 5 blocking checkpoints
 
 ## Coverage
 
