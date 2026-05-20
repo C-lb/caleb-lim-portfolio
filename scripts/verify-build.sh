@@ -948,6 +948,82 @@ else
   echo "  OK: Gate 25 — zero raw \`font-size: Npx\` literals outside tokens.css"
 fi
 
+echo
+echo "Phase 6 gates"
+echo "============="
+
+# Gate 26a (Phase 6): public/og.png present, is PNG, is 1200x630 (SC4 / D-03 / FOUND-04).
+# OG/Twitter card is a single static cream-on-ink asset reused by every page via Base.astro
+# meta block (D-03). Dimension lock guards the 1200x630 spec OpenGraph + Twitter Cards both expect.
+# Expected RED until Phase 6 Plan 06-03 lands the rendered card — that is correct.
+if [[ ! -f "public/og.png" ]]; then
+  echo "  FAIL: Gate 26a — public/og.png missing (SC4 / D-03 — expected RED pre-Wave 1, satisfied by Plan 06-03)"
+  fail=1
+else
+  dims=$(file public/og.png | grep -oE '[0-9]+ x [0-9]+' | head -1)
+  if [[ "$dims" != "1200 x 630" ]]; then
+    echo "  FAIL: Gate 26a — public/og.png is $dims, expected 1200 x 630 (SC4 / D-03)"
+    fail=1
+  else
+    echo "  OK: Gate 26a — public/og.png present at 1200 x 630"
+  fi
+fi
+
+# Gate 26b (Phase 6): dist/sitemap-index.xml + dist/sitemap-0.xml exist post-build (SC4 / D-04).
+# Emitted by @astrojs/sitemap integration in astro.config.mjs (per D-04). robots.txt at Gate 26c
+# references the index file; the two gates pair to lock the SEO crawl contract.
+# Expected RED until Phase 6 Plan 06-02 wires the integration — that is correct.
+gate26b_fail=0
+for sm in "$DIST/sitemap-index.xml" "$DIST/sitemap-0.xml"; do
+  if [[ ! -f "$sm" ]]; then
+    echo "  FAIL: Gate 26b — $sm missing (@astrojs/sitemap not emitting; SC4 / D-04 — expected RED pre-Wave 1, satisfied by Plan 06-02)"
+    gate26b_fail=1
+  fi
+done
+if [[ $gate26b_fail -eq 0 ]]; then
+  echo "  OK: Gate 26b — sitemap-index.xml + sitemap-0.xml present in $DIST"
+else
+  fail=1
+fi
+
+# Gate 26c (Phase 6): public/robots.txt present + references sitemap-index.xml (SC4 / D-04).
+# Hand-authored 4-line file (per PATTERNS.md): User-agent / Allow / blank / Sitemap line.
+# Pairs with Gate 26b — the sitemap exists in dist/ AND robots.txt advertises it to crawlers.
+# Expected RED until Phase 6 Plan 06-02 hand-authors the file — that is correct.
+if [[ ! -f "public/robots.txt" ]]; then
+  echo "  FAIL: Gate 26c — public/robots.txt missing (SC4 / D-04 — expected RED pre-Wave 1, satisfied by Plan 06-02)"
+  fail=1
+elif ! grep -q '^Sitemap:.*sitemap-index\.xml' public/robots.txt; then
+  echo "  FAIL: Gate 26c — public/robots.txt missing 'Sitemap: <url>/sitemap-index.xml' line (SC4 / D-04)"
+  fail=1
+else
+  echo "  OK: Gate 26c — public/robots.txt references sitemap-index.xml"
+fi
+
+# Gate 27 (Phase 6): zero "transition: none" inside @media (prefers-reduced-motion: reduce) blocks
+# across the three D-06 files (SC6 / D-06 / D-08). Regression-locks Plan 06-05's straggler removal
+# so the D-08 exempt motions (#12 StatusPill hover scale, #16 back-pill color, #18 pager color)
+# fire under reduced-motion as designed. Multi-line perl slurp catches the @media{...transition:none}
+# combination that single-line grep would miss.
+# Expected RED until Phase 6 Plan 06-05 lands the straggler removal — that is correct.
+# Plan 06-01 deviation (Rule 1 — bug fix): the m{...} delimiter form from PATTERNS.md
+# §Pattern 27 silently breaks because '}' inside the [^}]* character class terminates the
+# regex at the first inner brace. Switched delimiter to m!...! so braces inside the pattern
+# are literal. Verified: this form FAILs on the three D-06 files (transition:none present)
+# and OKs once the blocks are removed — exactly the regression behavior Gate 27 needs.
+gate27_fail=0
+for src_file in src/components/StatusPill.astro src/pages/\[category\].astro src/pages/\[category\]/\[slug\].astro; do
+  if perl -0777 -ne 'exit 1 if m!\@media\s*\(\s*prefers-reduced-motion:\s*reduce\s*\)\s*\{[^}]*transition:\s*none!s' "$src_file"; then
+    echo "  OK: Gate 27 — $src_file has no transition:none inside prefers-reduced-motion block"
+  else
+    echo "  FAIL: Gate 27 — $src_file contains transition:none inside prefers-reduced-motion (D-08 violation #12/#16/#18 — expected RED until Plan 06-05 lands D-06 cleanup)"
+    gate27_fail=1
+  fi
+done
+if [[ $gate27_fail -ne 0 ]]; then
+  fail=1
+fi
+
 echo "=========================="
 if [[ $fail -eq 0 ]]; then
   echo "ALL GREEN"
