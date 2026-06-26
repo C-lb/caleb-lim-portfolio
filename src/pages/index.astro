@@ -11,6 +11,9 @@ import portrait3 from '../assets/portrait3.jpg';
 import portrait4 from '../assets/portrait4.jpg';
 import portrait5 from '../assets/portrait5.jpeg';
 const portraits = [portrait1, portrait2, portrait3, portrait4, portrait5];
+// Easter-egg gift assets — cycled (with the chiptune + pop) on every brand click
+// past 22. portrait5 leads since it's the first reveal.
+const eggAssets = [portrait5, portrait1, portrait2, portrait3, portrait4];
 // Optional per-slide caption. Null = no caption.
 // 2026-05-18 (UAT): captions on 2/3/4 — portraits 1 and 5 caption-less.
 const portraitCaptions: (string | null)[] = [null, 'graphic design', 'event hosting', 'social impact', null];
@@ -59,6 +62,27 @@ const gridTemplate = {
 void DISCIPLINE_ACCENT;
 ---
 <Base title="Caleb Lim — Portfolio" bg="paper">
+  {/* First-visit intro. White blurred overlay; the line lifts in saying "What's
+      up?", backspaces, types "Welcome.", then the overlay lifts away to reveal the
+      page. Driven by the script below; once per session; skipped under
+      reduced-motion. Present at first paint so the homepage never flashes. */}
+  <div class="intro" data-intro aria-hidden="true">
+    <div class="intro-stack">
+      <p class="intro-line">
+        <span class="intro-text" data-intro-text></span><span class="intro-caret" data-intro-caret aria-hidden="true"></span>
+      </p>
+      {/* Easter-egg photo — src is set lazily in JS (cycling the list below) so it
+          never loads for normal visitors. */}
+      <img class="intro-egg" data-intro-egg data-egg-srcs={JSON.stringify(eggAssets.map((a) => a.src))} alt="Caleb Lim" decoding="async" />
+    </div>
+    {/* At the 5th brand click — points up to the top-right nav buttons. */}
+    <div class="intro-arrow" data-intro-arrow aria-hidden="true">
+      <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 104 C 30 60, 60 36, 100 24" />
+        <path d="M74 22 L 104 20 L 96 50" />
+      </svg>
+    </div>
+  </div>
   <section class="b-splash">
     <div class="b-hero">
       <div class="b-portrait" data-portrait-carousel data-bp-interval="3000">
@@ -102,9 +126,7 @@ void DISCIPLINE_ACCENT;
         <span class="bb-tint" aria-hidden="true"></span>
         <span class="bb-edge" aria-hidden="true"></span>
         <div class="b-bio-head">
-          <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
-          <h2>the short version</h2>
-          <span class="b-bio-arrow"><span class="b-bio-arrow-glyph" aria-hidden="true">→</span> KEEP READING</span>
+          <h2>About Me</h2>
         </div>
         <p>I never learned to pick one lane. Some weeks I'm deep in a financial model, others I'm drawing a brand or writing the words that tie it all together. What I care about most is the people the work is really for. Have a look around, and if something clicks, come say hi.</p>
       </a>
@@ -123,6 +145,136 @@ void DISCIPLINE_ACCENT;
 </Base>
 
 <style>
+  /* ---------- First-visit intro overlay ---------- */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: var(--sp-6);
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(16px) saturate(1.05);
+    backdrop-filter: blur(16px) saturate(1.05);
+    /* The exit lift — also blurs and smears as it leaves. */
+    transition: transform 780ms cubic-bezier(0.76, 0, 0.18, 1),
+                opacity 780ms ease,
+                filter 780ms ease,
+                -webkit-backdrop-filter 780ms ease,
+                backdrop-filter 780ms ease;
+    will-change: transform, filter;
+  }
+  .intro.is-exiting {
+    transform: translateY(-100%);
+    opacity: 0;
+    filter: blur(12px);
+    -webkit-backdrop-filter: blur(36px) saturate(1.05);
+    backdrop-filter: blur(36px) saturate(1.05);
+  }
+  .intro.is-done { display: none; }
+
+  .intro-line {
+    margin: 0;
+    display: inline-flex;
+    align-items: baseline; /* caret bottom sits on the text baseline */
+    gap: 0.04em;
+    line-height: 1;
+    /* font-size lives here so the caret's em-based height scales with the text */
+    font-size: clamp(40px, 8vw, 92px);
+  }
+  .intro-text {
+    font-family: var(--sans);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    white-space: nowrap;
+    /* lift-in start state */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 640ms ease, transform 640ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .intro-caret {
+    width: 0.06em;
+    height: 0.72em; /* cap height — matches the letters */
+    background: var(--ink);
+    border-radius: 1px;
+    /* lift-in start state, mirrors the text */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 640ms ease, transform 640ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .intro.is-lifted .intro-text,
+  .intro.is-lifted .intro-caret {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Steady while typing/deleting; blinks during the holds (class toggled in JS). */
+  .intro-caret.is-blinking { animation: intro-blink 1s step-end infinite; }
+  @keyframes intro-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+
+  /* Line + (hidden) easter-egg photo, stacked and centred. */
+  .intro-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(22px, 4vw, 40px);
+  }
+  .intro-egg {
+    display: none;
+    width: clamp(170px, 34vw, 280px);
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 30px 64px -28px rgba(10, 10, 10, 0.55);
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  /* Pop the photo in with a little overshoot when the egg fires. */
+  .intro.show-egg .intro-egg {
+    display: block;
+    animation: egg-pop 620ms cubic-bezier(0.2, 1.3, 0.4, 1) forwards;
+  }
+  @keyframes egg-pop {
+    0%   { opacity: 0; transform: scale(0.5) rotate(-6deg); }
+    60%  { opacity: 1; transform: scale(1.06) rotate(2deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  /* "Click my other buttons" arrow — pinned top-right, pointing up at the nav. */
+  .intro-arrow {
+    position: absolute;
+    top: clamp(58px, 8vh, 92px);
+    right: clamp(26px, 6vw, 78px);
+    width: clamp(64px, 11vw, 104px);
+    color: var(--ink);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro-arrow svg { width: 100%; height: auto; display: block; }
+  .intro.show-arrow .intro-arrow {
+    animation: arrow-in 360ms ease forwards, arrow-bob 1.1s ease-in-out 360ms infinite;
+  }
+  @keyframes arrow-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.9); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes arrow-bob {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(6px, -6px); }
+  }
+
+  /* Reduced motion: no lift, no typing — the script removes the overlay at once. */
+  @media (prefers-reduced-motion: reduce) {
+    .intro,
+    .intro-text,
+    .intro-caret { transition: none; }
+    .intro-caret.is-blinking { animation: none; }
+    .intro.show-egg .intro-egg { animation: none; opacity: 1; transform: none; }
+    .intro.show-arrow .intro-arrow { animation: none; opacity: 1; transform: none; }
+  }
+
   /* --- Sketch lines 283-530 verbatim, adapted to scoped Astro --- */
   .b-splash {
     min-height: calc(100vh - 120px); /* leave room for Base topbar + footer */
@@ -534,19 +686,52 @@ void DISCIPLINE_ACCENT;
       inset 0 0 22px rgba(255, 255, 255, 0.05);
     pointer-events: none;
   }
-  /* Bio entrance shake is hover-gated per Plan 05-07 planner discretion
-     (notes.planner_discretion). On touch (where (hover: none) is true) the
-     D-07 entrance shimmer added in Plan 05-07 Task 2 is the substitute
-     entrance motion — gating bio-shake to (hover: hover) prevents the rare
-     ~1150ms overlap window where shimmer would clobber bio-shake mid-flight.
-     D-08 still classifies bio-shake first-paint as EXEMPT under
-     prefers-reduced-motion: no-preference; the reduced-motion
-     `.b-bio { animation: none }` rule from Plan 05-06 stays OUTSIDE this
-     hover gate (see ~50 lines below). */
-  @media (hover: hover) and (pointer: fine) {
-    .b-bio {
-      animation: bio-shake 750ms ease-in-out 400ms 1;
-    }
+  /* Bio entrance: same Apple border-flow sheen + glow bloom as the discipline
+     cards (DisciplineCard.astro). The shared script adds .is-entered on
+     scroll-in; reduced-motion no-ops it. @property is registered globally, so
+     redeclaring here is harmless. */
+  @property --sheen-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  .b-bio::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: conic-gradient(from var(--sheen-angle),
+      rgba(242, 235, 219, 0) 0deg,
+      rgba(242, 235, 219, 0) 50deg,
+      rgba(242, 235, 219, 0.85) 84deg,
+      rgba(255, 251, 240, 1) 90deg,
+      rgba(242, 235, 219, 0) 98deg,
+      rgba(242, 235, 219, 0) 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .b-bio.is-entered::after {
+    animation: border-flow 1500ms cubic-bezier(0.22, 0.61, 0.36, 1) 1;
+  }
+  @keyframes border-flow {
+    0%   { opacity: 0; --sheen-angle: 0deg; }
+    10%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; --sheen-angle: 400deg; }
+  }
+  .b-bio.is-entered {
+    animation: bio-glow 1500ms ease-out 1;
+  }
+  @keyframes bio-glow {
+    0%   { box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7), 0 0 0 0 rgba(242, 235, 219, 0); }
+    35%  { box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7), 0 0 26px 1px rgba(242, 235, 219, 0.16); }
+    100% { box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7), 0 0 0 0 rgba(242, 235, 219, 0); }
   }
   /* Content sits above the glass layers (warp/tint/edge are z-index 0–2). */
   .b-bio > .b-bio-head,
@@ -563,67 +748,28 @@ void DISCIPLINE_ACCENT;
         0 14px 28px rgba(15, 13, 12, 0.24),
         0 4px 10px rgba(15, 13, 12, 0.14);
       z-index: 10;
-      animation-play-state: paused;
     }
     .b-bio:hover .bb-tint { background: rgba(12, 11, 10, 0.46); }
   }
-  /* No reduced-motion override on `.b-bio::before`: the liquid-glass overlay's
-     380ms opacity fade is EXEMPT per D-08 #9 (user-initiated hover feedback).
-     A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1
-     deviation — it contradicted the plan's truth #4 ("liquid-glass overlay fade
-     still fires under reduced-motion") in the same way the global hammer did.
-     The surgical `.b-bio { animation: none }` for the entrance shake lives
-     after the `@keyframes bio-shake` definition below. */
+  /* The liquid-glass hover fade stays exempt under reduced-motion (user-initiated
+     hover feedback); only the entrance sheen + glow is disabled, just below. */
   .b-bio:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
-  /* Same gentle shape as .b-card's card-shake — separate keyframes name because
-     the bio card lives outside the DisciplineCard scoped style block. */
-  @keyframes bio-shake {
-    0%, 100% { transform: rotate(var(--rest-rotate)); }
-    15%      { transform: rotate(calc(var(--rest-rotate) - 1.2deg)) translateX(-1px); }
-    30%      { transform: rotate(calc(var(--rest-rotate) + 1.2deg)) translateX(1px); }
-    45%      { transform: rotate(calc(var(--rest-rotate) - 0.8deg)) translateX(-0.6px); }
-    60%      { transform: rotate(calc(var(--rest-rotate) + 0.8deg)) translateX(0.6px); }
-    75%      { transform: rotate(calc(var(--rest-rotate) - 0.4deg)); }
-    90%      { transform: rotate(calc(var(--rest-rotate) + 0.4deg)); }
-  }
-  /* Surgical reduced-motion disable for the 750ms bio entrance shake (D-08 #4,
-     05-RESEARCH §3.4 step 2). Hover-tilt, liquid-glass fade, and the static rest
-     tilt (rotate 0.5deg) remain exempt — they are not animations and are not
-     touched here. The carousel slide-transition guard for `.b-portrait .bp-slide`
-     stays at its existing position (~line 204). */
+  /* Reduced-motion disable for the bio entrance sheen + glow. Hover-lift, the
+     liquid-glass fade, and the static rest are exempt (not animations). The
+     carousel slide-transition guard for `.b-portrait .bp-slide` stays put. */
   @media (prefers-reduced-motion: reduce) {
-    .b-bio {
+    .b-bio.is-entered,
+    .b-bio.is-entered::after {
       animation: none;
     }
   }
-  .b-bio-tag {
-    font-family: var(--mono);
-    font-size: var(--fs-mono);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: var(--sp-2);
-  }
-  .b-bio-tag-star {
-    display: inline-block;
-    font-size: 1.7em; /* upsize the star vs. the surrounding mono tag text */
-    line-height: 1;
-    vertical-align: middle; /* aligns vertical midpoint with baseline + half x-height of the caps */
-    position: relative;
-    top: -0.22em; /* lift so the star's geometric center sits on the cap-midpoint of ABOUT, not on its x-height */
-    margin-right: 0.18em;
-  }
-  /* h3 → h2 per Plan 05-09 Task 3 (closes Lighthouse heading-order audit — splash
-     had h1 → h3 skip). Visual contract unchanged: same font / weight / size token. */
   .b-bio h2 {
     font-family: var(--sans);
     font-weight: 700;
     font-size: var(--fs-h3);
     line-height: 1.05;
     letter-spacing: -0.02em;
-    text-transform: uppercase;
-    margin: 0 0 var(--sp-2);
+    margin: 0;
   }
   .b-bio p {
     font-family: var(--serif);
@@ -653,37 +799,6 @@ void DISCIPLINE_ACCENT;
     width: 120px;
     height: 120px;
   }
-  /* 2026-05-18 (UAT): KEEP READING CTA switched sans → mono. Stacked above the
-     enlarged silhouette via z-index so the text always reads even though it sits
-     within the silhouette's bottom-right footprint. */
-  .b-bio-arrow {
-    position: static;
-    margin-top: var(--sp-3);
-    font-family: var(--mono);
-    font-weight: 700;
-    font-size: var(--fs-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--paper);
-    z-index: 3;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    line-height: 1;
-    justify-self: start;
-  }
-  /* 2026-05-18 (UAT): arrow glyph trimmed 50% — was 22px (visually overpowered
-     the KEEP READING caps); now 11px to match the body text weight while still
-     reading as a separate glyph from the surrounding letterforms. */
-  .b-bio-arrow-glyph {
-    font-family: var(--sans);
-    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: 0;
-    color: var(--paper);
-  }
-
   /* QUIET DIVIDER (was the question bar). Lower-contrast hairlines than before. */
   .b-question {
     border-top: 1px solid rgba(10, 10, 10, 0.10);
@@ -780,9 +895,384 @@ void DISCIPLINE_ACCENT;
   }
 </style>
 
+{/* Global: during the 5th brand click, lift the topbar above the intro overlay
+    (which is z-index 200) so the real nav buttons show over the white, and pulse
+    them so the arrow has something to point at. The topbar lives in Base.astro,
+    so this must be a global rule. */}
+<style is:global>
+  .topbar.nav-spotlight {
+    position: relative;
+    z-index: 300;
+  }
+  .topbar.nav-spotlight nav {
+    border-radius: 12px;
+    animation: nav-pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes nav-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(10, 10, 10, 0); }
+    50%      { box-shadow: 0 0 0 6px rgba(10, 10, 10, 0.07); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .topbar.nav-spotlight nav { animation: none; }
+  }
+</style>
+
 <script>
+  // First-visit intro overlay. Sequence: lift in "What's up?", backspace it,
+  // type "Welcome.", then lift the whole overlay away to reveal the homepage.
+  // Runs once per session; reduced-motion (or a thrown error) reveals at once.
+  (() => {
+    const intro = document.querySelector<HTMLElement>('[data-intro]');
+    if (!intro) return;
+    const textEl = intro.querySelector<HTMLElement>('[data-intro-text]');
+    const caret = intro.querySelector<HTMLElement>('[data-intro-caret]');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const seen = sessionStorage.getItem('introSeen') === '1';
+
+    // Broadcast once the intro is finished (or skipped) so the card glimmer and
+    // the cycling greeting can hold off until the page is fully revealed.
+    const signalDone = () => {
+      if ((window as any).__introDone) return;
+      (window as any).__introDone = true;
+      document.dispatchEvent(new Event('intro:done'));
+    };
+
+    const reveal = () => {
+      intro.classList.add('is-done');
+      document.documentElement.style.overflow = '';
+      try { sessionStorage.setItem('introSeen', '1'); } catch {}
+      signalDone();
+    };
+
+    // Missing markup → nothing to animate. Otherwise keep going: the helpers below
+    // stay defined even on repeat visits / reduced-motion so the brand-click replay
+    // still works; only the first-visit auto-run is gated (see the dispatch block).
+    if (!textEl || !caret) { reveal(); return; }
+
+    // --- Intro sound effects. Synthesized with Web Audio (no asset files): a soft
+    // key-click per typed character, a filtered-noise whoosh on each lift. Volume
+    // is deliberately low. Best-effort under browser autoplay rules — the context
+    // only produces sound once it's running, which a prior gesture grants; we also
+    // try to resume it on the first interaction so repeat plays are reliable. ---
+    let actx: AudioContext | null = null;
+    const AC = (window.AudioContext || (window as any).webkitAudioContext);
+    const getCtx = () => {
+      if (!AC) return null;
+      if (!actx) { try { actx = new AC(); } catch { return null; } }
+      if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
+      return actx;
+    };
+    ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
+      window.addEventListener(ev, () => getCtx(), { once: true, passive: true }));
+
+    let noiseBuf: AudioBuffer | null = null;
+    const getNoise = (ctx: AudioContext) => {
+      if (noiseBuf) return noiseBuf;
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      return noiseBuf;
+    };
+    // A "creamy" tactile keypress: a rounded low thock for body + a short ceramic
+    // tap transient on top, run through a gentle lowpass so the top end stays soft
+    // rather than clicky. Lightly randomised per key so it doesn't read as robotic.
+    const playTick = () => {
+      const ctx = getCtx();
+      if (!ctx || ctx.state !== 'running') return;
+      const t = ctx.currentTime;
+      // shared rounding lowpass → pulled low so the top stays muted and round
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 2600 + Math.random() * 600;
+      lp.connect(ctx.destination);
+
+      // 1) Body — the thock: deep triangle with a quick downward pitch drop,
+      //    weighted heavier and held a touch longer for a fuller knock.
+      const body = ctx.createOscillator();
+      const bg = ctx.createGain();
+      body.type = 'triangle';
+      const f0 = 158 + Math.random() * 30;
+      body.frequency.setValueAtTime(f0, t);
+      body.frequency.exponentialRampToValueAtTime(88, t + 0.07);
+      bg.gain.setValueAtTime(0.0001, t);
+      bg.gain.exponentialRampToValueAtTime(0.12, t + 0.006);
+      bg.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+      body.connect(bg).connect(lp);
+      body.start(t);
+      body.stop(t + 0.15);
+
+      // 2) Tap — subtle low-mid transient just for definition; kept quiet and dark
+      //    so the body reads as the thock, not a click.
+      const tap = ctx.createBufferSource();
+      tap.buffer = getNoise(ctx);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1500 + Math.random() * 600;
+      bp.Q.value = 0.9;
+      const tg = ctx.createGain();
+      tg.gain.setValueAtTime(0.0001, t);
+      tg.gain.exponentialRampToValueAtTime(0.028, t + 0.002);
+      tg.gain.exponentialRampToValueAtTime(0.0001, t + 0.016);
+      tap.connect(bp).connect(tg).connect(lp);
+      tap.start(t, Math.random() * 0.5, 0.025);
+      tap.stop(t + 0.035);
+    };
+    // Deep whoosh: a dark low-passed noise sweep plus a sub-bass sine glide
+    // underneath for weight, so the lift reads as a low *whump* not an airy hiss.
+    const playWhoosh = () => {
+      const ctx = getCtx();
+      if (!ctx || ctx.state !== 'running') return;
+      const t = ctx.currentTime;
+      // body — low-passed noise, swept low so it stays dark
+      const src = ctx.createBufferSource();
+      src.buffer = getNoise(ctx);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.Q.value = 0.6;
+      lp.frequency.setValueAtTime(160, t);
+      lp.frequency.exponentialRampToValueAtTime(1000, t + 0.30);
+      lp.frequency.exponentialRampToValueAtTime(200, t + 0.72);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.17, t + 0.14);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.76);
+      src.connect(lp).connect(g).connect(ctx.destination);
+      src.start(t);
+      src.stop(t + 0.78);
+      // sub — a quiet sine glide for depth
+      const sub = ctx.createOscillator();
+      const sg = ctx.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(64, t);
+      sub.frequency.exponentialRampToValueAtTime(140, t + 0.18);
+      sub.frequency.exponentialRampToValueAtTime(50, t + 0.62);
+      sg.gain.setValueAtTime(0.0001, t);
+      sg.gain.exponentialRampToValueAtTime(0.10, t + 0.12);
+      sg.gain.exponentialRampToValueAtTime(0.0001, t + 0.64);
+      sub.connect(sg).connect(ctx.destination);
+      sub.start(t);
+      sub.stop(t + 0.66);
+    };
+
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const backspace = async () => {
+      while (textEl.textContent && textEl.textContent.length) {
+        textEl.textContent = textEl.textContent.slice(0, -1);
+        playTick();
+        await wait(46);
+      }
+    };
+    const typeIn = async (str: string) => {
+      for (const ch of str) { textEl.textContent += ch; playTick(); await wait(82); }
+    };
+    const armAudio = async () => {
+      const ac = getCtx();
+      if (ac && ac.state === 'suspended') { try { await ac.resume(); } catch {} }
+    };
+    const exit = () => {
+      document.documentElement.style.overflow = '';
+      playWhoosh();                          // overlay lifts away
+      intro.classList.add('is-exiting');
+      let done = false;
+      const finish = () => { if (done) return; done = true; intro.classList.add('is-done'); signalDone(); };
+      intro.addEventListener('transitionend', finish, { once: true });
+      window.setTimeout(finish, 1000); // failsafe if transitionend doesn't fire
+      try { sessionStorage.setItem('introSeen', '1'); } catch {}
+    };
+
+    let busy = false; // ignore brand re-clicks while an animation is playing
+
+    // First visit: lift in "What's up?", backspace, type "Welcome.", lift away.
+    const playFirstVisit = async () => {
+      busy = true;
+      try {
+        document.documentElement.style.overflow = 'hidden'; // lock scroll while up
+        await armAudio();                       // so the enter whoosh isn't swallowed
+        textEl.textContent = "What's up?";
+        await wait(280);
+        intro.classList.add('is-lifted');     // lift the line in
+        playWhoosh();
+        caret.classList.add('is-blinking');
+        await wait(950);                        // hold
+        caret.classList.remove('is-blinking');  // steady while deleting/typing
+        await backspace();
+        await wait(240);
+        await typeIn('Welcome.');
+        caret.classList.add('is-blinking');
+        await wait(1000);                       // hold
+        exit();
+        await wait(840);                        // let the lift finish before unlocking
+      } catch {
+        reveal();
+      } finally {
+        busy = false;
+      }
+    };
+
+    // Reset the (hidden) overlay to its base state without playing the exit
+    // transition in reverse — clear the lift/exit/egg classes while still
+    // display:none, then reveal at base and commit before the next lift-in.
+    const topbar = document.querySelector<HTMLElement>('.topbar');
+    const resetForReplay = () => {
+      intro.classList.remove('is-exiting', 'is-lifted', 'show-egg', 'show-arrow');
+      topbar?.classList.remove('nav-spotlight');
+      caret.classList.remove('is-blinking');
+      textEl.textContent = '';
+      void intro.offsetHeight;
+      intro.classList.remove('is-done');
+      void intro.offsetHeight;
+    };
+
+    // Brand re-click responses, by patience level. Caleb warms up, then slowly
+    // wears down. Tier is chosen by click count (1..21). Each line shows at most
+    // once per session; the 5th is a fixed "click my other buttons" pointer.
+    const PATIENCE = [
+      { upTo: 5,  lines: ['Hey!', "Caleb Lim! That's me!", 'Glad to be of help!', 'Yo!', 'Hello there!', 'Feel free to browse!'] },
+      { upTo: 11, lines: ['Yep, still me.', 'Need something?', 'Hi again!', 'At your service.', 'Mhm?', 'Oh, hi.', 'Yes? Yes?'] },
+      { upTo: 17, lines: ['Okay... You keep pressing...', 'Still me...', 'You good?', 'Hey! That tickles!', 'Easy there.', 'Why though?', 'Getting repetitive...'] },
+      { upTo: 21, lines: ['Bro click somewhere else.', 'What now?', 'Again? Really?', 'Seriously?', "I've got work to do.", 'Stop poking me!'] },
+    ];
+    const GIFT_LINES = ['Here you go.', 'Another one.', 'Take this too.', 'All yours.', 'Here, have this.', 'Enjoy!'];
+
+    // Lines already shown this session never repeat (persisted across reloads).
+    let used = new Set<string>();
+    try { used = new Set(JSON.parse(sessionStorage.getItem('brandUsed') || '[]')); } catch {}
+    const remember = (line: string) => {
+      used.add(line);
+      try { sessionStorage.setItem('brandUsed', JSON.stringify([...used])); } catch {}
+    };
+    const pickFrom = (pool: string[], avoidRepeat = true) => {
+      let cands = avoidRepeat ? pool.filter((l) => !used.has(l)) : pool;
+      if (!cands.length) cands = pool;                 // pool exhausted → allow reuse
+      const line = cands[Math.floor(Math.random() * cands.length)];
+      if (avoidRepeat) remember(line);
+      return line;
+    };
+    const pickLine = (pos: number) => {
+      const tier = PATIENCE.find((p) => pos <= p.upTo) ?? PATIENCE[PATIENCE.length - 1];
+      return pickFrom(tier.lines);
+    };
+
+    // A cheery NES-style "you got an item" fanfare for the easter egg.
+    const playFanfare = () => {
+      const ctx = getCtx();
+      if (!ctx || ctx.state !== 'running') return;
+      const t0 = ctx.currentTime + 0.03;
+      const master = ctx.createGain();
+      master.gain.value = 0.9;
+      const soft = ctx.createBiquadFilter();
+      soft.type = 'lowpass';
+      soft.frequency.value = 4200;
+      master.connect(soft).connect(ctx.destination);
+      const blip = (f: number, st: number, d: number, g = 0.09) => {
+        const o = ctx.createOscillator();
+        const ge = ctx.createGain();
+        o.type = 'square';
+        o.frequency.setValueAtTime(f, t0 + st);
+        ge.gain.setValueAtTime(0.0001, t0 + st);
+        ge.gain.exponentialRampToValueAtTime(g, t0 + st + 0.012);
+        ge.gain.exponentialRampToValueAtTime(0.0001, t0 + st + d);
+        o.connect(ge).connect(master);
+        o.start(t0 + st);
+        o.stop(t0 + st + d + 0.02);
+      };
+      blip(659, 0.00, 0.11);          // E5
+      blip(784, 0.11, 0.11);          // G5
+      blip(988, 0.22, 0.11);          // B5
+      blip(1319, 0.33, 0.42);         // E6 (held lead)
+      blip(1568, 0.33, 0.42, 0.05);   // G6 harmony
+      blip(2093, 0.70, 0.09, 0.05);   // sparkle
+      blip(2637, 0.80, 0.12, 0.05);   // sparkle up
+    };
+
+    // Session click count persists across reloads within the tab.
+    let clicks = Number(sessionStorage.getItem('brandClicks') || '0');
+    const egg = intro.querySelector<HTMLImageElement>('[data-intro-egg]');
+    let eggSrcs: string[] = [];
+    try { eggSrcs = JSON.parse(egg?.dataset.eggSrcs || '[]'); } catch {}
+
+    const playBothered = async () => {
+      if (busy) return;
+      busy = true;
+      clicks += 1;
+      try { sessionStorage.setItem('brandClicks', String(clicks)); } catch {}
+
+      // Once 22 is reached it stays in "gift" mode: every click hands over another
+      // asset with the chiptune + pop. Click 22 is the grudging first reveal.
+      const isGift = clicks >= 22;
+      const isArrow = clicks === 5;
+      let line: string;
+      if (clicks === 22) line = 'Okay! Okay! Fine. You can have this.';
+      else if (isGift) line = pickFrom(GIFT_LINES, false);
+      else if (isArrow) line = 'I have other buttons you can click!';
+      else line = pickLine(clicks);
+
+      try {
+        resetForReplay();
+        document.documentElement.style.overflow = 'hidden';
+        await armAudio();
+        await wait(60);                         // let the overlay paint
+        intro.classList.add('is-lifted');
+        playWhoosh();                            // line lifts in
+        caret.classList.add('is-blinking');
+        await wait(420);
+        caret.classList.remove('is-blinking');
+        await typeIn(line);
+        caret.classList.add('is-blinking');
+
+        if (isGift) {
+          await wait(380);
+          if (egg && eggSrcs.length) egg.src = eggSrcs[(clicks - 22) % eggSrcs.length];
+          intro.classList.add('show-egg');       // pop the photo in
+          playFanfare();
+          await wait(2600);                       // hold on the reveal
+        } else if (isArrow) {
+          topbar?.classList.add('nav-spotlight');  // lift the nav above the overlay
+          intro.classList.add('show-arrow');
+          await wait(2400);                         // hold so they see the pointer
+          intro.classList.remove('show-arrow');
+          topbar?.classList.remove('nav-spotlight');
+        } else {
+          await wait(1100);                       // hold on the line
+        }
+
+        exit();
+        await wait(840);
+      } catch {
+        intro.classList.add('is-done');
+        document.documentElement.style.overflow = '';
+        topbar?.classList.remove('nav-spotlight');
+      } finally {
+        busy = false;
+      }
+    };
+
+    // First-visit auto-run is gated to once per session and skipped under
+    // reduced-motion; either way the page is revealed for the card glimmer/greeting.
+    if (reduced || seen) reveal();
+    else playFirstVisit();
+
+    // Wire the top-left brand link to replay the bothered version. Only when motion
+    // is allowed — under reduced-motion the link just navigates home as normal.
+    if (!reduced) {
+      const brand = document.querySelector<HTMLAnchorElement>('.topbar .brand');
+      brand?.addEventListener('click', (e) => {
+        e.preventDefault();
+        playBothered();
+      });
+    }
+  })();
+
+  // Run a callback once the intro overlay is done (or immediately if it already
+  // finished / isn't present, e.g. a page without the intro).
+  const onIntroDone = (cb: () => void) => {
+    if ((window as any).__introDone || !document.querySelector('[data-intro]')) cb();
+    else document.addEventListener('intro:done', cb, { once: true });
+  };
+
   // Cycling typed greeting above the name. Types a line out, holds, deletes, and
-  // moves to the next — looping. Reduced-motion users just see the first line.
+  // moves to the next — looping. Held until the intro completes so the two typers
+  // don't run at once. Reduced-motion users just see the first line.
   const greetEl = document.querySelector<HTMLElement>('[data-greet]');
   if (greetEl) {
     const greetings = [
@@ -807,7 +1297,7 @@ void DISCIPLINE_ACCENT;
         else if (deleting && ci === 0) { deleting = false; gi = (gi + 1) % greetings.length; delay = 350; }
         window.setTimeout(tick, delay);
       };
-      window.setTimeout(tick, 600);
+      onIntroDone(() => window.setTimeout(tick, 600));
     }
   }
 

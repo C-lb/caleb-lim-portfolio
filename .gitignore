@@ -1,6 +1,11 @@
 node_modules
 dist
 .astro
+
+# intake staging — keep the folder + its README, ignore dropped/processed files
+intake/*
+!intake/README.md
+
 .env
 .env.production
 .DS_Store

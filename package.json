@@ -9,6 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "new-piece": "node scripts/new-piece.mjs",
     "pdf-poc": "node scripts/pdf-poc.mjs",
     "pdf-preprocess": "node scripts/pdf-preprocess.mjs",
     "prebuild": "node scripts/pdf-preprocess.mjs",
