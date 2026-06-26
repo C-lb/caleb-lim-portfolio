@@ -138,6 +138,14 @@ const isHome = Astro.url.pathname === '/';
      is:global is required so the body class selector wins (scoped styles hash). */
   body.bg-paper { background: var(--paper); color: var(--ink); }
   body.bg-ink   { background: var(--ink);   color: var(--paper); }
+  /* Guard against phantom horizontal scroll on phones: decorative absolutely
+     positioned elements (hover tooltips, off-screen carousel slides) can extend
+     past the viewport and create a sliver of horizontal scroll. clip blocks page
+     horizontal scroll without affecting vertical scroll or any inner scroll
+     container (e.g. the discipline-card carousel keeps its own overflow-x). Clip
+     on html too — body-only clip lets the overflow escape to the root, which stays
+     visible, so the page still scrolls sideways. */
+  html, body { overflow-x: clip; }
 </style>
 
 <style>
@@ -276,5 +284,17 @@ const isHome = Astro.url.pathname === '/';
       align-items: center;
       justify-content: center;
     }
+    /* Two-row topbar on phones: brand + icon nav share the top row, the
+       "open to roles" pill drops to its own centred row below (see StatusPill).
+       This removes any chance of the fixed centre pill overlapping the icons on
+       narrow screens (≤375px), where all three can't fit one row. Padding is
+       trimmed so the two rows don't make the header too tall. */
+    .topbar {
+      flex-wrap: wrap;
+      row-gap: var(--sp-2);
+      padding: var(--sp-4) var(--sp-4);
+    }
+    .topbar .brand { order: 1; }
+    .topbar nav { order: 2; }
   }
 </style>

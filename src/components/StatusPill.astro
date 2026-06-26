@@ -121,8 +121,17 @@
     .pill:hover { transform: none; }
     .pill .dot { animation: none; }
   }
-  /* Mobile shrink so the pill doesn't crowd the brand text. */
+  /* Phones: stop floating the pill over the topbar. It un-fixes and becomes its
+     own full-width, centred row inside the (now wrapping) topbar — order:3 puts it
+     below the brand + icon nav. Eliminates the centre-pill / nav-icon overlap that
+     occurs on narrow screens where brand + pill + 4 icons can't share one row. */
   @media (max-width: 700px) {
-    .sp-content { padding: 8px 12px; }
+    .pill-island {
+      position: static;
+      width: 100%;
+      order: 3;
+      margin-top: 2px;
+    }
+    .sp-content { padding: 8px 14px; }
   }
 </style>

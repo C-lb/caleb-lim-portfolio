@@ -889,9 +889,45 @@ void DISCIPLINE_ACCENT;
      so the card-name and meta text dominate the read instead of competing with
      the deco glyphs. */
   @media (max-width: 520px) {
-    .b-cards { grid-template-columns: 1fr !important; }
     .b-bio-mark :global(svg) { width: 56px; height: 56px; }
     .b-bio-mark { opacity: 0.25; }
+  }
+  /* Phones (≤700px): the discipline cards become a horizontal swipe carousel
+     instead of stacking. display:flex makes the grid-template rules above inert.
+     Each card snaps; the next peeks (flex-basis 80%) so the swipe affordance reads,
+     and a thin terracotta scrollbar reinforces it. No JS — native scroll-snap. */
+  @media (max-width: 700px) {
+    /* Portrait fills the top of the screen but stays inset from the edges — it spans
+       the full content width (not the 260px cap) with a tall portrait crop, keeping
+       the splash padding as a margin on all sides and its rounded corners + shadow. */
+    .b-portrait {
+      max-width: none;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+    }
+    .b-cards {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      gap: var(--sp-3);
+      /* The scroll container clips on BOTH axes (overflow-x:auto forces overflow-y
+         to auto), which would slice each card's soft drop shadow (falls ~44px down)
+         and entrance glow. Fix: go full-bleed to the splash's padding edges via a
+         negative margin, then pad the cards back in — now the clip box sits clear
+         of the shadows. Bottom padding is the largest since the shadow falls down. */
+      margin-inline: calc(-1 * var(--sp-5));
+      padding: var(--sp-5) var(--sp-5) var(--sp-8);
+      scroll-padding-inline: var(--sp-5);
+      /* Scrollbar hidden: the peeking next card is the swipe affordance, and a
+         visible bar would float low under the bottom padding. */
+      scrollbar-width: none;
+    }
+    .b-cards::-webkit-scrollbar { display: none; }
+    .b-cards > :global(.b-card) {
+      flex: 0 0 80%;
+      scroll-snap-align: start;
+    }
   }
 </style>
 

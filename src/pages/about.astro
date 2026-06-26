@@ -4,7 +4,20 @@
 // supersedes the Phase 2 D-12/D-14 verbatim contract. Word count stays in the
 // 80-150 band; banned words (passionate/multidisciplinary/intersection of) avoided.
 // Phase 4 added the contact block per CONTACT-05 + 3 photo wireframes.
+// 2026-06-26: wireframes replaced with mood/scene stock (Unsplash) matching the
+// original placeholder captions — at the desk / in the studio / process. Drop-in
+// replacements with real photos later; the captions and layout stay the same.
 import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import atTheDesk from '../assets/about/at-the-desk.jpg';
+import inTheStudio from '../assets/about/in-the-studio.jpg';
+import processSketch from '../assets/about/process-sketch.jpg';
+
+const aboutPhotos = [
+  { src: atTheDesk, caption: 'at the desk', alt: 'Hands working at a laptop on a desk' },
+  { src: inTheStudio, caption: 'in the studio', alt: 'A letterform being sketched on a tablet beside a type specimen book' },
+  { src: processSketch, caption: 'process / sketch', alt: 'A fountain pen mid-stroke, writing on lined paper' },
+];
 ---
 <Base title="About — Caleb Lim" bg="paper">
   <article class="about">
@@ -12,14 +25,13 @@ import Base from '../layouts/Base.astro';
     <h1>Caleb Lim</h1>
     <p class="bio">
       I'm Caleb, and I don't pick a lane. I sit between financial models,
-      brand strategy, graphic design, and the side projects that don't fit
-      anywhere, because the work that excites me rarely fits a job spec's
-      bullet points. Numbers in the morning, type at night, a campaign
-      brief in between. I'd rather hold the pitch deck, the brand mark, and
-      the model behind it than hand any of them off, and this site is part
-      of that argument. I built it, I wrote it, I picked every type pairing
-      and rotated card. Pick the room that fits your role; the work in it
-      is the case. If you want the full story, the resume's one click below.
+      brand strategy, and graphic design, plus the side projects that don't
+      fit anywhere, because the work that excites me rarely fits a job spec.
+      Numbers in the morning, type at night, a campaign brief in between.
+      I'd rather hold the pitch deck, the brand mark, and the model behind
+      it than hand any of them off. This site is part of that argument: I
+      built it, wrote it, and picked every type pairing myself. Pick the
+      room that fits your role; the work inside is the case.
     </p>
 
     {/* Values pills — six attribute chips sourced from the bio's voice (owner mentality,
@@ -37,23 +49,21 @@ import Base from '../layouts/Base.astro';
       </ul>
     </section>
 
-    {/* Photo wireframes — placeholders for personality photos. Replace with real images
-        from src/assets/about/ when available. Wireframes are intentional scaffolding
-        (dashed border + caption hint) so the layout reads as "photos coming" rather
-        than as a polished gallery missing assets. */}
+    {/* Personality photos — the three "lane" portraits (design / hosting / impact),
+        the same set the splash carousel uses. Horizontally scrollable; centered when
+        the row fits, scroll-snaps when it overflows (see the script at file end). */}
     <section class="about-photos-track" aria-label="Photos of Caleb">
-      <figure class="about-photo">
-        <span class="about-photo-tag">PHOTO · 01</span>
-        <span class="about-photo-hint">at the desk</span>
-      </figure>
-      <figure class="about-photo">
-        <span class="about-photo-tag">PHOTO · 02</span>
-        <span class="about-photo-hint">in the studio</span>
-      </figure>
-      <figure class="about-photo">
-        <span class="about-photo-tag">PHOTO · 03</span>
-        <span class="about-photo-hint">process / sketch</span>
-      </figure>
+      {aboutPhotos.map((photo) => (
+        <figure class="about-photo">
+          <Image
+            src={photo.src}
+            alt={photo.alt}
+            widths={[240, 480]}
+            sizes="(max-width: 600px) 70vw, 32vw"
+          />
+          <figcaption class="about-photo-cap">{photo.caption}</figcaption>
+        </figure>
+      ))}
     </section>
 
     <p class="resume-link">
@@ -110,43 +120,39 @@ import Base from '../layouts/Base.astro';
     border-radius: 999px;
   }
   .about-photo {
-    flex: 0 0 32%;
-    min-width: 200px;
-    aspect-ratio: 4 / 5;
+    flex: 0 0 auto;            /* fixed size, never stretches to fill the row */
     margin: 0;
-    border: 1.5px dashed var(--terracotta);
-    border-radius: 6px;
-    background: color-mix(in oklab, var(--paper) 92%, var(--terracotta) 8%);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: var(--sp-2);
-    padding: var(--sp-3);
-    color: var(--ink);
-    text-align: center;
     scroll-snap-align: center;
   }
-  .about-photo-tag {
+  /* Fixed square frame. object-fit: cover crops to fill without distorting, so a
+     landscape or portrait source both sit cleanly in the same box. Soft raised
+     surface, no hard border (lit top edge + diffuse ink-tinted drop shadow). */
+  .about-photo :global(img) {
+    width: 240px;
+    height: 240px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    display: block;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 12px 28px -16px rgba(10, 10, 10, 0.45);
+  }
+  .about-photo-cap {
     font-family: var(--mono);
     font-size: var(--fs-mono);
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    color: var(--terracotta);
-    text-transform: uppercase;
-  }
-  .about-photo-hint {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 0.92rem;
-    line-height: 1.35;
-    color: color-mix(in oklab, var(--ink) 70%, transparent);
-    max-width: 18ch;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: color-mix(in oklab, var(--ink) 60%, transparent);
+    text-align: center;
   }
   @media (max-width: 600px) {
-    .about-photo {
-      flex: 0 0 70%;
-      aspect-ratio: 4 / 5;
+    .about-photo :global(img) {
+      width: 200px;
+      height: 200px;
     }
     .about-photos-track {
       justify-content: flex-start;  /* swipeable from leftmost on narrow screens */
