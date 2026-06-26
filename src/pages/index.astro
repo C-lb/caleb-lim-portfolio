@@ -1101,9 +1101,13 @@ void DISCIPLINE_ACCENT;
     const typeIn = async (str: string) => {
       for (const ch of str) { textEl.textContent += ch; playTick(); await wait(82); }
     };
-    const armAudio = async () => {
+    const armAudio = () => {
       const ac = getCtx();
-      if (ac && ac.state === 'suspended') { try { await ac.resume(); } catch {} }
+      // Fire-and-forget — do NOT await. A suspended AudioContext only resumes after
+      // a user gesture, so `await ac.resume()` on page load (no gesture yet) hangs
+      // forever, freezing the intro sequence and leaving the white overlay covering
+      // the whole page. Sound is best-effort; kick resume() off without blocking.
+      if (ac && ac.state === 'suspended') ac.resume().catch(() => {});
     };
     const exit = () => {
       document.documentElement.style.overflow = '';
