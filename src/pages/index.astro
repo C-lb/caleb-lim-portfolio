@@ -1264,7 +1264,14 @@ void DISCIPLINE_ACCENT;
 
         if (isGift) {
           await wait(380);
-          if (egg && eggSrcs.length) egg.src = eggSrcs[(clicks - 22) % eggSrcs.length];
+          if (egg && eggSrcs.length) {
+            egg.src = eggSrcs[(clicks - 22) % eggSrcs.length];
+            // Decode the image BEFORE the pop. On phones the portrait JPG can take
+            // longer than the 620ms egg-pop to decode, so without this the animation
+            // finishes before the image paints and the photo just appears with no pop.
+            // Cap the wait so a slow/failed load can't stall the reveal.
+            try { await Promise.race([egg.decode(), new Promise((r) => setTimeout(r, 1500))]); } catch {}
+          }
           intro.classList.add('show-egg');       // pop the photo in
           playFanfare();
           await wait(2600);                       // hold on the reveal
