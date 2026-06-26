@@ -71,6 +71,12 @@ void DISCIPLINE_ACCENT;
       <p class="intro-line">
         <span class="intro-text" data-intro-text></span><span class="intro-caret" data-intro-caret aria-hidden="true"></span>
       </p>
+      {/* Phone-only "tap to enter" gate (shown by JS in .enter-mode). The tap is the
+          user gesture that unlocks WebAudio, so the intro that follows has sound.
+          On tap it pops to "Success!" and bursts pastel confetti + stars. */}
+      <button class="intro-enter" data-intro-enter type="button" aria-label="Tap to enter the site with sound">
+        <span class="ie-label" data-ie-label>Tap to enter</span>
+      </button>
       {/* Easter-egg photo — src is set lazily in JS (cycling the list below) so it
           never loads for normal visitors. */}
       <img class="intro-egg" data-intro-egg data-egg-srcs={JSON.stringify(eggAssets.map((a) => a.src))} alt="Caleb Lim" decoding="async" />
@@ -243,6 +249,52 @@ void DISCIPLINE_ACCENT;
     0%   { opacity: 0; transform: scale(0.5) rotate(-6deg); }
     60%  { opacity: 1; transform: scale(1.06) rotate(2deg); }
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  /* "Tap to enter" button — phone-only first-visit gate (the single primary action
+     on the overlay, so the accent fill is allowed). Hidden until JS adds .enter-mode,
+     which also hides the typing line so only the button shows, centred. */
+  .intro-enter { display: none; }
+  .intro.enter-mode .intro-line { display: none; }
+  .intro.enter-mode .intro-enter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45em;
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    background: var(--terracotta);
+    padding: 16px 32px; /* 2:1 */
+    border-radius: 999px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      0 14px 30px -14px rgba(10, 10, 10, 0.5);
+    animation: enter-breathe 2.4s ease-in-out infinite;
+    transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 220ms ease, box-shadow 220ms ease;
+  }
+  .intro.enter-mode .intro-enter:active { transform: scale(0.94); }
+  .intro.enter-mode .intro-enter:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; }
+  /* Success: stop breathing, flash success green, pop once. */
+  .intro.enter-mode .intro-enter.is-success {
+    background: #46c46a;
+    animation: enter-pop 460ms cubic-bezier(0.2, 1.3, 0.4, 1);
+  }
+  @keyframes enter-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.045); }
+  }
+  @keyframes enter-pop {
+    0%   { transform: scale(0.94); }
+    45%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
 
   /* "Click my other buttons" arrow — pinned top-right, pointing up at the nav. */
@@ -953,6 +1005,42 @@ void DISCIPLINE_ACCENT;
   @media (prefers-reduced-motion: reduce) {
     .topbar.nav-spotlight nav { animation: none; }
   }
+
+  /* Confetti + stars burst from the "tap to enter" button. GLOBAL because the bits
+     are created in JS and appended to <body>, so Astro's scoped selectors wouldn't
+     reach them. Each bit flies from the button centre to its --tx/--ty with a random
+     spin, then fades. Pastel colour set per-bit inline. */
+  .confetti-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .confetti-bit {
+    position: fixed;
+    width: 11px;
+    height: 15px;
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+    animation: confetti-fly var(--dur, 900ms) cubic-bezier(0.18, 0.7, 0.3, 1) forwards;
+    will-change: transform, opacity;
+  }
+  .confetti-bit.is-star {
+    width: 17px;
+    height: 17px;
+    border-radius: 0;
+    background: currentColor;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  @keyframes confetti-fly {
+    0%   { transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.3); opacity: 1; }
+    15%  { opacity: 1; }
+    100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot, 360deg)) scale(1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .confetti-bit { animation: none; opacity: 0; }
+  }
 </style>
 
 <script>
@@ -1317,9 +1405,69 @@ void DISCIPLINE_ACCENT;
       }
     };
 
-    // First-visit auto-run is gated to once per session and skipped under
-    // reduced-motion; either way the page is revealed for the card glimmer/greeting.
+    // Pastel confetti + stars burst from an element's centre. Pure DOM + CSS;
+    // the layer cleans itself up after the animation.
+    const PASTELS = ['#ffd1dc', '#c1e1ff', '#c9f0d1', '#fff3b0', '#e3d0ff', '#ffd8be', '#b5ead7', '#cdb4ff'];
+    const burst = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const layer = document.createElement('div');
+      layer.className = 'confetti-layer';
+      document.body.appendChild(layer);
+      for (let i = 0; i < 30; i++) {
+        const bit = document.createElement('span');
+        const isStar = i % 2 === 0;
+        bit.className = 'confetti-bit' + (isStar ? ' is-star' : '');
+        const color = PASTELS[Math.floor(Math.random() * PASTELS.length)];
+        if (isStar) bit.style.color = color; else bit.style.background = color;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 90 + Math.random() * 160;
+        bit.style.left = cx + 'px';
+        bit.style.top = cy + 'px';
+        bit.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        bit.style.setProperty('--ty', (Math.sin(angle) * dist - 30) + 'px'); // slight upward bias
+        bit.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        bit.style.setProperty('--dur', (750 + Math.random() * 550) + 'ms');
+        layer.appendChild(bit);
+      }
+      window.setTimeout(() => layer.remove(), 1500);
+    };
+
+    // Phone first-visit: a "tap to enter" button instead of auto-playing. The tap is
+    // the gesture that unlocks WebAudio, so the intro that follows has sound. The tap
+    // pops the button to "Success!" with a confetti + stars burst, then hands off to
+    // the intro sequence.
+    const isPhone = window.matchMedia('(max-width: 700px)').matches;
+    const enterBtn = intro.querySelector<HTMLButtonElement>('[data-intro-enter]');
+    const enterLabel = intro.querySelector<HTMLElement>('[data-ie-label]');
+    const showEnter = () => {
+      document.documentElement.style.overflow = 'hidden'; // lock scroll under the overlay
+      intro.removeAttribute('aria-hidden');                // make the button reachable
+      intro.classList.add('enter-mode');
+      let used = false;
+      enterBtn!.addEventListener('click', async () => {
+        if (used) return;
+        used = true;
+        // Unlock audio inside the gesture so the intro thocks + whoosh play.
+        const ctx = getCtx();
+        if (ctx && ctx.state === 'suspended') { try { await ctx.resume(); } catch {} }
+        enterBtn!.classList.add('is-success');
+        if (enterLabel) enterLabel.textContent = 'Success!';
+        burst(enterBtn!);
+        playFanfare();                                     // celebratory chime
+        await wait(950);                                   // hold on the success + confetti
+        intro.classList.remove('enter-mode');
+        intro.setAttribute('aria-hidden', 'true');
+        await wait(140);
+        playFirstVisit();                                  // intro types in, now audible
+      });
+    };
+
+    // First-visit run. Reduced-motion / already-seen → reveal at once. On phones, gate
+    // behind tap-to-enter (for sound); on desktop, auto-play.
     if (reduced || seen) reveal();
+    else if (isPhone && enterBtn) showEnter();
     else playFirstVisit();
 
     // Wire the top-left brand link to replay the bothered version. Only when motion
