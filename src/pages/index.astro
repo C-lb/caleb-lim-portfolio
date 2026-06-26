@@ -1000,8 +1000,24 @@ void DISCIPLINE_ACCENT;
       if (actx && actx.state === 'suspended') actx.resume().catch(() => {});
       return actx;
     };
-    ['pointerdown', 'keydown', 'touchstart'].forEach((ev) =>
-      window.addEventListener(ev, () => getCtx(), { once: true, passive: true }));
+    // Unlock + warm the audio context on the first user interaction. iOS Safari
+    // only truly unlocks WebAudio when a buffer is started inside a gesture, so play
+    // a 1-sample silent buffer once. Capture phase, all gesture types; keep resuming
+    // on later gestures in case the context re-suspends (e.g. tab backgrounded).
+    let audioUnlocked = false;
+    const unlockAudio = () => {
+      const ctx = getCtx();            // creates + resumes (best-effort)
+      if (!ctx || audioUnlocked) return;
+      try {
+        const s = ctx.createBufferSource();
+        s.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+        s.connect(ctx.destination);
+        s.start(0);
+        audioUnlocked = true;
+      } catch {}
+    };
+    ['pointerdown', 'touchstart', 'keydown', 'click'].forEach((ev) =>
+      window.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 
     let noiseBuf: AudioBuffer | null = null;
     const getNoise = (ctx: AudioContext) => {
@@ -1103,13 +1119,18 @@ void DISCIPLINE_ACCENT;
     const typeIn = async (str: string) => {
       for (const ch of str) { textEl.textContent += ch; playTick(); await wait(82); }
     };
-    const armAudio = () => {
+    const armAudio = async () => {
       const ac = getCtx();
-      // Fire-and-forget — do NOT await. A suspended AudioContext only resumes after
-      // a user gesture, so `await ac.resume()` on page load (no gesture yet) hangs
-      // forever, freezing the intro sequence and leaving the white overlay covering
-      // the whole page. Sound is best-effort; kick resume() off without blocking.
-      if (ac && ac.state === 'suspended') ac.resume().catch(() => {});
+      // Wait for the context to actually resume so the sounds that fire right after
+      // (whoosh, thocks) aren't dropped while it's still suspended — but CAP the wait
+      // so a cold load with no user gesture (where resume() never settles) can't hang
+      // the intro and leave the white overlay stuck (the original white-screen bug was
+      // an uncapped await here). Gesture-driven replays resume under the cap and get
+      // full sound; the cold first-visit intro plays on time, just silent until the
+      // browser allows audio (first interaction).
+      if (ac && ac.state === 'suspended') {
+        try { await Promise.race([ac.resume(), new Promise((r) => setTimeout(r, 350))]); } catch {}
+      }
     };
     const exit = () => {
       document.documentElement.style.overflow = '';
