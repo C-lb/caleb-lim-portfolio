@@ -26,10 +26,17 @@
   --role-link-odd:  #4a6e5d;
   --role-link-even: #6b4a3a;
 
-  /* Font family tokens — Fontsource appends 'Variable' to family names */
-  --sans:  "Bricolage Grotesque Variable", -apple-system, system-ui, sans-serif;
-  --serif: "Fraunces Variable", Georgia, serif;
-  --mono:  "JetBrains Mono Variable", ui-monospace, monospace;
+  /* Font family tokens — Fontsource appends 'Variable' to family names.
+     2026-06-26: site-wide swap to DM Sans (anti-vibecode sans set). The --serif
+     role is retained as a token name (used in many `font-style: italic` rules)
+     but now resolves to the SAME DM Sans family, so the former Fraunces serif
+     becomes DM Sans italic everywhere.
+     2026-06-26: --mono now also resolves to DM Sans (was JetBrains Mono) — every
+     former monospace label is the one sans face now. The token name is kept since
+     it is referenced widely; only the family changed. */
+  --sans:  "DM Sans Variable", -apple-system, system-ui, sans-serif;
+  --serif: "DM Sans Variable", -apple-system, system-ui, sans-serif;
+  --mono:  "DM Sans Variable", -apple-system, system-ui, sans-serif;
 
   /* Font-size tokens (UI-SPEC.md lines 160-176, 11 roles — see OVERRIDE-01) */
   --fs-display:      clamp(72px, 11vw, 168px);
@@ -78,6 +85,56 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    (380ms opacity), and the StatusPill lime-dot pulse. Suppressions for non-exempt
    motions (entrance shakes, carousel slide-transition, scroll-driven reveals) live
    in their per-source files. */
+
+/* Anti-vibecode tooltip (2026-06-26). Any element with [data-tip] shows a small
+   floating label below it on hover/focus. The charcoal surface sits lighter than
+   the dark category canvas and darker than the cream splash, so it reads on both.
+   .tip-flash force-shows it (used for the copy/download confirmation), .tip-success
+   tints the text green for "Copied" / "Saved". */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-3px);
+  background: #232020;
+  color: #f2ebdb;
+  padding: 6px 11px;
+  border-radius: 9px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow:
+    0 12px 26px -14px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 120;
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+[data-tip]:focus-visible::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+[data-tip].tip-flash::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+[data-tip].tip-success::after { color: #5ED27E; }
+
+/* Edge anchoring so tooltips near the viewport edge don't clip. */
+[data-tip][data-tip-left]::after { left: 0; transform: translateX(0) translateY(-3px); }
+[data-tip][data-tip-left]:hover::after,
+[data-tip][data-tip-left]:focus-visible::after,
+[data-tip][data-tip-left].tip-flash::after { transform: translateX(0) translateY(0); }
+[data-tip][data-tip-right]::after { left: auto; right: 0; transform: translateX(0) translateY(-3px); }
+[data-tip][data-tip-right]:hover::after,
+[data-tip][data-tip-right]:focus-visible::after,
+[data-tip][data-tip-right].tip-flash::after { transform: translateX(0) translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  [data-tip]::after { transition: opacity 0.15s ease; }
+}
 
 /* Phase 5: a11y utility — visually-hidden (clip-path screen-reader hider).
    Canonical WAI-ARIA pattern. Reserved for future use; Plan 05-03 itself uses

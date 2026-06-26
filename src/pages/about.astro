@@ -152,11 +152,13 @@ import Base from '../layouts/Base.astro';
       justify-content: flex-start;  /* swipeable from leftmost on narrow screens */
     }
   }
+  /* Raised pill (anti-vibecode): no stroke — lifted surface + lit top edge +
+     soft drop shadow. Horizontal padding is 2x the vertical. */
   .b-cat-back {
     display: inline-block;
-    background: var(--paper);
+    background: color-mix(in oklab, var(--paper) 78%, #ffffff);
     color: var(--ink);
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -164,8 +166,11 @@ import Base from '../layouts/Base.astro';
     letter-spacing: 0.1em;
     text-transform: uppercase;
     align-self: flex-start;
-    border: 1px solid var(--ink);
-    transition: background 0.2s ease, color 0.2s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(10, 10, 10, 0.10),
+      0 8px 18px -12px rgba(10, 10, 10, 0.40);
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     text-decoration: none;
   }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Color-only hover changes ARE
@@ -249,9 +254,14 @@ import Base from '../layouts/Base.astro';
     letter-spacing: 0.01em;
     color: var(--ink);
     padding: 7px 16px;
-    border: 1.5px solid var(--ink);
+    /* Raised neutral chip (anti-vibecode): solid 1.5px ink stroke replaced by a
+       lifted surface + dimmed hairline (≤8% black) + lit top edge. */
+    border: 1px solid rgba(10, 10, 10, 0.06);
     border-radius: 999px;
-    background: transparent;
+    background: color-mix(in oklab, var(--paper) 80%, #ffffff);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 4px 10px -8px rgba(10, 10, 10, 0.30);
     white-space: nowrap;
     line-height: 1.2;
     cursor: default; /* 2026-05-18 (UAT): pills are non-interactive labels, not links — kill the I-beam text cursor */

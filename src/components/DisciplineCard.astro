@@ -1,12 +1,12 @@
 ---
-// Phase 3 DisciplineCard — single source of truth for the four discipline cards
-// on splash + 404. CSS verbatim from sketch lines 456-516. Decoration per
-// D-03 k1-k4 mapping. Used in <a> form so the entire card is the click target.
+// Discipline card — splash + 404 primary nav. Used in <a> form so the whole card
+// is the click target.
 //
-// 2026-05-18 (UAT-driven): added isEmpty prop. When isEmpty=true the card renders
-// as a non-clickable <div> with a "coming soon" cue — reverses Phase 3's SPLASH-04
-// "drop empty cards" rule. Gate 18 still passes because placeholder cards emit
-// no href and Gate 18 counts splash hrefs, not card divs.
+// 2026-06-26 (redesign): charcoal liquid-glass panel (four-layer warp/tint/edge/
+//   content stack, sharing #glass-distortion from Base.astro), straight, one
+//   material. Disciplines read by label + a flat single-stroke icon (Feather
+//   family) in the top-right, aligned on a row with the card number. Empty cards
+//   link to a coming-soon stub.
 import type { Category } from '../content/categories';
 
 interface Props {
@@ -17,127 +17,171 @@ interface Props {
 }
 const { category, k, index, isEmpty = false } = Astro.props;
 
-// UI-SPEC Copywriting Contract overridden by user during phase-exit walk:
-// drop slash separator for parallel reading at recruiter skim-speed.
 const cardLabel: Record<Category, string> = {
   design:    'Graphic Design',
   finance:   'Financial Models',
   personal:  'Personal Projects',
-  marketing: 'Marketing',
+  saas: 'SaaS',
 };
 
-// All four deco glyphs are CSS-only — k1 circle, k2 bar-chart, k3 sparkle, k4
-// broadcast-ripple. No text content emitted into the .deco span.
-const cueText = isEmpty ? 'in the works — coming soon' : 'View the work →';
+const cueText = isEmpty ? 'In the works →' : 'View the work →';
 const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 ---
-{isEmpty ? (
-  <div id={`card-${category}`} class={cls} aria-label={`${cardLabel[category]} — coming soon`}>
+<a
+  href={`/${category}`}
+  id={`card-${category}`}
+  class={cls}
+  aria-label={isEmpty ? `${cardLabel[category]} — coming soon` : undefined}
+>
+  {/* Liquid-glass layers (refraction → milky body → lit bevel). Decorative. */}
+  <span class="bc-warp" aria-hidden="true"></span>
+  <span class="bc-tint" aria-hidden="true"></span>
+  <span class="bc-edge" aria-hidden="true"></span>
+
+  {/* Top row: card number (left) and discipline icon (right), aligned. */}
+  <div class="bc-top">
     <span class="b-card-no">0{index} / 04</span>
-    <div>
-      <span class="b-card-name">{cardLabel[category]}</span>
-    </div>
-    <span class="b-card-cue">{cueText}</span>
-    <span class="deco" aria-hidden="true"></span>
+    <span class="bc-icon" aria-hidden="true">
+      {category === 'design' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+        </svg>
+      )}
+      {category === 'finance' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      )}
+      {category === 'personal' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      )}
+      {category === 'saas' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
+        </svg>
+      )}
+    </span>
   </div>
-) : (
-  <a href={`/${category}`} id={`card-${category}`} class={cls}>
-    <span class="b-card-no">0{index} / 04</span>
-    <div>
-      <span class="b-card-name">{cardLabel[category]}</span>
-    </div>
-    <span class="b-card-cue">{cueText}</span>
-    <span class="deco" aria-hidden="true"></span>
-  </a>
-)}
+
+  <div class="b-card-mid">
+    <span class="b-card-name">{cardLabel[category]}</span>
+  </div>
+  <span class="b-card-cue">{cueText}</span>
+</a>
 
 <style>
   .b-card {
+    --rest-rotate: 0deg; /* straight — entrance/click shake keyframes compose against this */
     position: relative;
-    border-radius: 10px;
-    padding: 22px 22px 24px; /* phase-exit walk: beefed for primary-nav weight */
-    cursor: pointer;
+    border-radius: 18px;
     overflow: hidden;
-    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.35s ease;
+    isolation: isolate;
+    padding: 22px 22px 24px;
+    cursor: pointer;
     display: grid;
     grid-template-rows: auto 1fr auto;
     gap: 4px;
-    min-height: 180px; /* phase-exit walk: cards must read as primary nav, not asides */
+    min-height: 210px;
     text-decoration: none;
-    box-shadow: 0 1px 0 rgba(15, 13, 12, 0.15);
+    color: var(--paper);
+    box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7);
+    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.32s ease;
   }
-  /* Liquid-glass overlay — invisible at rest, fades in on hover. The diagonal
-     white-sheen gradient + inset edge highlights mimic Apple's glass material;
-     backdrop-filter blurs whatever sits behind the card so the discipline color
-     reads as a tinted lens rather than a flat fill. */
-  .b-card::before {
-    content: "";
+
+  /* --- Liquid-glass four-layer stack (warp → tint → edge → content) --- */
+  .b-card .bc-warp {
     position: absolute;
     inset: 0;
+    z-index: 0;
     border-radius: inherit;
+    backdrop-filter: blur(3px) saturate(1.3);
+    -webkit-backdrop-filter: blur(3px) saturate(1.3);
+    filter: url(#glass-distortion);
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 380ms ease;
-    background:
-      linear-gradient(135deg,
-        rgba(255, 255, 255, 0.45) 0%,
-        rgba(255, 255, 255, 0.10) 32%,
-        rgba(255, 255, 255, 0.02) 58%,
-        rgba(255, 255, 255, 0.32) 100%);
-    box-shadow:
-      inset 0  1px 1px rgba(255, 255, 255, 0.55),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.22),
-      inset  1px 0 1px rgba(255, 255, 255, 0.20),
-      inset -1px 0 1px rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(8px) saturate(1.5);
-    -webkit-backdrop-filter: blur(8px) saturate(1.5);
-    z-index: 1;
   }
-  /* Keep card content above the glass overlay. .deco stays absolute (per the
-     per-k rules below) — we only bump its z-index, not its position. */
-  .b-card > :not(.deco) { position: relative; z-index: 2; }
-  .b-card .deco { z-index: 2; }
+  .b-card .bc-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: rgba(12, 11, 10, 0.55);
+    pointer-events: none;
+    transition: background 0.32s ease;
+  }
+  .b-card .bc-edge {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    box-shadow:
+      inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.40),
+      inset -1px -1px 1px rgba(255, 255, 255, 0.16),
+      inset 0 0 22px rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
+  /* content above the glass */
+  .b-card > .bc-top,
+  .b-card > .b-card-mid,
+  .b-card > .b-card-cue {
+    position: relative;
+    z-index: 3;
+  }
+
   .b-card:focus-visible {
-    outline: 3px solid var(--ink);
+    outline: 3px solid var(--paper);
     outline-offset: 4px;
   }
-  /* k3 (turmeric) — default ink outline reads clearly; no override needed */
 
-  /* Empty/placeholder cards: card is rendered (so all 4 disciplines read as a
-     thesis even when not yet populated) but visually marked as "not yet" via
-     reduced opacity and an italicised cue. They still receive the full hover
-     treatment (3D tilt + liquid-glass overlay) so all four disciplines feel
-     equally interactive on the splash. */
-  .b-card.is-empty {
-    cursor: default;
-    opacity: 0.85;
-  }
+  .b-card.is-empty { opacity: 0.82; }
   .b-card.is-empty .b-card-cue {
     font-style: italic;
     opacity: 0.78;
   }
 
+  /* Top row — number left, icon right, vertically centred on the same line. */
+  .bc-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
   .b-card-no {
     font-family: var(--mono);
-    font-size: var(--fs-card-no); /* was 10px; migrated to --fs-card-no (9px) per 05-TOKEN-MAP — 1px shrink acceptable */
+    font-size: var(--fs-card-no);
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    opacity: 0.85;
+    opacity: 0.8;
   }
+  .bc-icon {
+    display: inline-flex;
+    color: var(--paper);
+    opacity: 0.9;
+  }
+  .bc-icon svg {
+    width: 26px;
+    height: 26px;
+    display: block;
+  }
+
   .b-card-name {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: clamp(28px, 3.4vw, 44px); /* phase-exit walk: bumped from --fs-card */
-    line-height: 0.92;
+    font-size: clamp(24px, 2.9vw, 38px);
+    line-height: 0.95;
     letter-spacing: -0.035em;
     text-transform: uppercase;
     align-self: end;
   }
   .b-card-cue {
     font-family: var(--mono);
-    font-size: var(--fs-card-no); /* was 10px; migrated to --fs-card-no (9px) per 05-TOKEN-MAP */
+    font-size: var(--fs-card-no);
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -146,175 +190,17 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     opacity: 0.85;
   }
 
-  /* k1 = Design (umber #8c6326) — outline circle top-right (sketch lines 495-497).
-     Rest-rotate stored in a custom property so the entrance-shake @keyframes can
-     compose against it via calc(). Same pattern applied to k2/k3/k4 below. */
-  .b-card.k1 {
-    --rest-rotate: -1deg;
-    background: var(--design);
-    color: var(--paper);
-    transform: rotate(var(--rest-rotate));
-  }
-  .b-card.k1 .deco {
-    position: absolute;
-    right: -22px;
-    top: -22px;
-    width: 100px;
-    height: 100px;
-    border: 9px solid var(--paper);
-    border-radius: 50%;
-  }
-
-  /* k2 = Finance (cobalt). 2026-05-18 (UAT): decoration rewritten — was an
-     oversized italic Fraunces "2" numeral in --acid (deep gold). User flagged
-     the orange and asked for a motif tied to financial models. New design: a
-     four-bar mini bar-chart drawn with stacked linear-gradients in --paper.
-     Each bar is 12px wide; the four heights (28%, 60%, 44%, 80%) sketch an
-     ascending-then-mixed performance chart. */
-  /* 2026-05-18 (UAT): text + deco color flipped from --paper → --ink for
-     readability on the lighter silvered-cobalt bg, matching k3 (Personal)'s
-     ink-on-acid treatment. */
-  .b-card.k2 {
-    --rest-rotate: 1deg;
-    background: var(--cobalt);
-    color: var(--ink);
-    transform: rotate(var(--rest-rotate));
-  }
-  .b-card.k2 .deco {
-    position: absolute;
-    top: 22px;
-    right: 22px;
-    width: 76px;
-    height: 56px;
-    background:
-      linear-gradient(to top, var(--ink) 28%, transparent 28%) left   bottom / 12px 100% no-repeat,
-      linear-gradient(to top, var(--ink) 60%, transparent 60%) 22px   bottom / 12px 100% no-repeat,
-      linear-gradient(to top, var(--ink) 44%, transparent 44%) 44px   bottom / 12px 100% no-repeat,
-      linear-gradient(to top, var(--ink) 80%, transparent 80%) right  bottom / 12px 100% no-repeat;
-  }
-
-  /* k3 = Personal (deep gold) — 4-pointed editorial sparkle (replaces 2026-05-18
-     the prior horizontal dotted-line motif). Built from two crossed bars with
-     tapered ends via radial-gradients, giving a "burst / star / asterisk" feel
-     that matches the rustic-editorial palette. Distinct from k1 circle,
-     k2 numeral, k4 triangle. */
-  /* k3 rest tilt was -0.5deg; updated 2026-05-18 to +1deg so it matches k2's
-     direction. Splash render order is design-finance-marketing-personal, which
-     puts k3 in the bottom-right slot (position 4) — same column as k2 (position 2),
-     so they should lean the same way. */
-  .b-card.k3 {
-    --rest-rotate: 1deg;
-    background: var(--acid);
-    color: var(--ink); /* turmeric bg → ink */
-    transform: rotate(var(--rest-rotate));
-  }
-  .b-card.k3 .deco {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 120px; /* 2026-05-18 (UAT): enlarged star — was 84×84 */
-    height: 120px;
-    background:
-      radial-gradient(ellipse 7px 58px at center, var(--ink) 70%, transparent 100%),
-      radial-gradient(ellipse 58px 7px at center, var(--ink) 70%, transparent 100%);
-    opacity: 0.78;
-    transform: rotate(12deg);
-  }
-
-  /* k4 = Marketing (olive lime, dark) — accent triangle */
-  /* k4 rest tilt was +0.7deg; updated 2026-05-18 to -1deg so it matches k1's
-     direction. Splash render order puts k4 in the bottom-left slot (position 3) —
-     same column as k1 (position 1), so they should lean the same way.
-     2026-05-18 (UAT): decoration rewritten — was an acid (deep gold) triangle.
-     User flagged the orange and asked for a motif tied to marketing. New design:
-     a "broadcast / signal ripple" — a paper solid dot at the deco's bottom-left
-     origin plus three concentric arc rings expanding outward (drawn with stacked
-     radial-gradients). Reads as reach / signal / megaphone wave. */
-  .b-card.k4 {
-    --rest-rotate: -1deg;
-    background: var(--plum);
-    color: var(--paper); /* olive lime bg → paper */
-    transform: rotate(var(--rest-rotate));
-  }
-  /* 2026-05-18 (UAT): broadcast-ripple swapped for an 8-point starburst — edgier
-     mark, family-related to k3 (Personal)'s 4-point sparkle but distinct in
-     count, size, rotation, and color (paper on plum vs ink on acid). Built from
-     two crossed-pair radial-gradients: the .deco itself draws the long primary
-     cross (horizontal + vertical), and ::before overlays the shorter diagonal
-     cross rotated 45deg to land at the 1.5/4.5/7.5/10.5 o'clock positions. */
-  .b-card.k4 .deco {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 96px;
-    height: 96px;
-    background:
-      radial-gradient(ellipse 6px 48px at center, var(--paper) 70%, transparent 100%),
-      radial-gradient(ellipse 48px 6px at center, var(--paper) 70%, transparent 100%);
-    opacity: 0.92;
-    transform: rotate(8deg);
-  }
-  .b-card.k4 .deco::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 4px 34px at center, var(--paper) 70%, transparent 100%),
-      radial-gradient(ellipse 34px 4px at center, var(--paper) 70%, transparent 100%);
-    transform: rotate(45deg);
-  }
-
-  /* Hover lifts + 3D-tilts the card and reveals the liquid-glass overlay.
-     perspective() in the transform list applies depth to this element directly
-     (no parent perspective needed). The rotateX/Y tilt gives the card a
-     subtle "leaning towards you" motion that pairs with the glass sheen.
-     The translateY + amplified shadow read as elevation. Placed AFTER all
-     per-k rest-tilt blocks so the hover transform wins on equal-specificity
-     source-order tiebreak. .b-card.is-empty:hover (specificity 0,3,0)
-     still wins for placeholders and keeps them inert. */
-  /* Hover transforms tuned to stay within the 10px grid gap — angles and lift
-     reduced from the prior pass (rotateY ±5° → ±3°, rotateX ±3° → ±2°,
-     translateY -6px → -3px) so the projected geometry doesn't bleed into
-     neighbouring cells. Deeper perspective (900 → 1200) flattens the tilt
-     further. z-index bump guarantees the hovered card paints above neighbours
-     if any residual shadow does spill across. */
-  /* D-06 Touch-hover gate: hover-tilt + glass-overlay reveal are suppressed on
-     touch devices (where hover:hover is false). First tap navigates instead of
-     surfacing a phantom hover state. Desktop with a fine pointer still gets the
-     full tilt + glass effect. Plan 05-07 Task 1 — see 05-UI-SPEC §Interaction
-     Contract — Touch-Hover Gating. */
+  /* Hover: clean straight lift + slightly clearer glass. */
   @media (hover: hover) and (pointer: fine) {
     .b-card:hover {
-      transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
-      box-shadow:
-        0 14px 28px rgba(15, 13, 12, 0.24),
-        0 4px 10px rgba(15, 13, 12, 0.14);
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px -24px rgba(10, 10, 10, 0.8);
       z-index: 10;
     }
-    /* k2 (Financial Models) and k3 (Personal Projects) get the mirror-inverted
-       tilt — both rotateX and rotateY signs flipped — so they lean the opposite
-       way on hover. Pairs symmetrically with k1 / k4 across the grid. */
-    .b-card.k2:hover,
-    .b-card.k3:hover {
-      transform: perspective(1200px) translateY(-3px) rotateX(-2deg) rotateY(3deg);
-    }
-    .b-card:hover::before { opacity: 1; }
+    .b-card:hover .bc-tint { background: rgba(12, 11, 10, 0.46); }
   }
-  /* No reduced-motion override on `.b-card::before`: the liquid-glass overlay's
-     380ms opacity fade is EXEMPT per D-08 #7 (user-initiated hover feedback).
-     A prior `transition: none` rule here was removed in Plan 05-06 as a Rule 1
-     deviation — it contradicted the plan's truth #4 ("liquid-glass overlay fade
-     still fires under reduced-motion") in the same way the global hammer did. */
 
-  /* Entrance shake — runs once on page load to cue that the cards are interactable.
-     Composes the shake on top of each card's per-k --rest-rotate via calc() so the
-     animation lands back on the correct rest tilt. The global prefers-reduced-motion
-     block in tokens.css clamps animation-duration to 0.01ms so users with the
-     reduced-motion preference skip the shake automatically.
-     2026-05-18 (UAT): softened — rotation amplitude dropped from ±3deg/±2deg/±1deg
-     to ±1.2deg/±0.8deg/±0.4deg, translateX from ±3px to ±1px. Reads as a polite
-     'hey, I'm here' nudge instead of a dramatic wiggle. Scope widened to ALL cards
-     including empty placeholders (was :not(.is-empty)) per user request. */
+  /* Entrance shake — composes against the straight rest. */
   @keyframes card-shake {
     0%, 100% { transform: rotate(var(--rest-rotate)); }
     15%      { transform: rotate(calc(var(--rest-rotate) - 1.2deg)) translateX(-1px); }
@@ -327,27 +213,13 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   .b-card {
     animation: card-shake 750ms ease-in-out 400ms 1;
   }
-  /* Surgical reduced-motion disable for the 750ms entrance shake (D-08 #3,
-     05-RESEARCH §3.4 step 2). Hover-tilt, click-shake, liquid-glass, and rest
-     tilts remain exempt — they are not animations and are not touched here. */
   @media (prefers-reduced-motion: reduce) {
-    .b-card {
-      animation: none;
-    }
+    .b-card { animation: none; }
   }
-  /* Pause the entrance shake the moment a user hovers — they've found the card,
-     no need to keep waving at them. Gated to (hover: hover) per D-06 so touch
-     devices don't trigger an :hover state on first tap. */
   @media (hover: hover) and (pointer: fine) {
     .b-card:hover { animation-play-state: paused; }
   }
-  /* Suppress the entrance animation after the first role-link click so that
-     removing .is-shaking doesn't cause animation-name to flip back to
-     card-shake and visibly re-trigger. Placed BEFORE .is-shaking so the
-     click rule (also !important) wins via source order. */
   .b-card.entrance-done { animation: none !important; }
-  /* Replay shake on demand (role-label click). Fast single nudge — snap
-     out to a small offset, drift back to rest. */
   @keyframes card-shake-click {
     0%   { transform: rotate(var(--rest-rotate)); }
     40%  { transform: rotate(calc(var(--rest-rotate) - 1.6deg)) translateX(-1.4px); }
@@ -356,55 +228,15 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   .b-card.is-shaking {
     animation: card-shake-click 220ms ease-out 0ms 1 !important;
   }
-  /* Allow the on-demand shake to play even if hover is engaged. Inside the same
-     hover-gate as the pause rule above (only relevant when hover is real). */
   @media (hover: hover) and (pointer: fine) {
     .b-card.is-shaking:hover { animation-play-state: running; }
   }
 
-  /* Mobile (≤900px): shrink + push the decorations so they corner-anchor rather
-     than wash across the text. Card-name + cue stay the primary read; the deco
-     glyphs become small corner marks. */
-  @media (max-width: 900px) {
-    .b-card { padding: 18px 18px 20px; min-height: 152px; }
-    .b-card.k1 .deco { width: 70px; height: 70px; right: -16px; top: -16px; border-width: 6px; }
-    .b-card.k2 .deco { width: 60px; height: 44px; top: 16px; right: 16px; }
-    .b-card.k3 .deco { width: 80px; height: 80px; top: 12px; right: 12px;
-      background:
-        radial-gradient(ellipse 5px 38px at center, var(--ink) 70%, transparent 100%),
-        radial-gradient(ellipse 38px 5px at center, var(--ink) 70%, transparent 100%);
-    }
-    .b-card.k4 .deco { width: 64px; height: 64px; top: 12px; right: 12px;
-      background:
-        radial-gradient(ellipse 4px 32px at center, var(--paper) 70%, transparent 100%),
-        radial-gradient(ellipse 32px 4px at center, var(--paper) 70%, transparent 100%);
-    }
-    .b-card.k4 .deco::before {
-      background:
-        radial-gradient(ellipse 3px 22px at center, var(--paper) 70%, transparent 100%),
-        radial-gradient(ellipse 22px 3px at center, var(--paper) 70%, transparent 100%);
-    }
-  }
-  /* Tighter mobile (≤520px): drop deco opacity slightly so the card-name reads
-     cleanly even when the title runs into the deco zone on very small phones. */
-  @media (max-width: 520px) {
-    .b-card .deco { opacity: 0.65; }
-    .b-card.k3 .deco { opacity: 0.55; }
-    .b-card-name { font-size: clamp(22px, 7vw, 30px); }
-  }
-
-  /* D-07 Touch entrance shimmer (Plan 05-07 Task 2). On touch devices (where
-     (hover: none) is true) the splash discipline cards + bio sticker have no
-     hover micro-interaction to surface "this is interactive." The shimmer fires
-     once when a card scrolls into view (IntersectionObserver below adds
-     .is-entered) — a brief lime/currentColor ring pulses out and back,
-     compensating for the missing hover state. Fires ONLY on touch (the gate
-     below); reduced-motion override at the end of this block ensures it never
-     plays for users with the preference. */
+  /* Touch entrance shimmer. */
   @keyframes card-shimmer {
-    0%   { box-shadow: 0 0 0 0 currentColor; }
-    50%  { box-shadow: 0 0 0 6px color-mix(in oklab, currentColor 8%, transparent); }
-    100% { box-shadow: 0 0 0 0 currentColor; }
+    0%   { box-shadow: 0 0 0 0 rgba(242, 235, 219, 0); }
+    50%  { box-shadow: 0 0 0 6px rgba(242, 235, 219, 0.12); }
+    100% { box-shadow: 0 0 0 0 rgba(242, 235, 219, 0); }
   }
   @media (hover: none) {
     .b-card.is-entered,
@@ -412,25 +244,25 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
       animation: card-shimmer 600ms ease-out 1;
     }
   }
-  /* Belt-and-suspenders: even if JS gate misses (e.g. user toggles Reduce
-     Motion AFTER page load but BEFORE first viewport intersection), CSS
-     refuses to play the keyframe. */
   @media (prefers-reduced-motion: reduce) {
     .b-card.is-entered,
     .b-bio.is-entered {
       animation: none;
     }
   }
+
+  @media (max-width: 900px) {
+    .b-card { padding: 20px 20px 22px; min-height: 158px; }
+    .bc-icon svg { width: 22px; height: 22px; }
+  }
+  @media (max-width: 520px) {
+    .b-card-name { font-size: clamp(22px, 7vw, 30px); }
+  }
 </style>
 
 <script>
-  // D-07 Touch entrance shimmer (Plan 05-07 Task 2). Add .is-entered to each
-  // .b-card / .b-bio on first viewport intersection so the @keyframes
-  // card-shimmer rule above can fire — but only when (hover: none) is true
-  // AND the user hasn't asked for reduced motion. Each element is unobserved
-  // after its first hit so the shimmer doesn't replay on scroll-up/scroll-down.
-  // The runtime change listener re-evaluates if Reduce Motion is toggled mid-
-  // session and the user is still on a touch device.
+  // Touch entrance shimmer — add .is-entered on first viewport intersection so the
+  // keyframe can fire, only on (hover: none) and when reduced-motion is off.
   const isTouchDevice = window.matchMedia('(hover: none)').matches;
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 

@@ -1,0 +1,145 @@
+---
+// Uniform gallery grid. 2026-06-26: replaces the three near-duplicate buckets
+// (GalleryA12 / B35 / C68) whose spanning tiles blew a single piece up to a
+// full-bleed slab. Every piece is now an equal, properly-sized clickable card
+// (thumbnail + title + role) on a 12-column grid — 3 across on desktop, 2 on
+// tablet, 1 on phone — that simply wraps and scrolls down the page. Scales the
+// same from 1 piece to many.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import type { Category } from '../content/categories';
+
+interface Props {
+  pieces: CollectionEntry<'pieces'>[];
+  category: Category;
+}
+const { pieces, category } = Astro.props;
+const total = pieces.length;
+---
+<ul class="gallery" role="list">
+  {pieces.map((piece, i) => (
+    <li>
+      <a href={`/${category}/${piece.id}`} class="g-card">
+        <div class="g-thumb">
+          <Image
+            src={piece.data.hero}
+            alt={piece.data.title}
+            class="g-cover"
+            priority={i === 0}
+            widths={[320, 640]}
+            sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 360px"
+          />
+        </div>
+        <div class="g-meta">
+          <span class="g-tag">{String(i + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+          <span class="g-ttl">{piece.data.title}</span>
+          <span class="g-role">{piece.data.role}</span>
+          <span class="g-cue">View piece →</span>
+        </div>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .gallery {
+    margin-top: var(--sp-6);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--sp-5);
+    list-style: none;
+    padding: 0;
+  }
+  .gallery > li { grid-column: span 4; min-width: 0; }
+
+  /* Neutral raised card on the dark category canvas — soft, no stroke. */
+  .g-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--paper);
+    background: rgba(242, 235, 219, 0.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 18px 40px -26px rgba(0, 0, 0, 0.7);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .g-thumb {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .g-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.35s ease;
+  }
+  .g-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+  }
+  .g-tag {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .g-ttl {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: var(--fs-ttl);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .g-role {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: var(--fs-tile-role);
+    line-height: 1.3;
+    opacity: 0.82;
+  }
+  .g-cue {
+    margin-top: var(--sp-1);
+    font-family: var(--mono);
+    font-size: var(--fs-card-no);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .g-card:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        0 26px 50px -24px rgba(0, 0, 0, 0.8);
+    }
+    .g-card:hover .g-cover { transform: scale(1.03); }
+  }
+  .g-card:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .g-card, .g-cover { transition: none; }
+  }
+
+  /* Tablet: 2 across. Phone: 1 across. */
+  @media (max-width: 1024px) {
+    .gallery > li { grid-column: span 6; }
+  }
+  @media (max-width: 600px) {
+    .gallery { gap: var(--sp-4); }
+    .gallery > li { grid-column: span 12; }
+  }
+</style>

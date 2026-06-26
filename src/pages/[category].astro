@@ -3,18 +3,15 @@ import Base from '../layouts/Base.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORIES, type Category } from '../content/categories';
 import { DISCIPLINE_ACCENT } from '../styles/disciplines';
-import GalleryA12 from '../components/GalleryA12.astro';
-import GalleryB35 from '../components/GalleryB35.astro';
-import GalleryC68 from '../components/GalleryC68.astro';
+import Gallery from '../components/Gallery.astro';
+import DisciplineNav from '../components/DisciplineNav.astro';
 
 export async function getStaticPaths() {
-  // D-07: only emit a route for disciplines with ≥1 non-draft piece.
-  // Empty categories fall through to Cloudflare Pages' dist/404.html.
-  const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
-  const populated = new Set(allPieces.map((p) => p.data.category));
-  return CATEGORIES.filter((c) => populated.has(c)).map((cat) => ({
-    params: { category: cat },
-  }));
+  // 2026-06-26: emit a route for EVERY discipline, populated or not. Empty ones
+  // render a coming-soon stub (below) instead of dead-ending in a 404, so the
+  // splash discipline cards are all clickable. Reverses the prior D-07 rule that
+  // only emitted populated routes.
+  return CATEGORIES.map((cat) => ({ params: { category: cat } }));
 }
 
 const { category } = Astro.params as { category: Category };
@@ -26,14 +23,13 @@ const pieces = (await getCollection('pieces', ({ data }) =>
 
 const accent = DISCIPLINE_ACCENT[category];
 const n = pieces.length;
-if (n > 8) console.warn(`[gallery] ${category} has ${n} pieces — Bucket C truncates to 8 (D-06)`);
 
 // UI-SPEC Copywriting Contract overridden during phase-exit walk: drop slash.
 const categoryLabel: Record<Category, string> = {
   design:    'GRAPHIC DESIGN',
   finance:   'FINANCIAL MODELS',
   personal:  'PERSONAL PROJECTS',
-  marketing: 'MARKETING',
+  saas: 'SAAS',
 };
 // Tab/<title> form is Title Case — readable in browser tab + bookmark + search results.
 // 2026-05-18 (UAT): replaces the prior label.toLowerCase() which rendered tabs as
@@ -43,21 +39,61 @@ const categoryTabTitle: Record<Category, string> = {
   design:    'Graphic Design',
   finance:   'Financial Models',
   personal:  'Personal Projects',
-  marketing: 'Marketing',
+  saas: 'SaaS',
 };
 const label = categoryLabel[category];
 const countStr = String(n).padStart(2, '0');
+const isEmpty = n === 0;
+
+// Per-discipline coming-soon copy. Only the empty discipline's blurb is shown,
+// but all four are kept for forward-compat (any room can empty out between edits).
+const comingSoonBlurb: Record<Category, string> = {
+  design:    'Graphic design pieces are being prepared. Check back shortly.',
+  finance:   'Financial models are being prepared. Check back shortly.',
+  personal:  'Side projects and experiments that do not fit a brief. Being written up now.',
+  saas: 'SaaS work is being prepared. Check back shortly.',
+};
+
+// Disciplines that already have work, for the "see what's ready" links on the stub.
+const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+const readyCategories = CATEGORIES.filter(
+  (c) => allPieces.some((p) => p.data.category === c),
+);
+const readyLabel: Record<Category, string> = {
+  design: 'Graphic Design', finance: 'Financial Models',
+  personal: 'Personal Projects', saas: 'SaaS',
+};
 ---
 <Base title={`${categoryTabTitle[category]} — Caleb Lim`} bg="ink">
   <section class="b-category" style={`--accent: ${accent}`}>
     <header class="b-cat-head">
       <a href="/" class="b-cat-back">← Splash</a>
-      <h2>{label} <em>/{countStr}</em></h2>
-      <span class="b-cat-meta">{countStr} PIECES · <strong>UPDATED MAY 2026</strong></span>
+      <h2>{label} <em>{isEmpty ? 'soon' : `/${countStr}`}</em></h2>
+      <span class="b-cat-meta">
+        {isEmpty ? <strong>COMING SOON</strong> : <>{countStr} PIECES · <strong>UPDATED MAY 2026</strong></>}
+      </span>
     </header>
-    {n <= 2 && <GalleryA12 pieces={pieces} category={category} />}
-    {n >= 3 && n <= 5 && <GalleryB35 pieces={pieces} category={category} />}
-    {n >= 6 && <GalleryC68 pieces={pieces} category={category} />}
+
+    <DisciplineNav current={category} />
+
+    {isEmpty ? (
+      <div class="b-coming">
+        <p class="b-coming-lead">This room is still being hung.</p>
+        <p class="b-coming-blurb">{comingSoonBlurb[category]}</p>
+        {readyCategories.length > 0 && (
+          <div class="b-coming-ready">
+            <span class="b-coming-ready-label">Work that's ready now</span>
+            <div class="b-coming-links">
+              {readyCategories.map((c) => (
+                <a class="b-coming-link" href={`/${c}`}>{readyLabel[c]} →</a>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    ) : (
+      <Gallery pieces={pieces} category={category} />
+    )}
   </section>
 </Base>
 
@@ -73,13 +109,17 @@ const countStr = String(n).padStart(2, '0');
     align-items: end;
     gap: var(--sp-6);
     padding-bottom: var(--sp-5);
-    border-bottom: 1px solid #333;
+    /* Neutral hairline (was #333) — calmer, tied to the paper ink rather than a
+       one-off grey. */
+    border-bottom: 1px solid rgba(242, 235, 219, 0.14);
   }
+  /* Raised pill (anti-vibecode): paper surface on the dark canvas with a lit top
+     edge and soft drop shadow instead of a stroke. Horizontal padding 2x vertical. */
   .b-cat-back {
     display: inline-block;
     background: var(--paper);
     color: var(--ink);
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -88,7 +128,11 @@ const countStr = String(n).padStart(2, '0');
     text-transform: uppercase;
     align-self: end;
     justify-self: start;
-    transition: background 0.2s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(10, 10, 10, 0.18),
+      0 10px 24px -16px rgba(0, 0, 0, 0.6);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
     text-decoration: none;
   }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Back-pill hover color/bg only
@@ -136,9 +180,95 @@ const countStr = String(n).padStart(2, '0');
     font-weight: 600;
   }
 
+  /* Coming-soon stub (empty discipline). Anti-vibecode neutral surface on the
+     dark category canvas: one raised panel lighter than the bg, the discipline
+     accent reserved for the single primary "ready work" link. No second hue, no
+     side accent, soft diffuse shadow. */
+  .b-coming {
+    margin-top: var(--sp-8);
+    max-width: 560px;
+    background: rgba(242, 235, 219, 0.05);
+    border-radius: 20px;
+    padding: var(--sp-8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 24px 60px -36px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .b-coming-lead {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: var(--fs-h3);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+    margin: 0;
+  }
+  .b-coming-blurb {
+    font-family: var(--serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    color: var(--paper);
+    opacity: 0.78;
+    margin: 0;
+    max-width: 44ch;
+  }
+  .b-coming-ready {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-5);
+    border-top: 1px solid rgba(242, 235, 219, 0.12);
+  }
+  .b-coming-ready-label {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    opacity: 0.6;
+  }
+  .b-coming-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  /* The single primary action: accent-filled, the one place the discipline accent
+     becomes a fill. Horizontal padding is 2x the vertical (10/20). */
+  .b-coming-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 14px 30px -18px rgba(0, 0, 0, 0.6);
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .b-coming-link:hover { transform: translateY(-1px); filter: brightness(1.08); }
+  }
+  .b-coming-link:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+
   /* Reduced-motion (D-13) */
   @media (prefers-reduced-motion: reduce) {
     .b-cat-back { transition: none; }
+    .b-coming-link { transition: none; }
   }
 
   @media (max-width: 900px) {

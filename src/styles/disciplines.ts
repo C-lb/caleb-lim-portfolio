@@ -8,7 +8,7 @@ export const DISCIPLINE_ACCENT: Record<Category, string> = {
   design:    '#8c6326',  // deep ochre/umber       — k1 (NEW dedicated token --design)
   finance:   '#8ba1a9',  // silvered blue-gray     — k2 (--cobalt)
   personal:  '#dc972a',  // deep gold              — k3 (--acid)
-  marketing: '#536644',  // dark forest sage       — k4 (--plum)
+  saas: '#536644',  // dark forest sage       — k4 (--plum)
 } as const;
 
 // D-03: decorative-geometry variant per discipline. k1=outline circle,
@@ -17,5 +17,5 @@ export const DISCIPLINE_K: Record<Category, 1 | 2 | 3 | 4> = {
   design:    1,
   finance:   2,
   personal:  3,
-  marketing: 4,
+  saas: 4,
 } as const;

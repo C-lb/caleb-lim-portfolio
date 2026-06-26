@@ -1,0 +1,132 @@
+---
+// Inner-page discipline switcher. Lets a recruiter move between disciplines
+// without returning to the splash first (the prior nav was "← Splash" only).
+// Anti-vibecode neutral treatment: neutral chips on the dark category canvas,
+// the single per-discipline accent marks the current room, every chip carries
+// hover / focus states and a hover tooltip. Empty disciplines stay reachable
+// and are tagged "soon" so the picker still reads as the full four-discipline
+// thesis even before every room is hung.
+import { CATEGORIES, type Category } from '../content/categories';
+import { DISCIPLINE_ACCENT } from '../styles/disciplines';
+import { getCollection } from 'astro:content';
+
+interface Props {
+  current?: Category;
+}
+const { current } = Astro.props;
+
+// Build-time count of non-draft pieces per discipline so the nav can tag the
+// empty ones (mirrors the splash count idiom in index.astro).
+const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
+const countByCategory: Record<Category, number> = {
+  design: 0, finance: 0, personal: 0, saas: 0,
+};
+for (const piece of allPieces) countByCategory[piece.data.category]++;
+
+const navLabel: Record<Category, string> = {
+  design: 'Design',
+  finance: 'Finance',
+  personal: 'Personal',
+  saas: 'SaaS',
+};
+---
+<nav class="disc-nav" aria-label="Disciplines">
+  {CATEGORIES.map((cat) => {
+    const isCurrent = cat === current;
+    const isEmpty = countByCategory[cat] === 0;
+    const tip = isEmpty
+      ? `${navLabel[cat]} — coming soon`
+      : isCurrent
+        ? `${navLabel[cat]} — you are here`
+        : `View ${navLabel[cat]} work`;
+    return (
+      <a
+        href={`/${cat}`}
+        class={`disc-link${isCurrent ? ' is-current' : ''}${isEmpty ? ' is-soon' : ''}`}
+        style={`--accent: ${DISCIPLINE_ACCENT[cat]}`}
+        title={tip}
+        aria-label={tip}
+        aria-current={isCurrent ? 'page' : undefined}
+      >
+        <span class="disc-dot" aria-hidden="true"></span>
+        <span class="disc-text">{navLabel[cat]}</span>
+        {isEmpty && <span class="disc-soon" aria-hidden="true">soon</span>}
+      </a>
+    );
+  })}
+</nav>
+
+<style>
+  .disc-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-5);
+  }
+  /* Neutral raised chip. The discipline accent only appears on the current chip
+     (single-accent rule). Strokes dropped in favour of a soft raised edge. */
+  .disc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    text-decoration: none;
+    background: rgba(242, 235, 219, 0.06);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 10px 24px -16px rgba(0, 0, 0, 0.6);
+    transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  }
+  .disc-link .disc-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.4;
+    flex: none;
+  }
+  .disc-link .disc-soon {
+    font-size: var(--fs-card-no);
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+  }
+  .disc-link.is-soon { opacity: 0.78; }
+  /* Current discipline: accent-tinted surface + lit accent dot. The accent token
+     is the site's one identity colour, so marking location with it stays within
+     the single-accent rule. */
+  .disc-link.is-current {
+    background: color-mix(in oklab, var(--accent) 28%, transparent);
+    opacity: 1;
+  }
+  .disc-link.is-current .disc-dot {
+    background: var(--accent);
+    opacity: 1;
+  }
+  /* The current chip is the page you're already on — keep it visible as a marker
+     but inert so it isn't a no-op link. */
+  .disc-link.is-current[aria-current="page"] {
+    cursor: default;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .disc-link:not(.is-current):hover {
+      background: rgba(242, 235, 219, 0.13);
+      transform: translateY(-1px);
+      opacity: 1;
+    }
+  }
+  .disc-link:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .disc-link { transition: none; }
+  }
+</style>

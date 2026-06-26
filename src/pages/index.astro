@@ -19,7 +19,7 @@ const portraitCaptions: (string | null)[] = [null, 'graphic design', 'event host
 // non-draft pieces per category. Personal often empty at launch.
 const allPieces = await getCollection('pieces', ({ data }) => data.draft !== true);
 const countByCategory: Record<Category, number> = {
-  design: 0, finance: 0, personal: 0, marketing: 0,
+  design: 0, finance: 0, personal: 0, saas: 0,
 };
 for (const piece of allPieces) {
   countByCategory[piece.data.category]++;
@@ -33,23 +33,10 @@ for (const piece of allPieces) {
 // canonical content/route order). 2026-05-18 (UAT): swapped marketing and
 // personal so the populated marketing card sits next to the populated design
 // card in row 1's pair-with-placeholder rhythm.
-const allCategoriesOnSplash: readonly Category[] = ['design', 'finance', 'marketing', 'personal'];
-// UAT-driven splash interaction (2026-05-18): the four role labels under "CALEB LIM"
-// scroll to the discipline card their role-pitch maps to. Now that all 4 cards
-// are always rendered, the role link always targets the discipline-specific card.
-const ROLE_TO_CATEGORY: { role: string; category: Category }[] = [
-  { role: 'analyst',          category: 'finance' },
-  { role: 'brand strategist', category: 'marketing' },
-  { role: 'designer',         category: 'design' },
-  { role: 'marketer',         category: 'marketing' },
-];
-const roleHref = (cat: Category) => `#card-${cat}`;
-const roleAria = (cat: Category) => ({
-  design: 'graphic design',
-  finance: 'financial models',
-  personal: 'personal projects',
-  marketing: 'marketing',
-}[cat]);
+const allCategoriesOnSplash: readonly Category[] = ['design', 'finance', 'saas', 'personal'];
+// 2026-06-26: the role labels (analyst / brand strategist / designer / marketer)
+// under CALEB LIM were removed at the owner's request, along with their
+// scroll-to-card interaction.
 // N-card grid template (UI-SPEC.md lines 446-451). With placeholder cards landed
 // 2026-05-18 the splash always shows 4 cards, so the 4-card template is the only
 // one that fires in practice — the other entries kept for forward-compat with
@@ -58,12 +45,15 @@ const roleAria = (cat: Category) => ({
 // to a 2x2 matrix — two columns, two rows. Reads as a balanced grid rather than
 // a wide horizontal sweep, and pairs each populated card next to its placeholder
 // counterpart at desktop widths.
+// 2026-06-26 (redesign): cards deploy on a real 12-column grid — four cards span
+// 3 columns each, a single scannable row on desktop (collapses to 2 then 1 col via
+// the media queries below). The 2x2 matrix is retired.
 const gridTemplate = {
-  4: '1fr 1fr',
-  3: '1fr 1fr 1fr',
+  4: 'repeat(12, 1fr)',
+  3: 'repeat(12, 1fr)',
   2: '1fr 1fr',
   1: '1fr',
-}[allCategoriesOnSplash.length] ?? '1fr 1fr';
+}[allCategoriesOnSplash.length] ?? 'repeat(12, 1fr)';
 // DISCIPLINE_ACCENT is imported to keep the splash's k→accent contract co-located
 // even though the card component owns its own CSS; suppress unused-import lint.
 void DISCIPLINE_ACCENT;
@@ -99,33 +89,26 @@ void DISCIPLINE_ACCENT;
             ></button>
           ))}
         </div>
+        <div class="bp-glass" aria-hidden="true"></div>
       </div>
       <div class="b-name">
-        <h1>CALEB<br /><span class="lim">LIM</span></h1>
-        <div class="roles">
-          {ROLE_TO_CATEGORY.map(({ role, category }) => (
-            <a href={roleHref(category)} class="role-link" aria-label={`${role} — jump to ${roleAria(category)} work`}>{role}</a>
-          ))}
-        </div>
+        <p class="b-greeting" aria-live="polite"><span class="greet" data-greet></span><span class="greet-caret" aria-hidden="true"></span></p>
+        <h1><span class="im">I'm</span> CALEB<br /><span class="lim">LIM</span></h1>
       </div>
-      <a href="/about" class="b-bio">
-        <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
-        <h2>why choose caleb?</h2>
-        <p>Analyst eye, designer hand. Eight years splitting time between brand systems, financial models, and the campaigns that move them. Pick the room that's relevant to your hire — every piece in it is mine end-to-end.</p>
-        <span class="b-bio-mark" aria-hidden="true">
-          <svg viewBox="0 0 60 60" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="30" cy="22" r="9" />
-            <path d="M12 52 C 14 38, 24 34, 30 34 C 36 34, 46 38, 48 52" />
-          </svg>
-        </span>
-        <span class="b-bio-arrow"><span class="b-bio-arrow-glyph" aria-hidden="true">→</span> KEEP READING</span>
+    </div>
+
+    <a href="/about" class="b-bio">
+        <span class="bb-warp" aria-hidden="true"></span>
+        <span class="bb-tint" aria-hidden="true"></span>
+        <span class="bb-edge" aria-hidden="true"></span>
+        <div class="b-bio-head">
+          <span class="b-bio-tag"><span class="b-bio-tag-star" aria-hidden="true">★</span> ABOUT</span>
+          <h2>the short version</h2>
+          <span class="b-bio-arrow"><span class="b-bio-arrow-glyph" aria-hidden="true">→</span> KEEP READING</span>
+        </div>
+        <p>I never learned to pick one lane. Some weeks I'm deep in a financial model, others I'm drawing a brand or writing the words that tie it all together. What I care about most is the people the work is really for. Have a look around, and if something clicks, come say hi.</p>
       </a>
-    </div>
-    <div class="b-question">
-      <span class="marker">→ PICK ONE</span>
-      <span class="q">What do you wish to <span class="q-tail">see?<svg class="q-smile" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="9" cy="10" r="0.9" fill="currentColor" stroke="none" /><circle cx="15" cy="10" r="0.9" fill="currentColor" stroke="none" /><path d="M8 14 Q 12 18, 16 14" /></svg></span></span>
-      <span class="arrow" aria-hidden="true">↓</span>
-    </div>
+
     <div id="cards" class="b-cards" style={`grid-template-columns: ${gridTemplate}`}>
       {allCategoriesOnSplash.map((cat, i) => (
         <DisciplineCard
@@ -143,26 +126,55 @@ void DISCIPLINE_ACCENT;
   /* --- Sketch lines 283-530 verbatim, adapted to scoped Astro --- */
   .b-splash {
     min-height: calc(100vh - 120px); /* leave room for Base topbar + footer */
-    padding: 16px 28px 22px; /* sketch line 285 — UI-SPEC OVERRIDE-03 (top tightened for fold) */
+    /* 2026-06-26 (redesign): more breathing room + a centred max-width so the
+       layout doesn't sprawl edge-to-edge on wide screens. */
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: clamp(20px, 3.5vw, 40px);
     display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    gap: 14px;
+    /* 2026-06-26: three stacked bands — header (portrait + name), then the about-me
+       card, then the discipline picker. */
+    grid-template-rows: auto auto auto;
+    align-content: space-between;
+    gap: clamp(24px, 3.4vw, 44px);
   }
 
-  /* HERO BAND: portrait | name+roles | bio (sketch lines 309-414) */
+  /* HEADER BAND: portrait (3) | name (9). */
   .b-hero {
     display: grid;
-    grid-template-columns: 280px 1.5fr 1.2fr;
-    gap: 16px;
-    align-items: stretch;
-    min-height: 320px;
+    grid-template-columns: repeat(12, 1fr);
+    gap: clamp(20px, 3vw, 44px);
+    align-items: center;
+    min-height: 0;
   }
+  .b-hero > .b-portrait { grid-column: span 3; }
+  .b-hero > .b-name     { grid-column: span 9; }
   .b-portrait {
     background: var(--ink);
-    border-radius: 8px;
+    border-radius: 18px; /* matches the glass cards */
     overflow: hidden;
     position: relative;
     aspect-ratio: 4/5; /* keep portrait shape; carousel slides fill this box */
+    /* Slightly smaller now that the about-me card sits below the header. */
+    width: 100%;
+    max-width: 260px;
+    justify-self: start;
+    box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7);
+  }
+  /* Liquid-glass frame: a lit bevel rim over the photo so the portrait reads as a
+     card set in glass (the photo stays fully visible; this is the .edge layer of the
+     glass recipe). pointer-events:none so the carousel arrows/dots stay clickable. */
+  .b-portrait .bp-glass {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+      inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.45),
+      inset -1px -1px 1px rgba(255, 255, 255, 0.18),
+      inset 0 0 34px rgba(255, 255, 255, 0.06);
   }
   /* 2026-05-18 (UAT v2): slides are absolutely stacked; each transitions
      independently. JS pre-positions the incoming slide off-screen on the
@@ -185,7 +197,7 @@ void DISCIPLINE_ACCENT;
     /* Each slide carries the same corner radius as the outer .b-portrait frame so
        the photo's curved edge reads even during the slide-in (when it crosses the
        container midline, the curve preserves the card-shape silhouette). */
-    border-radius: 8px;
+    border-radius: inherit;
     overflow: hidden;
     opacity: 0;
     /* Only transform animates — opacity is binary (idle slides invisible, in-flight
@@ -208,14 +220,14 @@ void DISCIPLINE_ACCENT;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: inherit;
   }
   /* Per-slide caption overlay. Mono, white, anchored to bottom-left. A soft
      bottom-gradient sits behind the text so it stays legible against any photo. */
   .b-portrait .bp-caption {
     position: absolute;
     left: 14px;
-    bottom: 28px; /* sits above the dot indicators */
+    bottom: 52px; /* clears the dot pill with room to breathe */
     color: var(--paper);
     font-family: var(--mono);
     font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
@@ -273,9 +285,15 @@ void DISCIPLINE_ACCENT;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(15, 13, 12, 0.65);
+    /* Anti-vibecode glass control: translucent dark fill, lit rim, soft shadow. */
+    background: rgba(20, 18, 16, 0.42);
+    backdrop-filter: blur(6px) saturate(1.2);
+    -webkit-backdrop-filter: blur(6px) saturate(1.2);
     color: var(--paper);
-    border: 1.5px solid rgba(242, 235, 219, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      0 8px 18px -8px rgba(0, 0, 0, 0.55);
     cursor: pointer;
     opacity: 0;
     transition: opacity 180ms ease, background-color 180ms ease, transform 180ms ease;
@@ -289,7 +307,7 @@ void DISCIPLINE_ACCENT;
   }
   .b-portrait:hover .bp-arrow,
   .b-portrait:focus-within .bp-arrow { opacity: 1; }
-  .b-portrait .bp-arrow:hover { background: var(--ink); transform: translateY(-50%) scale(1.08); }
+  .b-portrait .bp-arrow:hover { background: rgba(20, 18, 16, 0.62); transform: translateY(-50%) scale(1.08); }
   .b-portrait .bp-arrow:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
   .b-portrait .bp-arrow-prev { left: 8px; }
   .b-portrait .bp-arrow-next { right: 8px; }
@@ -297,13 +315,21 @@ void DISCIPLINE_ACCENT;
      fully opaque paper; inactive dots are semi-transparent paper. */
   .b-portrait .bp-dots {
     position: absolute;
-    bottom: 10px;
-    left: 0;
-    right: 0;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     z-index: 2;
+    /* Anti-vibecode glass pill so the dots read over any photo. */
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(20, 18, 16, 0.38);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
   /* Tap target: 24×24 button shell (WCAG 2.5.5 / Lighthouse target-size). Visible
      8×8 dot rendered via ::before pseudo so the surface remains identical but the
@@ -342,7 +368,8 @@ void DISCIPLINE_ACCENT;
   .b-name h1 {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: var(--fs-display);
+    /* Slightly smaller than --fs-display to make room for the about-me band. */
+    font-size: clamp(52px, 8.4vw, 124px);
     line-height: var(--lh-display);
     letter-spacing: -0.045em;
     text-transform: uppercase;
@@ -350,6 +377,40 @@ void DISCIPLINE_ACCENT;
     margin: 0;
   }
   .b-name h1 .lim { color: var(--terracotta); }
+  /* Typed, cycling greeting line above the name. */
+  .b-greeting {
+    font-family: var(--sans);
+    font-size: clamp(18px, 2.1vw, 26px);
+    font-weight: 500;
+    line-height: 1.15;
+    color: var(--ink);
+    opacity: 0.92;
+    margin: 0 0 var(--sp-3);
+    min-height: 1.3em; /* reserve a line so the name doesn't jump while typing */
+    display: flex;
+    align-items: center;
+  }
+  .greet-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    margin-left: 4px;
+    background: var(--design);
+    animation: caret-blink 1s steps(1) infinite;
+  }
+  @keyframes caret-blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .greet-caret { animation: none; } }
+  /* Small "I'm" lead-in above the giant name. */
+  .b-name h1 .im {
+    display: block;
+    font-size: clamp(22px, 2.6vw, 34px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: var(--ink);
+    margin-bottom: var(--sp-1);
+  }
   .b-name .roles {
     display: flex;
     flex-wrap: wrap;
@@ -404,20 +465,74 @@ void DISCIPLINE_ACCENT;
   /* 2026-05-18 (UAT): bg reverted to acid (turmeric); text + ink-family glyphs
      stay ink — same ink-on-light treatment as k2 Finance and k3 Personal so
      the bio card reads as a peer of the disciplines. */
+  /* About-me is now a full-width horizontal band between the header and the cards:
+     a left rail (eyebrow / heading / keep-reading) and the paragraph on the right. */
   .b-bio {
-    --rest-rotate: 0.5deg;
-    display: block;
-    background: var(--acid);
-    color: var(--ink);
-    border-radius: 10px;
-    padding: 18px 22px 36px; /* sketch line 387 — UI-SPEC OVERRIDE-03 (tightened for fold) */
+    --rest-rotate: 0deg;
+    display: grid;
+    grid-template-columns: minmax(200px, 320px) 1fr;
+    column-gap: clamp(28px, 4vw, 64px);
+    align-items: center;
+    background: transparent;
+    color: var(--paper);
+    border-radius: 18px;
+    padding: clamp(22px, 2.6vw, 34px) clamp(26px, 3vw, 44px);
     position: relative;
     overflow: hidden;
+    isolation: isolate;
     transform: rotate(var(--rest-rotate));
     text-decoration: none;
     cursor: pointer;
+    box-shadow: 0 22px 48px -26px rgba(10, 10, 10, 0.7);
     transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
                 box-shadow 0.35s ease;
+  }
+  /* Left rail: a tight stack (eyebrow / heading / keep-reading). */
+  .b-bio-head {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+  }
+  @media (max-width: 760px) {
+    .b-bio {
+      grid-template-columns: 1fr;
+      row-gap: var(--sp-3);
+    }
+  }
+  /* Liquid-glass four-layer stack (same recipe as DisciplineCard). */
+  .b-bio .bb-warp {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(3px) saturate(1.3);
+    -webkit-backdrop-filter: blur(3px) saturate(1.3);
+    filter: url(#glass-distortion);
+    pointer-events: none;
+  }
+  .b-bio .bb-tint {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    background: rgba(12, 11, 10, 0.55);
+    pointer-events: none;
+    transition: background 0.32s ease;
+  }
+  .b-bio .bb-edge {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    box-shadow:
+      inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.40),
+      inset -1px -1px 1px rgba(255, 255, 255, 0.16),
+      inset 0 0 22px rgba(255, 255, 255, 0.05);
+    pointer-events: none;
   }
   /* Bio entrance shake is hover-gated per Plan 05-07 planner discretion
      (notes.planner_discretion). On touch (where (hover: none) is true) the
@@ -433,52 +548,24 @@ void DISCIPLINE_ACCENT;
       animation: bio-shake 750ms ease-in-out 400ms 1;
     }
   }
-  /* Liquid-glass overlay — same recipe as the discipline cards. Hidden at rest,
-     fades in on hover. The :not() exclusions keep .b-bio-mark and .b-bio-arrow
-     in their existing absolute positions while still placing them above the glass. */
-  .b-bio::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 380ms ease;
-    background:
-      linear-gradient(135deg,
-        rgba(255, 255, 255, 0.45) 0%,
-        rgba(255, 255, 255, 0.10) 32%,
-        rgba(255, 255, 255, 0.02) 58%,
-        rgba(255, 255, 255, 0.32) 100%);
-    box-shadow:
-      inset 0  1px 1px rgba(255, 255, 255, 0.55),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.22),
-      inset  1px 0 1px rgba(255, 255, 255, 0.20),
-      inset -1px 0 1px rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(8px) saturate(1.5);
-    -webkit-backdrop-filter: blur(8px) saturate(1.5);
-    z-index: 1;
-  }
-  .b-bio > :not(.b-bio-mark):not(.b-bio-arrow) { position: relative; z-index: 2; }
-  .b-bio > .b-bio-mark,
-  .b-bio > .b-bio-arrow { z-index: 2; }
+  /* Content sits above the glass layers (warp/tint/edge are z-index 0–2). */
+  .b-bio > .b-bio-head,
+  .b-bio > p { position: relative; z-index: 3; }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Bio-card 3D tilt + glass overlay
      + entrance-shake pause only fire on devices with a real hover mechanism.
      On touch, the entrance shimmer (added in Task 2) is the substitute
      micro-interaction; first tap navigates to /about. */
   @media (hover: hover) and (pointer: fine) {
     .b-bio:hover {
-      /* Same tilt/lift reduction as DisciplineCard hover — keeps the card's
-         projected geometry from spilling into the portrait/name neighbour grid
-         cells. z-index bump ensures clean paint order if any shadow drifts. */
-      transform: perspective(1200px) translateY(-3px) rotateX(2deg) rotateY(-3deg);
+      /* 2026-06-26: clean straight lift (no tilt) to match the discipline cards. */
+      transform: translateY(-4px);
       box-shadow:
         0 14px 28px rgba(15, 13, 12, 0.24),
         0 4px 10px rgba(15, 13, 12, 0.14);
       z-index: 10;
       animation-play-state: paused;
     }
-    .b-bio:hover::before { opacity: 1; }
+    .b-bio:hover .bb-tint { background: rgba(12, 11, 10, 0.46); }
   }
   /* No reduced-motion override on `.b-bio::before`: the liquid-glass overlay's
      380ms opacity fade is EXEMPT per D-08 #9 (user-initiated hover feedback).
@@ -487,7 +574,7 @@ void DISCIPLINE_ACCENT;
      still fires under reduced-motion") in the same way the global hammer did.
      The surgical `.b-bio { animation: none }` for the entrance shake lives
      after the `@keyframes bio-shake` definition below. */
-  .b-bio:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .b-bio:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; }
   /* Same gentle shape as .b-card's card-shake — separate keyframes name because
      the bio card lives outside the DisciplineCard scoped style block. */
   @keyframes bio-shake {
@@ -544,7 +631,7 @@ void DISCIPLINE_ACCENT;
     line-height: var(--lh-bio);
     font-weight: 400;
     margin: 0;
-    max-width: 32ch;
+    max-width: 64ch;
   }
   /* 2026-05-18 (UAT): profile silhouette enlarged + more prominent. Was 56×56
      SVG at 0.18 opacity — now 120×120 at 0.4 opacity in ink (bg reverted to
@@ -552,11 +639,12 @@ void DISCIPLINE_ACCENT;
      decoration approach). Anchored to bottom-right with a slight bleed so it
      crops naturally to the rounded card edge. */
   .b-bio-mark {
+    display: none; /* 2026-06-26: dropped the silhouette watermark in the horizontal band */
     position: absolute;
-    bottom: 8px; /* 2026-05-18 (UAT): nudged right + up so the silhouette sits cleanly inside the card edge instead of bleeding into the corner */
+    bottom: 8px;
     left: 8px;
-    color: var(--ink);
-    opacity: 0.4;
+    color: var(--paper);
+    opacity: 0.35;
     line-height: 0;
     pointer-events: none;
     display: block;
@@ -569,20 +657,20 @@ void DISCIPLINE_ACCENT;
      enlarged silhouette via z-index so the text always reads even though it sits
      within the silhouette's bottom-right footprint. */
   .b-bio-arrow {
-    position: absolute;
-    right: 18px;
-    bottom: 18px;
+    position: static;
+    margin-top: var(--sp-3);
     font-family: var(--mono);
     font-weight: 700;
-    font-size: var(--fs-mono); /* was 11px; exact match per 05-TOKEN-MAP */
+    font-size: var(--fs-mono);
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    color: var(--ink);
-    z-index: 1;
+    color: var(--paper);
+    z-index: 3;
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
     line-height: 1;
+    justify-self: start;
   }
   /* 2026-05-18 (UAT): arrow glyph trimmed 50% — was 22px (visually overpowered
      the KEEP READING caps); now 11px to match the body text weight while still
@@ -593,17 +681,14 @@ void DISCIPLINE_ACCENT;
     font-weight: 800;
     line-height: 1;
     letter-spacing: 0;
-    color: var(--ink);
+    color: var(--paper);
   }
 
-  /* QUESTION BAR */
+  /* QUIET DIVIDER (was the question bar). Lower-contrast hairlines than before. */
   .b-question {
-    border-top: 2px solid var(--ink);
-    border-bottom: 2px solid var(--ink);
-    padding: 8px 0; /* sketch line 424 — UI-SPEC OVERRIDE-03 (tightened for fold) */
-    display: flex;
-    align-items: center;
-    gap: var(--sp-5);
+    border-top: 1px solid rgba(10, 10, 10, 0.10);
+    border-bottom: 1px solid rgba(10, 10, 10, 0.10);
+    padding: 6px 0;
   }
   /* Plan 05-09 Task 2 deviation: the post-Task-3 re-audit caught --terracotta bg
      (#82785d) + --paper fg (#f2ebdb) at 3.68:1 — under WCAG AA 4.5:1 for 13px bold
@@ -651,11 +736,12 @@ void DISCIPLINE_ACCENT;
     color: var(--design);
   }
 
-  /* CARDS ROW */
+  /* CARDS ROW — 12-col grid, each card spans 3 (four across). */
   .b-cards {
     display: grid;
-    gap: 10px; /* sketch line 452 — UI-SPEC OVERRIDE-03 */
+    gap: clamp(12px, 1.4vw, 20px);
   }
+  .b-cards > :global(.b-card) { grid-column: span 3; }
 
   /* Mobile collapse @ ≤900px (sketch lines 615-626) */
   @media (max-width: 900px) {
@@ -664,8 +750,13 @@ void DISCIPLINE_ACCENT;
       grid-template-columns: 1fr;
       min-height: 0;
     }
+    /* Reset the 12-col spans so the hero stacks in one column. */
+    .b-hero > .b-portrait,
+    .b-hero > .b-name,
+    .b-hero > .b-bio { grid-column: auto; }
     .b-portrait { aspect-ratio: 4/3; transform: none; }
     .b-cards { grid-template-columns: 1fr 1fr !important; }
+    .b-cards > :global(.b-card) { grid-column: span 1; }
     /* 2026-05-18 (UAT): keep the question + arrow on the same flex row even on
        mobile so the down-arrow rides the right edge of the same line as
        "What do you wish to see?", instead of dropping below it. The .marker
@@ -690,33 +781,35 @@ void DISCIPLINE_ACCENT;
 </style>
 
 <script>
-  // Smooth-scroll the role-label anchors to their target discipline card.
-  // Reduced-motion users get an instant jump (no animation).
-  // Falls back to native anchor-jump on unsupported browsers (no event listener attached).
-  const links = document.querySelectorAll<HTMLAnchorElement>('.roles a.role-link');
-  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-  links.forEach((a) => {
-    a.addEventListener('click', (e) => {
-      const href = a.getAttribute('href');
-      if (!href || !href.startsWith('#')) return;
-      const target = document.querySelector(href);
-      if (!target) return; // unknown anchor → let the browser handle (no-op)
-      e.preventDefault();
-      target.scrollIntoView({ behavior: prefersReduced.matches ? 'auto' : 'smooth', block: 'start' });
-      history.replaceState(null, '', href);
-      // Fire the shake instantly on click — no waiting for scroll to land.
-      // Mark every card .entrance-done first so that when .is-shaking is
-      // removed later, the base entrance animation can't re-trigger and
-      // produce a second visible motion.
-      if (target instanceof HTMLElement && target.classList.contains('b-card')) {
-        document.querySelectorAll('.b-card').forEach((c) => c.classList.add('entrance-done'));
-        target.classList.remove('is-shaking');
-        void target.offsetWidth;
-        target.classList.add('is-shaking');
-        target.addEventListener('animationend', () => target.classList.remove('is-shaking'), { once: true });
-      }
-    });
-  });
+  // Cycling typed greeting above the name. Types a line out, holds, deletes, and
+  // moves to the next — looping. Reduced-motion users just see the first line.
+  const greetEl = document.querySelector<HTMLElement>('[data-greet]');
+  if (greetEl) {
+    const greetings = [
+      "Nice to meet you.",
+      "Hi there, glad you stopped by.",
+      "Let's make something good.",
+      "Coffee's on me.",
+      "Pull up a chair.",
+      "Ready when you are.",
+    ];
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      greetEl.textContent = greetings[0];
+    } else {
+      let gi = 0, ci = 0, deleting = false;
+      const tick = () => {
+        const word = greetings[gi];
+        ci += deleting ? -1 : 1;
+        greetEl.textContent = word.slice(0, ci);
+        let delay = deleting ? 45 : 80;
+        if (!deleting && ci === word.length) { deleting = true; delay = 1700; }
+        else if (deleting && ci === 0) { deleting = false; gi = (gi + 1) % greetings.length; delay = 350; }
+        window.setTimeout(tick, delay);
+      };
+      window.setTimeout(tick, 600);
+    }
+  }
 
   // Portrait carousel — Instagram-style slide cycler with prev/next arrows, dot
   // indicators, and auto-advance every data-bp-interval ms (default 5000). One

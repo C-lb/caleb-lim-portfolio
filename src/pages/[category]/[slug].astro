@@ -22,7 +22,7 @@ export async function getStaticPaths() {
   // MUST match the gallery's sort key at src/pages/[category].astro:25 verbatim.
   // Pitfall P-1: drift between gallery sort and prev/next sort breaks recruiter UX.
   const byCategory: Record<Category, Piece[]> = {
-    design: [], finance: [], personal: [], marketing: [],
+    design: [], finance: [], personal: [], saas: [],
   };
   for (const p of all) {
     const cat = p.data.category as Category;
@@ -81,7 +81,7 @@ const backLabel: Record<Category, string> = {
   design:    '← Graphic / Design',
   finance:   '← Financial / Models',
   personal:  '← Personal / Projects',
-  marketing: '← Marketing',
+  saas: '← SaaS',
 };
 ---
 <Base title={`${title} — Caleb Lim`} bg="paper">
@@ -176,11 +176,14 @@ const backLabel: Record<Category, string> = {
     flex-direction: column;
     gap: var(--sp-4);
   }
+  /* Raised pill (anti-vibecode): no stroke. Contrast comes from a surface lifted
+     off the paper canvas plus a lit top edge and soft drop shadow. Horizontal
+     padding is 2x the vertical. */
   .b-cat-back {
     display: inline-block;
-    background: var(--paper);
+    background: color-mix(in oklab, var(--paper) 78%, #ffffff);
     color: var(--ink);
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -188,8 +191,11 @@ const backLabel: Record<Category, string> = {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     align-self: flex-start;
-    border: 1px solid var(--ink);
-    transition: background 0.2s ease, color 0.2s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(10, 10, 10, 0.10),
+      0 8px 18px -12px rgba(10, 10, 10, 0.40);
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Back-pill hover color/bg only on
      devices with a real hover mechanism. */
