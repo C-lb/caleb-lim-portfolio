@@ -17,9 +17,14 @@ import StatusPill from '../components/StatusPill.astro';
 interface Props {
   title: string;
   bg?: 'paper' | 'ink';
+  description?: string;
+  ogImage?: string;
 }
-const { title, bg = 'paper' } = Astro.props;
+const { title, bg = 'paper', description, ogImage = '/og.png' } = Astro.props;
 const isHome = Astro.url.pathname === '/';
+const desc = description ?? 'Caleb Lim — work across brand and design, financial models, product, and side projects.';
+const ogUrl = Astro.site ? new URL(ogImage, Astro.site).href : ogImage;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
 ---
 <!doctype html>
 <html lang="en">
@@ -27,6 +32,17 @@ const isHome = Astro.url.pathname === '/';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={desc} />
+    <meta name="twitter:image" content={ogUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" as="font" type="font/woff2" href={dmSansDisplay} crossorigin="anonymous" />
   </head>

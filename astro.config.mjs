@@ -1,5 +1,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  // No integrations in Phase 1 — visuals are placeholder. Tailwind / fonts / motion land in Phase 3.
+  // Absolute URLs for OG/Twitter image tags. Update to the custom domain when
+  // one is connected; default is the Vercel project domain.
+  site: 'https://caleb-lim-portfolio.vercel.app',
 });

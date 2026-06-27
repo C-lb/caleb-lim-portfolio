@@ -84,7 +84,7 @@ const backLabel: Record<Category, string> = {
   saas: '← SaaS',
 };
 ---
-<Base title={`${title} — Caleb Lim`} bg="paper">
+<Base title={`${title} — Caleb Lim`} bg="paper" description={context}>
   <article class="detail" style={`--accent: ${accent}`}>
     <header class="detail-head">
       <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
