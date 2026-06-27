@@ -5,6 +5,7 @@ import { CATEGORIES, type Category } from '../content/categories';
 import { DISCIPLINE_ACCENT } from '../styles/disciplines';
 import Gallery from '../components/Gallery.astro';
 import DisciplineNav from '../components/DisciplineNav.astro';
+import FeaturedPiece from '../components/FeaturedPiece.astro';
 
 export async function getStaticPaths() {
   // 2026-06-26: emit a route for EVERY discipline, populated or not. Empty ones
@@ -45,13 +46,19 @@ const label = categoryLabel[category];
 const countStr = String(n).padStart(2, '0');
 const isEmpty = n === 0;
 
-// Per-discipline coming-soon copy. Only the empty discipline's blurb is shown,
-// but all four are kept for forward-compat (any room can empty out between edits).
+// Empty-room copy. Reads as a deliberate, honest note plus a strong push to the
+// rooms that have work — not "still being hung" (which reads unfinished).
+const comingSoonLead: Record<Category, string> = {
+  design:    'No graphic design pieces are posted here yet.',
+  finance:   'No financial models are posted here yet.',
+  personal:  'Personal projects are not posted here yet.',
+  saas: 'No SaaS work is posted here yet.',
+};
 const comingSoonBlurb: Record<Category, string> = {
-  design:    'Graphic design pieces are being prepared. Check back shortly.',
-  finance:   'Financial models are being prepared. Check back shortly.',
-  personal:  'Side projects and experiments that do not fit a brief. Being written up now.',
-  saas: 'SaaS work is being prepared. Check back shortly.',
+  design:    'The work that is up lives in the other rooms. Start there.',
+  finance:   'The work that is up lives in the other rooms. Start there.',
+  personal:  'Side projects and experiments that do not fit a brief. The posted work lives in the other rooms.',
+  saas: 'The work that is up lives in the other rooms. Start there.',
 };
 
 // Disciplines that already have work, for the "see what's ready" links on the stub.
@@ -76,9 +83,9 @@ const readyLabel: Record<Category, string> = {
 
     <DisciplineNav current={category} />
 
-    {isEmpty ? (
+    {n === 0 ? (
       <div class="b-coming">
-        <p class="b-coming-lead">This room is still being hung.</p>
+        <p class="b-coming-lead">{comingSoonLead[category]}</p>
         <p class="b-coming-blurb">{comingSoonBlurb[category]}</p>
         {readyCategories.length > 0 && (
           <div class="b-coming-ready">
@@ -91,8 +98,13 @@ const readyLabel: Record<Category, string> = {
           </div>
         )}
       </div>
+    ) : n === 1 ? (
+      <FeaturedPiece piece={pieces[0]} category={category} />
     ) : (
-      <Gallery pieces={pieces} category={category} />
+      <>
+        <FeaturedPiece piece={pieces[0]} category={category} />
+        <Gallery pieces={pieces.slice(1)} category={category} />
+      </>
     )}
   </section>
 </Base>
