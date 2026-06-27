@@ -1,0 +1,159 @@
+---
+// Marquee / sole-piece treatment. Hero image beside the piece's context so a
+// recruiter reads the whole story without a click, while the empty-column
+// problem of a single grid tile disappears. Whole card links to the piece.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import type { Category } from '../content/categories';
+import { DISCIPLINE_ACCENT } from '../styles/disciplines';
+
+interface Props {
+  piece: CollectionEntry<'pieces'>;
+  category: Category;
+}
+const { piece, category } = Astro.props;
+const accent = DISCIPLINE_ACCENT[category];
+const { title, role, context, outcome, hero } = piece.data;
+---
+<a
+  href={`/${category}/${piece.id}`}
+  class="feat"
+  style={`--accent: ${accent}`}
+  aria-label={`View ${title}`}
+>
+  <div class="feat-thumb">
+    <Image
+      src={hero}
+      alt={title}
+      class="feat-cover"
+      priority
+      widths={[640, 960]}
+      sizes="(max-width: 900px) 100vw, 560px"
+    />
+  </div>
+  <div class="feat-body">
+    <span class="feat-eyebrow">Featured work</span>
+    <h3 class="feat-ttl">{title}</h3>
+    <p class="feat-role">{role}</p>
+    <dl class="feat-cr">
+      <div><dt>Context</dt><dd>{context}</dd></div>
+      <div><dt>Outcome</dt><dd>{outcome}</dd></div>
+    </dl>
+    <span class="feat-cue">View piece →</span>
+  </div>
+</a>
+
+<style>
+  /* Raised neutral card on the dark category canvas — soft shadow, no stroke,
+     no side accent. Accent appears only on the eyebrow + cue (one identity mark). */
+  .feat {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--sp-6);
+    align-items: stretch;
+    margin-top: var(--sp-6);
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--paper);
+    background: rgba(242, 235, 219, 0.05);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 24px 56px -30px rgba(0, 0, 0, 0.75);
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+  }
+  .feat-thumb {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .feat-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.35s ease;
+  }
+  .feat-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-6) var(--sp-6) var(--sp-6) 0;
+  }
+  .feat-eyebrow {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .feat-ttl {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: var(--fs-h3);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .feat-role {
+    font-style: italic;
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    opacity: 0.82;
+    margin: 0;
+  }
+  .feat-cr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin: var(--sp-2) 0 0;
+  }
+  .feat-cr dt {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 2px;
+  }
+  .feat-cr dd {
+    margin: 0;
+    font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    opacity: 0.88;
+    max-width: 46ch;
+  }
+  .feat-cue {
+    margin-top: auto;
+    padding-top: var(--sp-4);
+    font-family: var(--mono);
+    font-size: var(--fs-card-no);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .feat:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 32px 64px -28px rgba(0, 0, 0, 0.85);
+    }
+    .feat:hover .feat-cover { transform: scale(1.03); }
+  }
+  .feat:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .feat, .feat-cover { transition: none; }
+  }
+  /* Stack on tablet/phone — image on top, body below, with more vertical air. */
+  @media (max-width: 900px) {
+    .feat { grid-template-columns: 1fr; gap: var(--sp-4); }
+    .feat-body { padding: 0 var(--sp-5) var(--sp-5); gap: var(--sp-4); }
+  }
+</style>
