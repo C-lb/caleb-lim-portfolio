@@ -45,12 +45,13 @@ const total = pieces.length;
   .gallery {
     margin-top: var(--sp-6);
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(260px, 360px));
+    justify-content: center;
     gap: var(--sp-5);
     list-style: none;
     padding: 0;
   }
-  .gallery > li { grid-column: span 4; min-width: 0; }
+  .gallery > li { min-width: 0; }
 
   /* Neutral raised card on the dark category canvas — soft, no stroke. */
   .g-card {
@@ -134,12 +135,11 @@ const total = pieces.length;
     .g-card, .g-cover { transition: none; }
   }
 
-  /* Tablet: 2 across. Phone: 1 across. */
-  @media (max-width: 1024px) {
-    .gallery > li { grid-column: span 6; }
-  }
+  /* Phone: tighten gap, let cards stretch full-width. */
   @media (max-width: 600px) {
-    .gallery { gap: var(--sp-4); }
-    .gallery > li { grid-column: span 12; }
+    .gallery {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--sp-4);
+    }
   }
 </style>
