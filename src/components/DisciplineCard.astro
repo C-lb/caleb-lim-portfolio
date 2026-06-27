@@ -24,6 +24,15 @@ const cardLabel: Record<Category, string> = {
   saas: 'SaaS',
 };
 
+// One-line role lens so a recruiter maps each room to the kind of role it
+// speaks to. Sentence case, no em dashes, no banned filler.
+const cardLens: Record<Category, string> = {
+  design:    'Brand systems and visual identity',
+  finance:   'Models, analysis, and the numbers',
+  personal:  'Range, side projects, and play',
+  saas: 'Product thinking and building',
+};
+
 const cueText = isEmpty ? 'In the works →' : 'View the work →';
 const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 ---
@@ -70,6 +79,7 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
 
   <div class="b-card-mid">
     <span class="b-card-name">{cardLabel[category]}</span>
+    <span class="b-card-lens">{cardLens[category]}</span>
   </div>
   <span class="b-card-cue">{cueText}</span>
 </a>
@@ -178,6 +188,15 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     letter-spacing: -0.035em;
     text-transform: uppercase;
     align-self: end;
+  }
+  .b-card-lens {
+    display: block;
+    margin-top: var(--sp-1);
+    font-size: var(--fs-tile-role);
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+    color: var(--paper);
+    opacity: 0.68;
   }
   .b-card-cue {
     font-family: var(--mono);
