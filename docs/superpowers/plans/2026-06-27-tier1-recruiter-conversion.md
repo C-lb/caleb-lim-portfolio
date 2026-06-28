@@ -15,7 +15,7 @@
 - **Tokens only.** Pull every colour, space, radius, and size from `src/styles/tokens.css`. No new one-off hex or px values in new CSS. Accents: design `#8c6326`, finance(cobalt) `#8ba1a9`, personal(acid) `#dc972a`, saas(plum) `#536644` — but always via `DISCIPLINE_ACCENT[category]` / `--accent`, never hard-coded.
 - **Copy rules.** No em dashes anywhere. Sentence case for body and eyebrows (the UPPERCASE category `h2` is the one deliberate exception). Banned filler phrases that trip `verify-build.sh`: `passionate`, `multidisciplinary`, `intersection of`. The literal substring `PLACEHOLDER` must not appear in non-draft piece content.
 - **Route contract.** All four `/[category]` routes are emitted (populated or not). Do not change `getStaticPaths` in `[category].astro`.
-- **Verification gates (must pass before deploy):** `npm run build` succeeds, `npm run test:smoke` exits 0, `npm run verify:anti-ai` exits 0.
+- **Verification gates (must pass before deploy):** `npm run build` succeeds, `npm run verify:anti-ai` exits 0, and `npm run test:smoke` introduces **zero new failures versus the base commit (1309503)**. NOTE: `verify-build.sh` is already broadly RED at base (14 failures) because it encodes an obsolete earlier-phase spec (Bricolage font, D-07 route-404 contract, a "marketing" category now named "saas", gates marked "expected RED pre-Wave 1"). Do NOT treat its non-zero exit as a blocker — the real signal is "no NEW failures vs base" plus the per-task grep + visual checks.
 - **Deploy:** push to `main` → Vercel auto-deploys. No staging gate; verify locally first.
 - **Production origin (confirm):** OG absolute URLs need `site` in `astro.config.mjs`. Default to `https://caleb-lim-portfolio.vercel.app`; if a custom domain is live, use that instead. This is the one value to confirm with the owner.
 
@@ -519,11 +519,11 @@ Per-page OG + Twitter meta so a pasted link renders a titled card with an image,
 - Modify: `astro.config.mjs` (add `site`).
 - Modify: `src/layouts/Base.astro:17-21` (add `description` + `ogImage` props) and `:26-32` (inject meta into `<head>`).
 - Modify: `src/pages/index.astro`, `src/pages/[category].astro`, `src/pages/[category]/[slug].astro`, `src/pages/about.astro` — pass a `description` to `<Base>`.
-- Create: `public/og-default.png` (1200x630), generated once via Playwright.
+- Create: `public/og.png` (1200x630), generated once via Playwright.
 
 **Interfaces:**
 - Consumes: `Astro.site` (from config) to build the absolute image URL.
-- Produces: `<Base title description ogImage>` — `description` (string, optional) and `ogImage` (string path, optional, defaults to `/og-default.png`).
+- Produces: `<Base title description ogImage>` — `description` (string, optional) and `ogImage` (string path, optional, defaults to `/og.png`).
 
 - [ ] **Step 1: Set the site origin**
 
@@ -550,7 +550,7 @@ interface Props {
   description?: string;
   ogImage?: string;
 }
-const { title, bg = 'paper', description, ogImage = '/og-default.png' } = Astro.props;
+const { title, bg = 'paper', description, ogImage = '/og.png' } = Astro.props;
 const isHome = Astro.url.pathname === '/';
 const desc = description ?? 'Caleb Lim — work across brand and design, financial models, product, and side projects.';
 const ogUrl = Astro.site ? new URL(ogImage, Astro.site).href : ogImage;
@@ -591,7 +591,7 @@ In the same file, replace the `<head>` block (lines 26-32) with:
 
 - [ ] **Step 5: Generate the static OG image**
 
-Create a throwaway HTML in the scratchpad that renders a 1200x630 card using DM Sans (via Google Fonts) on the paper background with the name and positioning line, then screenshot it with Playwright into `public/og-default.png`.
+Create a throwaway HTML in the scratchpad that renders a 1200x630 card using DM Sans (via Google Fonts) on the paper background with the name and positioning line, then screenshot it with Playwright into `public/og.png`.
 
 Scratchpad file `og-source.html`:
 
@@ -614,12 +614,12 @@ Scratchpad file `og-source.html`:
 </div></body></html>
 ```
 
-Then with Playwright: navigate to the `file://` path, resize the viewport to 1200x630, screenshot the `.card` element, and save the result to `public/og-default.png`. Verify it is a 1200x630 PNG:
+Then with Playwright: navigate to the `file://` path, resize the viewport to 1200x630, screenshot the `.card` element, and save the result to `public/og.png`. Verify it is a 1200x630 PNG:
 
 ```bash
-file public/og-default.png
+file public/og.png
 npx sharp-cli --version >/dev/null 2>&1 || true   # optional
-node -e "const s=require('sharp');s('public/og-default.png').metadata().then(m=>console.log(m.width,m.height))"
+node -e "const s=require('sharp');s('public/og.png').metadata().then(m=>console.log(m.width,m.height))"
 ```
 
 Expected: `1200 630`.
@@ -632,10 +632,10 @@ Run:
 npm run build
 grep -o 'og:image" content="[^"]*"' dist/index.html | head -1
 grep -o 'og:title" content="[^"]*"' dist/design/index.html | head -1
-test -f dist/og-default.png && echo "og image copied"
+test -f dist/og.png && echo "og image copied"
 ```
 
-Expected: `og:image` resolves to an absolute `https://.../og-default.png` URL; the design page carries its own `og:title`; `dist/og-default.png` exists.
+Expected: `og:image` resolves to an absolute `https://.../og.png` URL; the design page carries its own `og:title`; `dist/og.png` exists.
 
 - [ ] **Step 7: Smoke + anti-AI gates**
 
@@ -645,7 +645,7 @@ Expected: both exit 0.
 - [ ] **Step 8: Commit**
 
 ```bash
-git add astro.config.mjs src/layouts/Base.astro src/pages public/og-default.png
+git add astro.config.mjs src/layouts/Base.astro src/pages public/og.png
 git commit -m "feat: per-page OG/Twitter meta + static share image
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
