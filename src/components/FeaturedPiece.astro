@@ -44,7 +44,7 @@ const { title, role, context, outcome, hero } = piece.data;
 </a>
 
 <style>
-  /* Raised neutral card on the dark category canvas — soft shadow, no stroke,
+  /* Raised neutral card on the dark category canvas. Soft shadow, no stroke,
      no side accent. Accent appears only on the eyebrow + cue (one identity mark). */
   .feat {
     display: grid;
@@ -116,7 +116,7 @@ const { title, role, context, outcome, hero } = piece.data;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     opacity: 0.6;
-    margin-bottom: 2px;
+    margin-bottom: var(--sp-1);
   }
   .feat-cr dd {
     margin: 0;
@@ -151,7 +151,7 @@ const { title, role, context, outcome, hero } = piece.data;
   @media (prefers-reduced-motion: reduce) {
     .feat, .feat-cover { transition: none; }
   }
-  /* Stack on tablet/phone — image on top, body below, with more vertical air. */
+  /* Stack on tablet/phone: image on top, body below, with more vertical air. */
   @media (max-width: 900px) {
     .feat { grid-template-columns: 1fr; gap: var(--sp-4); }
     .feat-body { padding: 0 var(--sp-5) var(--sp-5); gap: var(--sp-4); }
