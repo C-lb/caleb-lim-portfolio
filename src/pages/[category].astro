@@ -43,7 +43,6 @@ const categoryTabTitle: Record<Category, string> = {
   saas: 'SaaS',
 };
 const label = categoryLabel[category];
-const countStr = String(n).padStart(2, '0');
 const isEmpty = n === 0;
 
 // Empty-room copy. Reads as a deliberate, honest note plus a strong push to the
@@ -75,9 +74,9 @@ const readyLabel: Record<Category, string> = {
   <section class="b-category" style={`--accent: ${accent}`}>
     <header class="b-cat-head">
       <a href="/" class="b-cat-back">← Splash</a>
-      <h2>{label} <em>{isEmpty ? 'soon' : `/${countStr}`}</em></h2>
+      <h2>{label}{isEmpty && <em> soon</em>}</h2>
       <span class="b-cat-meta">
-        {isEmpty ? <strong>COMING SOON</strong> : <>{countStr} PIECES · <strong>UPDATED MAY 2026</strong></>}
+        {isEmpty ? <strong>COMING SOON</strong> : <strong>UPDATED MAY 2026</strong>}
       </span>
     </header>
 
