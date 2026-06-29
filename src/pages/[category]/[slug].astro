@@ -55,7 +55,7 @@ interface Props {
   next: NeighbourRef | null;
 }
 const { piece, prev, next } = Astro.props;
-const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, pullQuote } = piece.data;
 const slug = piece.id;
 
 // Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
@@ -83,12 +83,29 @@ const backLabel: Record<Category, string> = {
   personal:  '← Personal / Projects',
   saas: '← SaaS',
 };
+
+// Tier 2 meta strip: discipline label mirrors backLabel minus the arrow.
+const metaLabel: Record<Category, string> = {
+  design:   'Graphic / Design',
+  finance:  'Financial / Models',
+  personal: 'Personal / Projects',
+  saas:     'SaaS',
+};
 ---
 <Base title={`${title} — Caleb Lim`} bg="paper" description={context}>
   <article class="detail" style={`--accent: ${accent}`}>
     <header class="detail-head">
       <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
       <h1>{title}</h1>
+      <div class="meta-strip">
+        <span class="meta-disc">{metaLabel[category as Category]}</span>
+        {year && (<><span class="meta-dot">·</span><span class="meta-year">{year}</span></>)}
+        {deliverables && deliverables.length > 0 && (
+          <ul class="deliverables">
+            {deliverables.map((d) => <li class="deliverable">{d}</li>)}
+          </ul>
+        )}
+      </div>
     </header>
 
     {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
@@ -102,20 +119,30 @@ const backLabel: Record<Category, string> = {
       sizes="(max-width: 960px) 100vw, 960px"
     />
 
-    {/* PIECE-02: three blurb blocks — Context / Role / Outcome with uppercase mono labels */}
-    <section class="cro">
+    {/* Tier 2: narrative body — Context as the lead (situation), Role as action. */}
+    <section class="narrative">
       <div class="cro-block">
         <span class="label">Context</span>
-        <p>{context}</p>
+        <p class="lead">{context}</p>
       </div>
       <div class="cro-block">
         <span class="label">Role</span>
         <p>{role}</p>
       </div>
-      <div class="cro-block">
-        <span class="label">Outcome</span>
-        <p>{outcome}</p>
-      </div>
+    </section>
+
+    {/* Tier 2: pull-quote — large editorial line, one accent eyebrow only. */}
+    {pullQuote && (
+      <blockquote class="pull-quote">
+        <span class="pq-mark" aria-hidden="true">"</span>
+        <p>{pullQuote}</p>
+      </blockquote>
+    )}
+
+    {/* Tier 2: Outcome lifted out of the equal stack into the page's payoff band. */}
+    <section class="outcome-band">
+      <span class="label outcome-label">Outcome</span>
+      <p>{outcome}</p>
     </section>
 
     {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
@@ -219,13 +246,47 @@ const backLabel: Record<Category, string> = {
     color: var(--ink);
     margin: 0;
   }
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2) var(--sp-3);
+  }
+  .meta-disc, .meta-year, .meta-dot {
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+  .deliverables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  /* Raised pills: no stroke, lifted off paper, soft shadow, 2:1 padding. */
+  .deliverable {
+    background: color-mix(in oklab, var(--paper) 80%, #ffffff);
+    color: var(--ink);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      0 6px 14px -10px rgba(10, 10, 10, 0.40);
+  }
   .detail-hero {
     width: 100%;
     height: auto;
     border-radius: 8px;
     margin-bottom: var(--sp-8);
   }
-  .cro {
+  .narrative {
     display: flex;
     flex-direction: column;
     gap: var(--sp-6);
@@ -236,7 +297,7 @@ const backLabel: Record<Category, string> = {
     flex-direction: column;
     gap: var(--sp-2);
   }
-  .cro .label {
+  .label {
     font-family: var(--mono);
     font-size: var(--fs-mono);
     font-weight: 600;
@@ -245,9 +306,64 @@ const backLabel: Record<Category, string> = {
     color: var(--ink);
     opacity: 0.6;
   }
-  .cro p {
+  .narrative p {
     font-family: var(--serif);
     font-size: var(--fs-body);
+    line-height: var(--lh-bio);
+    color: var(--ink);
+    margin: 0;
+  }
+  /* Context lead: same body token, a touch more presence as the situation opener. */
+  .narrative p.lead {
+    font-size: var(--fs-ttl);
+    line-height: 1.5;
+  }
+
+  /* Pull-quote: one accent moment (the mark), neutral ink text, generous air. */
+  .pull-quote {
+    margin: var(--sp-10) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .pull-quote .pq-mark {
+    font-family: var(--sans);
+    font-size: var(--fs-card);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .pull-quote p {
+    font-family: var(--sans);
+    font-size: var(--fs-q);
+    line-height: var(--lh-tight);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* Outcome payoff band: raised surface (no stroke, no side stripe), single
+     padding level, soft diffuse shadow, lit top edge. The page's payoff. */
+  .outcome-band {
+    background: color-mix(in oklab, var(--paper) 88%, #ffffff);
+    border-radius: 12px;
+    padding: var(--sp-6);
+    margin-bottom: var(--sp-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 -1px 0 rgba(10, 10, 10, 0.08),
+      0 18px 36px -22px rgba(10, 10, 10, 0.42);
+  }
+  .outcome-band .outcome-label {
+    color: var(--accent);
+    opacity: 1;
+  }
+  .outcome-band p {
+    font-family: var(--serif);
+    font-size: var(--fs-ttl);
     line-height: var(--lh-bio);
     color: var(--ink);
     margin: 0;
@@ -343,5 +459,8 @@ const backLabel: Record<Category, string> = {
     .detail { padding: var(--sp-5); }
     .detail-pager { grid-template-columns: 1fr; gap: var(--sp-5); }
     .pager-link.next { text-align: left; align-items: flex-start; }
+    .pull-quote { margin: var(--sp-8) 0; }
+    .outcome-band { padding: var(--sp-5); }
+    .meta-strip { gap: var(--sp-2); }
   }
 </style>
