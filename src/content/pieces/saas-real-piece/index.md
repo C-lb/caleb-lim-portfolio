@@ -4,6 +4,8 @@ category: saas
 order: 1
 draft: false
 hero: "./hero.webp"
+deliverables: ["Marketing art direction", "Photoshoot direction", "Campaign collateral"]
+pullQuote: "Visuals carried the cycle from fundraising through leader recruitment into the on-the-ground trip."
 context: |
   PVL is the SMU overseas community service project (youth and community
   programmes in Vietnam) the design system was built for. Marketing carried

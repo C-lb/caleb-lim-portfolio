@@ -6,6 +6,8 @@ draft: false
 hero: "./hero.webp"
 pdfPaginate: [1, 5, 10, 11, 12]
 fullPdf: "/source-pdfs/design-real-piece.pdf"
+deliverables: ["Logo system", "Photoshoot art direction", "Shirt prints"]
+pullQuote: "Replaced three prior ad-hoc looks with one durable mark the team could apply themselves."
 context: |
   PVL is an SMU overseas community service project running youth and community
   programmes in Vietnam. Going into the cycle, fundraising decks, leader
