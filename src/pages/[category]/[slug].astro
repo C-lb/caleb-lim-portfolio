@@ -92,7 +92,7 @@ const metaLabel: Record<Category, string> = {
   saas:     'SaaS',
 };
 ---
-<Base title={`${title} — Caleb Lim`} bg="paper" description={context}>
+<Base title={`${title} — Caleb Lim`} bg="ink" description={context}>
   <article class="detail" style={`--accent: ${accent}`}>
     <header class="detail-head">
       <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
@@ -203,12 +203,11 @@ const metaLabel: Record<Category, string> = {
     flex-direction: column;
     gap: var(--sp-4);
   }
-  /* Raised pill (anti-vibecode): no stroke. Contrast comes from a surface lifted
-     off the paper canvas plus a lit top edge and soft drop shadow. Horizontal
-     padding is 2x the vertical. */
+  /* Raised pill (anti-vibecode): paper surface on the dark canvas with a lit top
+     edge and soft drop shadow instead of a stroke. Horizontal padding 2x vertical. */
   .b-cat-back {
     display: inline-block;
-    background: color-mix(in oklab, var(--paper) 78%, #ffffff);
+    background: var(--paper);
     color: var(--ink);
     padding: 8px 16px;
     border-radius: 999px;
@@ -219,10 +218,11 @@ const metaLabel: Record<Category, string> = {
     text-transform: uppercase;
     align-self: flex-start;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      inset 0 -1px 0 rgba(10, 10, 10, 0.10),
-      0 8px 18px -12px rgba(10, 10, 10, 0.40);
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(10, 10, 10, 0.18),
+      0 10px 24px -16px rgba(0, 0, 0, 0.6);
     transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
   }
   /* D-06 Touch-hover gate (Plan 05-07 Task 1). Back-pill hover color/bg only on
      devices with a real hover mechanism. */
@@ -233,7 +233,7 @@ const metaLabel: Record<Category, string> = {
     }
   }
   .b-cat-back:focus-visible {
-    outline: 3px solid var(--ink);
+    outline: 3px solid var(--paper);
     outline-offset: 3px;
   }
   .detail h1 {
@@ -243,7 +243,7 @@ const metaLabel: Record<Category, string> = {
     line-height: var(--lh-cat);
     letter-spacing: -0.04em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--paper);
     margin: 0;
   }
   .meta-strip {
@@ -258,7 +258,7 @@ const metaLabel: Record<Category, string> = {
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--paper);
     opacity: 0.6;
   }
   .deliverables {
@@ -266,10 +266,10 @@ const metaLabel: Record<Category, string> = {
     flex-wrap: wrap;
     gap: var(--sp-2);
   }
-  /* Raised pills: no stroke, lifted off paper, soft shadow, 2:1 padding. */
+  /* Raised pills: no stroke, lifted off ink canvas, soft shadow, 2:1 padding. */
   .deliverable {
-    background: color-mix(in oklab, var(--paper) 80%, #ffffff);
-    color: var(--ink);
+    background: rgba(242, 235, 219, 0.06);
+    color: var(--paper);
     padding: var(--sp-1) var(--sp-2);
     border-radius: 999px;
     font-family: var(--mono);
@@ -277,8 +277,8 @@ const metaLabel: Record<Category, string> = {
     font-weight: 600;
     letter-spacing: 0.08em;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      0 6px 14px -10px rgba(10, 10, 10, 0.40);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 6px 14px -10px rgba(0, 0, 0, 0.6);
   }
   .detail-hero {
     width: 100%;
@@ -303,14 +303,14 @@ const metaLabel: Record<Category, string> = {
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--paper);
     opacity: 0.6;
   }
   .narrative p {
     font-family: var(--serif);
     font-size: var(--fs-body);
     line-height: var(--lh-bio);
-    color: var(--ink);
+    color: var(--paper);
     margin: 0;
   }
   /* Context lead: same body token, a touch more presence as the situation opener. */
@@ -338,14 +338,14 @@ const metaLabel: Record<Category, string> = {
     font-size: var(--fs-q);
     line-height: var(--lh-tight);
     letter-spacing: -0.02em;
-    color: var(--ink);
+    color: var(--paper);
     margin: 0;
   }
 
-  /* Outcome payoff band: raised surface (no stroke, no side stripe), single
-     padding level, soft diffuse shadow, lit top edge. The page's payoff. */
+  /* Outcome payoff band: raised surface on dark canvas (lighter than bg), soft
+     diffuse shadow, lit top edge. The page's payoff. */
   .outcome-band {
-    background: color-mix(in oklab, var(--paper) 88%, #ffffff);
+    background: rgba(242, 235, 219, 0.05);
     border-radius: 12px;
     padding: var(--sp-6);
     margin-bottom: var(--sp-8);
@@ -353,9 +353,8 @@ const metaLabel: Record<Category, string> = {
     flex-direction: column;
     gap: var(--sp-3);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      inset 0 -1px 0 rgba(10, 10, 10, 0.08),
-      0 18px 36px -22px rgba(10, 10, 10, 0.42);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 18px 36px -22px rgba(0, 0, 0, 0.7);
   }
   .outcome-band .outcome-label {
     color: var(--accent);
@@ -365,7 +364,7 @@ const metaLabel: Record<Category, string> = {
     font-family: var(--serif);
     font-size: var(--fs-ttl);
     line-height: var(--lh-bio);
-    color: var(--ink);
+    color: var(--paper);
     margin: 0;
   }
   .paginated-pages {
@@ -386,7 +385,7 @@ const metaLabel: Record<Category, string> = {
     font-family: var(--serif);
     font-style: italic;
     font-size: var(--fs-body); /* was 16px; migrated to --fs-body (15.5px) per 05-TOKEN-MAP */
-    color: var(--ink);
+    color: var(--paper);
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;
@@ -409,13 +408,13 @@ const metaLabel: Record<Category, string> = {
     gap: var(--sp-6);
     margin-top: var(--sp-8);
     padding-top: var(--sp-5);
-    border-top: 1px solid var(--ink);
+    border-top: 1px solid rgba(242, 235, 219, 0.14);
   }
   .pager-link {
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    color: var(--ink);
+    color: var(--paper);
     text-decoration: none;
     transition: color 0.2s ease;
   }
@@ -429,7 +428,7 @@ const metaLabel: Record<Category, string> = {
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--paper);
     opacity: 0.6;
   }
   .pager-title {
@@ -437,7 +436,7 @@ const metaLabel: Record<Category, string> = {
     font-style: italic;
     font-size: var(--fs-body); /* was 16px; migrated to --fs-body (15.5px) per 05-TOKEN-MAP */
     line-height: var(--lh-bio);
-    color: var(--ink);
+    color: var(--paper);
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;

@@ -1,5 +1,5 @@
 ---
-// Phase 3 D-14 custom 404. Cream-paper canvas (matches splash). Big Bricolage "404",
+// Phase 3 D-14 custom 404. Ink canvas (matches gallery/slug). Big DM Sans "404",
 // one dry Fraunces italic caption, four DisciplineCards repeated below.
 // Cloudflare Pages auto-serves dist/404.html with HTTP 404 for unknown routes
 // (zero-config; verified locally at Plan 05 Task 3 via npm run preview + curl, and re-verified on Cloudflare Pages at Phase 6 deploy).
@@ -25,7 +25,7 @@ const cardOrder: readonly Category[] = ['design', 'finance', 'saas', 'personal']
 // 12-col grid, four cards span 3 each (matches the splash redesign).
 const gridTemplate = 'repeat(12, 1fr)';
 ---
-<Base title="404 — Caleb Lim" bg="paper">
+<Base title="404 — Caleb Lim" bg="ink">
   <section class="four-oh-four">
     <h1>404</h1>
     <p class="caption">This page doesn't exist. The four that do are below.</p>
@@ -57,7 +57,7 @@ const gridTemplate = 'repeat(12, 1fr)';
     font-size: var(--fs-display);
     line-height: var(--lh-display);
     letter-spacing: -0.045em;
-    color: var(--ink);
+    color: var(--paper);
     margin: 0;
     font-variation-settings: "wdth" 100, "opsz" 96;
   }
@@ -67,7 +67,7 @@ const gridTemplate = 'repeat(12, 1fr)';
     font-weight: 400;
     font-size: var(--fs-ttl); /* was 18px; migrated to --fs-ttl (22px) per 05-TOKEN-MAP — 1-use, nearest existing step */
     line-height: 1.4;
-    color: var(--ink);
+    color: var(--paper);
     opacity: 0.4;
     margin: 0 0 var(--sp-8);
   }
