@@ -119,7 +119,7 @@ const metaLabel: Record<Category, string> = {
       sizes="(max-width: 960px) 100vw, 960px"
     />
 
-    {/* Tier 2: narrative body — Context as the lead (situation), Role as action. */}
+    {/* Tier 2: narrative body. Context as the lead (situation), Role as action. */}
     <section class="narrative">
       <div class="cro-block">
         <span class="label">Context</span>
@@ -131,7 +131,7 @@ const metaLabel: Record<Category, string> = {
       </div>
     </section>
 
-    {/* Tier 2: pull-quote — large editorial line, one accent eyebrow only. */}
+    {/* Tier 2: pull-quote. Large editorial line, one accent eyebrow only. */}
     {pullQuote && (
       <blockquote class="pull-quote">
         <span class="pq-mark" aria-hidden="true">"</span>
@@ -270,7 +270,7 @@ const metaLabel: Record<Category, string> = {
   .deliverable {
     background: color-mix(in oklab, var(--paper) 80%, #ffffff);
     color: var(--ink);
-    padding: 4px 10px;
+    padding: var(--sp-1) var(--sp-2);
     border-radius: 999px;
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -316,7 +316,7 @@ const metaLabel: Record<Category, string> = {
   /* Context lead: same body token, a touch more presence as the situation opener. */
   .narrative p.lead {
     font-size: var(--fs-ttl);
-    line-height: 1.5;
+    line-height: var(--lh-bio);
   }
 
   /* Pull-quote: one accent moment (the mark), neutral ink text, generous air. */
