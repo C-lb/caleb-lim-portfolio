@@ -26,6 +26,14 @@ const pieces = defineCollection({
       .describe('Path to the full PDF for the "Open full PDF" link. Typically /source-pdfs/[slug].pdf — the prebuild script copies source.pdf to this location when this field is set.'),
     outcomeTagline: z.string().optional()
       .describe('Deferred — CONTENT-01, v2 only. Phase 2 ignores.'),
+    // Tier 2: optional case-study metadata. Each renders only when set, so existing
+    // pieces stay valid and an absent field disappears from the layout.
+    year: z.string().optional()
+      .describe('Display year or range, e.g. "2025" or "2024-2025". String (not number) so ranges work. Use a hyphen, never an em dash.'),
+    deliverables: z.array(z.string()).optional()
+      .describe('Short scope tags for the meta strip, e.g. ["Logo system", "Photoshoot art direction", "Shirt prints"]. Keep each 1-4 words.'),
+    pullQuote: z.string().optional()
+      .describe('One editorial line given large treatment between the narrative and the PDF slides. Lift from the work or the result; one sentence; no em dash.'),
   }),
 });
 
