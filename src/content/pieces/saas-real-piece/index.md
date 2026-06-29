@@ -1,8 +1,9 @@
 ---
-title: "PVL — Overseas Community Project marketing campaign"
+title: "PVL - Overseas Community Project marketing campaign"
 category: saas
 order: 1
 draft: false
+year: "2025"
 hero: "./hero.webp"
 deliverables: ["Marketing art direction", "Photoshoot direction", "Campaign collateral"]
 pullQuote: "Visuals carried the cycle from fundraising through leader recruitment into the on-the-ground trip."
@@ -19,6 +20,6 @@ role: |
   fundraising deck, and recruitment touchpoints.
 outcome: |
   Visuals carried the cycle from fundraising through leader recruitment
-  into the on-the-ground trip. Same identity, same tone the whole way —
+  into the on-the-ground trip. Same identity, same tone the whole way -
   no rebuild between phases, no off-brand one-offs.
 ---
