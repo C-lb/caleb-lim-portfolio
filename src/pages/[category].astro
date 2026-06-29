@@ -6,6 +6,7 @@ import { DISCIPLINE_ACCENT } from '../styles/disciplines';
 import Gallery from '../components/Gallery.astro';
 import DisciplineNav from '../components/DisciplineNav.astro';
 import FeaturedPiece from '../components/FeaturedPiece.astro';
+import PieceCarousel from '../components/PieceCarousel.astro';
 
 export async function getStaticPaths() {
   // 2026-06-26: emit a route for EVERY discipline, populated or not. Empty ones
@@ -101,6 +102,7 @@ const readyLabel: Record<Category, string> = {
       <FeaturedPiece piece={pieces[0]} category={category} />
     ) : (
       <>
+        <PieceCarousel pieces={pieces} accent={accent} theme="dark" label="Browse this room" />
         <FeaturedPiece piece={pieces[0]} category={category} />
         <Gallery pieces={pieces.slice(1)} category={category} />
       </>
