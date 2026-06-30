@@ -13,7 +13,8 @@
     "pdf-poc": "node scripts/pdf-poc.mjs",
     "pdf-preprocess": "node scripts/pdf-preprocess.mjs",
     "prebuild": "node scripts/pdf-preprocess.mjs",
-    "test": "node --test",
+    "studio": "node scripts/studio/server.mjs",
+    "test": "node --test --test-concurrency=1",
     "test:smoke": "bash scripts/verify-build.sh",
     "verify:anti-ai": "bash scripts/verify-anti-ai-tells.sh"
   },
