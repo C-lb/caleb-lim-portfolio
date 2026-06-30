@@ -105,9 +105,9 @@ The client sends the desired **final ordered** gallery as a JSON array, each ite
 Server algorithm:
 1. Resolve each item: `keep` → path to existing file in the piece dir; `new` → the
    matching uploaded temp file by `idx`.
-2. Re-optimize every resolved image through `optimizeImage` into the temp dir,
-   renumbered `gallery-01..NN` in plan order. (Re-optimizing kept images is acceptable:
-   idempotent, cheap, local; keeps one code path.)
+2. Into the temp dir, renumbered `gallery-01..NN` in plan order: **copy** kept images
+   byte-identical (no recompression), and run **only new uploads** through
+   `optimizeImage`. The fresh temp dir means the renumber never collides.
 3. Any existing `gallery-*.webp` not referenced by a `keep` is simply not carried into
    the temp dir, so the swap drops it. Empty plan → no gallery, `gallery` frontmatter
    key omitted.
@@ -218,8 +218,10 @@ based (no full astro build needed, unlike the two existing create build tests):
 
 ## Risks / edge cases
 
-- **Re-optimizing kept gallery images** slightly recompresses them each save. Acceptable
-  (local, idempotent enough, single code path). Noted, not fixed.
+- **Kept media is copied byte-identical** (cover + kept gallery images), so repeated
+  saves never recompress unchanged images. Only new uploads run through `optimizeImage`.
+- **Temp dir lives in the repo**, not `os.tmpdir()` (a repo-root `.studio-tmp/`), so the
+  swap rename is always same-filesystem (no EXDEV) and never under Astro's content glob.
 - **Atomic swap window:** between `rm` backup and completion there is a tiny non-atomic
   window; acceptable for a local single-user tool, and the backup-then-swap ordering
   means the original survives any failure before the final rename.
