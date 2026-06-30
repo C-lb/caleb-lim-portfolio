@@ -125,3 +125,68 @@ test('GET /api/pieces/:slug/pdf-thumbs 404s when the piece has no PDF', async ()
     assert.equal(res.status, 404);
   } finally { await nukePiece(slug); server.close(); }
 });
+
+async function pngBlob(color) {
+  const buf = await sharp({ create: { width: 800, height: 600, channels: 3, background: color } }).png().toBuffer();
+  return new Blob([buf], { type: 'image/png' });
+}
+
+test('PUT /api/pieces/:slug updates text and reorders gallery', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('Put Me One', 'design', 2);
+  try {
+    const fd = new FormData();
+    fd.set('title', 'Put Me One');
+    fd.set('category', 'design');
+    fd.set('role', 'updated role'); fd.set('outcome', 'o'); fd.set('context', 'c');
+    fd.set('year', '2024');
+    fd.set('deliverables', JSON.stringify(['Edited']));
+    fd.set('pullQuote', '');
+    fd.set('draft', 'false');
+    fd.set('galleryPlan', JSON.stringify([{ kind: 'keep', name: 'gallery-02.webp' }, { kind: 'keep', name: 'gallery-01.webp' }, { kind: 'new', idx: 0 }]));
+    fd.append('gallery', await pngBlob({ r: 1, g: 2, b: 3 }), 'new.png');
+    fd.set('pdfPlan', JSON.stringify({ action: 'keep' }));
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}`, { method: 'PUT', body: fd });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.slug, slug);
+    assert.equal(json.previewUrl, `http://localhost:4321/design/${slug}`);
+    const get = await (await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}`)).json();
+    assert.equal(get.role, 'updated role');
+    assert.equal(get.year, '2024');
+    assert.deepEqual(get.gallery, ['gallery-01.webp', 'gallery-02.webp', 'gallery-03.webp']);
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+test('PUT /api/pieces/:slug replaces the cover', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('Put Me Two');
+  try {
+    const before = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    const fd = new FormData();
+    fd.set('title', 'Put Me Two'); fd.set('category', 'design');
+    fd.set('role', 'r'); fd.set('outcome', 'o'); fd.set('context', 'c');
+    fd.set('draft', 'false'); fd.set('galleryPlan', JSON.stringify([])); fd.set('pdfPlan', JSON.stringify({ action: 'keep' }));
+    fd.set('cover', await pngBlob({ r: 240, g: 12, b: 12 }), 'cover.png');
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}`, { method: 'PUT', body: fd });
+    assert.equal(res.status, 200);
+    const after = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    assert.ok(!before.equals(after), 'cover replaced');
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+test('PUT /api/pieces/:slug 400s on an empty required field', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('Put Me Three');
+  try {
+    const fd = new FormData();
+    fd.set('title', 'Put Me Three'); fd.set('category', 'design');
+    fd.set('role', ''); fd.set('outcome', 'o'); fd.set('context', 'c');
+    fd.set('draft', 'false'); fd.set('galleryPlan', JSON.stringify([])); fd.set('pdfPlan', JSON.stringify({ action: 'keep' }));
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}`, { method: 'PUT', body: fd });
+    assert.equal(res.status, 400);
+  } finally { await nukePiece(slug); server.close(); }
+});

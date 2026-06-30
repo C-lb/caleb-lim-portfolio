@@ -10,7 +10,7 @@ import crypto from 'node:crypto';
 import matter from 'gray-matter';
 import { createPiece } from '../lib/createPiece.mjs';
 import { PIECES_DIR, exists } from '../lib/pieceCore.mjs';
-import { readPiece } from '../lib/updatePiece.mjs';
+import { readPiece, updatePiece } from '../lib/updatePiece.mjs';
 import { uncommittedCount, publish } from './git.mjs';
 import { rasterizeAllPages } from '../lib/pdf-thumbs.mjs';
 
@@ -99,7 +99,8 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
   app.post('/api/publish', async (req, res) => {
     try {
       const title = (req.body?.title || '').trim();
-      const message = title ? `Add piece: ${title}` : 'Add portfolio piece';
+      const verb = req.body?.mode === 'update' ? 'Update' : 'Add';
+      const message = title ? `${verb} piece: ${title}` : `${verb} portfolio piece`;
       const result = await publish({ cwd: repoRoot, message });
       res.json(result);
     } catch (err) {
@@ -158,6 +159,47 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
         thumbs: pages.map((p) => ({ n: p.n, w: p.w, h: p.h, url: `/api/pdf/preview/${stagingId}/${p.file}` })),
       });
     } catch (err) { res.status(500).json({ error: `Could not read that PDF: ${err.message}` }); }
+  });
+
+  app.put('/api/pieces/:slug', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'gallery' }]), async (req, res) => {
+    const tempPaths = [];
+    try {
+      const slug = path.basename(req.params.slug);
+      const b = req.body;
+      const galleryFiles = req.files?.gallery ?? [];
+      const cover = req.files?.cover?.[0] ?? null;
+      for (const files of Object.values(req.files ?? {})) for (const f of files) tempPaths.push(f.path);
+
+      const rawPlan = parseJsonArray(b.galleryPlan);
+      const galleryPlan = rawPlan.map((it) =>
+        it && it.kind === 'new'
+          ? { kind: 'new', path: galleryFiles[it.idx]?.path }
+          : { kind: 'keep', name: String(it?.name ?? '') });
+      for (const it of galleryPlan) {
+        if (it.kind === 'new' && !it.path) throw new Error('A new gallery image was referenced but not uploaded.');
+      }
+
+      let pdfPlan = { action: 'keep' };
+      try { const parsed = JSON.parse(b.pdfPlan); if (parsed && parsed.action) pdfPlan = parsed; } catch { /* keep */ }
+      if (pdfPlan.action === 'replace') pdfPlan = { action: 'replace', pdfPath: stagingPdfPath(pdfPlan.stagingId), pages: pdfPlan.pages };
+
+      const fields = {
+        title: b.title, category: b.category, role: b.role, outcome: b.outcome, context: b.context,
+        year: b.year || undefined, deliverables: parseJsonArray(b.deliverables).map(String).filter(Boolean),
+        pullQuote: b.pullQuote || undefined, draft: b.draft === 'true',
+      };
+
+      const { category, warnings } = await updatePiece({ slug, fields, cover: cover?.path ?? null, galleryPlan, pdfPlan });
+      if (pdfPlan.action === 'replace' && pdfPlan.pdfPath) {
+        await fs.rm(path.dirname(pdfPlan.pdfPath), { recursive: true, force: true }).catch(() => {});
+      }
+      res.json({ slug, category, previewUrl: `${DEV_PREVIEW_ORIGIN}/${category}/${slug}`, warnings });
+    } catch (err) {
+      const status = /required|category|not found|uploaded/i.test(err.message) ? 400 : 500;
+      res.status(status).json({ error: err.message });
+    } finally {
+      for (const p of tempPaths) fs.rm(p, { force: true }).catch(() => {});
+    }
   });
 
   app.use(express.static(UI_DIR));
