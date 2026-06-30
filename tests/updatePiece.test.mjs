@@ -152,3 +152,73 @@ test('updatePiece rejects an unknown category', async () => {
     );
   } finally { await nukePiece(slug); }
 });
+
+async function seedPieceWithGallery(n = 2) {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-gal-'));
+  const hero = path.join(tmp, 'c.png'); await makeImage(hero);
+  const gPaths = [];
+  for (let i = 0; i < n; i++) { const g = path.join(tmp, `g${i}.png`); await makeImage(g, { r: i * 40, g: 80, b: 120 }); gPaths.push(g); }
+  const { slug } = await createPiece({
+    title: `Gallery Seed ${n}`, category: 'design', role: 'r', outcome: 'o', context: 'c',
+    heroPath: hero, galleryPaths: gPaths,
+  });
+  await fs.rm(tmp, { recursive: true, force: true });
+  return slug;
+}
+
+test('updatePiece appends a new gallery image', async () => {
+  const slug = await seedPieceWithGallery(2);
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-add-'));
+  try {
+    const nu = path.join(tmp, 'n.png'); await makeImage(nu, { r: 5, g: 5, b: 5 });
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Gallery Seed 2' }), cover: null,
+      galleryPlan: [{ kind: 'keep', name: 'gallery-01.webp' }, { kind: 'keep', name: 'gallery-02.webp' }, { kind: 'new', path: nu }],
+      pdfPlan: { action: 'keep' },
+    });
+    const p = await readPiece(slug);
+    assert.deepEqual(p.gallery, ['gallery-01.webp', 'gallery-02.webp', 'gallery-03.webp']);
+    await assert.doesNotReject(fs.access(path.join(PIECES_DIR, slug, 'gallery-03.webp')));
+  } finally { await nukePiece(slug); await fs.rm(tmp, { recursive: true, force: true }); }
+});
+
+test('updatePiece removes a gallery image and renumbers without gaps', async () => {
+  const slug = await seedPieceWithGallery(3);
+  try {
+    // Drop the middle image; keep 1 and 3.
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Gallery Seed 3' }), cover: null,
+      galleryPlan: [{ kind: 'keep', name: 'gallery-01.webp' }, { kind: 'keep', name: 'gallery-03.webp' }],
+      pdfPlan: { action: 'keep' },
+    });
+    const p = await readPiece(slug);
+    assert.deepEqual(p.gallery, ['gallery-01.webp', 'gallery-02.webp']);
+    await assert.rejects(fs.access(path.join(PIECES_DIR, slug, 'gallery-03.webp')), 'orphan removed');
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece reorders gallery images by plan order', async () => {
+  const slug = await seedPieceWithGallery(2);
+  try {
+    const orig1 = await fs.readFile(path.join(PIECES_DIR, slug, 'gallery-01.webp'));
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Gallery Seed 2' }), cover: null,
+      galleryPlan: [{ kind: 'keep', name: 'gallery-02.webp' }, { kind: 'keep', name: 'gallery-01.webp' }],
+      pdfPlan: { action: 'keep' },
+    });
+    // The image that was gallery-01 is now gallery-02 (byte-identical copy).
+    const now2 = await fs.readFile(path.join(PIECES_DIR, slug, 'gallery-02.webp'));
+    assert.ok(orig1.equals(now2), 'former gallery-01 is now gallery-02');
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece clears the gallery on an empty plan', async () => {
+  const slug = await seedPieceWithGallery(2);
+  try {
+    await updatePiece({ slug, fields: baseFields({ title: 'Gallery Seed 2' }), cover: null, galleryPlan: [], pdfPlan: { action: 'keep' } });
+    const p = await readPiece(slug);
+    assert.deepEqual(p.gallery, []);
+    const raw = await fs.readFile(path.join(PIECES_DIR, slug, 'index.md'), 'utf8');
+    assert.doesNotMatch(raw, /gallery:/);
+  } finally { await nukePiece(slug); }
+});
