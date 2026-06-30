@@ -224,3 +224,84 @@ test('updatePiece clears the gallery on an empty plan', async () => {
     await assert.rejects(fs.access(path.join(PIECES_DIR, slug, 'gallery-02.webp')), 'gallery-02 removed from disk');
   } finally { await nukePiece(slug); }
 });
+
+async function seedPieceWithPdf({ draft = false, pages = [1, 2, 3] } = {}) {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-pdf-'));
+  const hero = path.join(tmp, 'c.png'); await makeImage(hero);
+  const pdf = path.join(tmp, 'd.pdf'); await makePdf(pdf, 3);
+  const { slug } = await createPiece({
+    title: `Pdf Seed ${draft ? 'D' : 'P'}`, category: 'finance', role: 'r', outcome: 'o', context: 'c',
+    heroPath: hero, pdfPath: pdf, pdfPages: pages, draft,
+  });
+  await fs.rm(tmp, { recursive: true, force: true });
+  return slug;
+}
+
+test('updatePiece repick prunes page thumbs to the new selection', async () => {
+  const slug = await seedPieceWithPdf({ pages: [1, 2, 3] });
+  try {
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Pdf Seed P', category: 'finance' }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'repick', pages: [1] },
+    });
+    const p = await readPiece(slug);
+    assert.deepEqual(p.pdf.paginate, [1]);
+    // page-2 / page-3 thumbs pruned (page 1 is cover.webp).
+    await assert.rejects(fs.access(path.join(OUTPUT_DIR, slug, 'page-2.webp')), 'page-2 pruned');
+    await assert.rejects(fs.access(path.join(OUTPUT_DIR, slug, 'page-3.webp')), 'page-3 pruned');
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece replace swaps the source PDF', async () => {
+  const slug = await seedPieceWithPdf();
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-rep-'));
+  try {
+    const newPdf = path.join(tmp, 'new.pdf'); await makePdf(newPdf, 5);
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Pdf Seed P', category: 'finance' }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'replace', pdfPath: newPdf, pages: [4, 5] },
+    });
+    const p = await readPiece(slug);
+    assert.deepEqual(p.pdf.paginate, [4, 5]);
+    await assert.doesNotReject(fs.access(path.join(OUTPUT_DIR, slug, 'page-4.webp')));
+  } finally { await nukePiece(slug); await fs.rm(tmp, { recursive: true, force: true }); }
+});
+
+test('updatePiece remove deletes the deck and all public artifacts', async () => {
+  const slug = await seedPieceWithPdf();
+  try {
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Pdf Seed P', category: 'finance' }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'remove' },
+    });
+    const p = await readPiece(slug);
+    assert.equal(p.pdf.present, false);
+    await assert.rejects(fs.access(path.join(PIECES_DIR, slug, 'source.pdf')), 'source.pdf gone');
+    await assert.rejects(fs.access(path.join(OUTPUT_DIR, slug)), 'public thumbs gone');
+    await assert.rejects(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)), 'public source gone');
+    const raw = await fs.readFile(path.join(PIECES_DIR, slug, 'index.md'), 'utf8');
+    assert.doesNotMatch(raw, /pdfPaginate:/);
+    assert.doesNotMatch(raw, /fullPdf:/);
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece publish->draft strips public artifacts; draft->publish regenerates', async () => {
+  const slug = await seedPieceWithPdf(); // published with PDF -> public artifacts exist
+  try {
+    await assert.doesNotReject(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)), 'precondition: public exists');
+    // Flip to draft.
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Pdf Seed P', category: 'finance', draft: true }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'keep' },
+    });
+    await assert.rejects(fs.access(path.join(OUTPUT_DIR, slug)), 'draft: public thumbs stripped');
+    await assert.rejects(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)), 'draft: public source stripped');
+    await assert.doesNotReject(fs.access(path.join(PIECES_DIR, slug, 'source.pdf')), 'draft: in-dir source kept');
+    // Flip back to published.
+    await updatePiece({
+      slug, fields: baseFields({ title: 'Pdf Seed P', category: 'finance', draft: false }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'keep' },
+    });
+    await assert.doesNotReject(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)), 'republish: public regenerated');
+  } finally { await nukePiece(slug); }
+});
