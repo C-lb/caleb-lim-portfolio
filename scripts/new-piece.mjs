@@ -10,8 +10,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
-import sharp from 'sharp';
-import matter from 'gray-matter';
+import { createPiece } from './lib/createPiece.mjs';
 
 // Keep in sync with src/content/categories.ts
 const CATEGORIES = ['design', 'finance', 'personal', 'saas'];
@@ -54,9 +53,6 @@ async function askRequired(q) {
   return a;
 }
 
-const slugify = (s) =>
-  s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 60);
-
 async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
 
 async function listIntake() {
@@ -71,27 +67,6 @@ async function listIntake() {
   }
   return { images, pdfs };
 }
-
-// Largest existing `order` for a category, so new pieces append to the end.
-async function nextOrder(category) {
-  if (!(await exists(PIECES_DIR))) return 1;
-  let max = 0;
-  for (const slug of await fs.readdir(PIECES_DIR)) {
-    const idx = path.join(PIECES_DIR, slug, 'index.md');
-    if (!(await exists(idx))) continue;
-    try {
-      const { data } = matter(await fs.readFile(idx, 'utf8'));
-      if (data.category === category && Number.isFinite(data.order)) max = Math.max(max, data.order);
-    } catch { /* skip unreadable */ }
-  }
-  return max + 1;
-}
-
-// Block scalar so multi-line prose matches the house frontmatter style.
-const block = (key, val) => {
-  const lines = String(val).trim().split('\n');
-  return `${key}: |\n${lines.map((l) => '  ' + l).join('\n')}`;
-};
 
 async function resolveFile(label, candidates) {
   if (candidates.length === 1) {
@@ -145,39 +120,24 @@ async function main() {
     } else { pdfSrc = ''; }
   }
 
-  // Unique slug.
-  let slug = slugify(title) || 'piece';
-  let n = 2;
-  while (await exists(path.join(PIECES_DIR, slug))) slug = `${slugify(title)}-${n++}`;
-
-  const order = await nextOrder(category);
-  const pieceDir = path.join(PIECES_DIR, slug);
-
-  console.log(c.dim(`\nWill create src/content/pieces/${slug}/  (category: ${category}, order: ${order})`));
+  console.log(c.dim(`\nWill create a piece in category ${category}.`));
   const go = await ask(`Create it? ${c.dim('[Y/n]')}`, 'y');
   if (!/^y/i.test(go)) { console.log('Cancelled.'); closeIO(); return; }
 
-  await fs.mkdir(pieceDir, { recursive: true });
-
-  // Optimise the hero to webp (downscale only; never upscale).
-  await sharp(heroSrc).rotate().resize(1600, 1600, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toFile(path.join(pieceDir, 'hero.webp'));
-
-  const fm = [
-    '---',
-    `title: ${JSON.stringify(title)}`,
-    `category: ${category}`,
-    `order: ${order}`,
-    'draft: false',
-    'hero: "./hero.webp"',
-  ];
-  if (pdfSrc) {
-    await fs.copyFile(pdfSrc, path.join(pieceDir, 'source.pdf'));
-    const pages = pdfPages.split(',').map((s) => parseInt(s.trim(), 10)).filter((x) => Number.isInteger(x) && x > 0);
-    fm.push(`pdfPaginate: [${(pages.length ? pages : [1]).join(', ')}]`);
-    fm.push(`fullPdf: "/source-pdfs/${slug}.pdf"`);
+  let result;
+  try {
+    result = await createPiece({
+      title, category, role, outcome, context,
+      heroPath: heroSrc,
+      pdfPath: pdfSrc || null,
+      pdfPages: pdfPages ? pdfPages.split(',').map((s) => parseInt(s.trim(), 10)).filter((x) => Number.isInteger(x) && x > 0) : [],
+    });
+  } catch (err) {
+    console.log(c.y(`\n${err.message}`));
+    closeIO();
+    process.exit(1);
   }
-  fm.push(block('context', context), block('role', role), block('outcome', outcome), '---', '');
-  await fs.writeFile(path.join(pieceDir, 'index.md'), fm.join('\n'), 'utf8');
+  const { slug } = result;
 
   // Move the consumed intake files aside so the next drop starts clean.
   const usedFiles = [heroSrc, pdfSrc].filter(Boolean).filter((f) => f.startsWith(INTAKE_DIR));
@@ -186,11 +146,9 @@ async function main() {
     await fs.mkdir(archive, { recursive: true });
     for (const f of usedFiles) { try { await fs.rename(f, path.join(archive, path.basename(f))); } catch {} }
   }
+  for (const w of result.warnings) console.log(c.y(`  note: ${w}`));
 
   console.log(c.g(`\n✓ Created src/content/pieces/${slug}/`));
-  console.log(`  • hero.webp  ${c.dim('(optimised cover)')}`);
-  if (pdfSrc) console.log(`  • source.pdf ${c.dim('(deck — pages ' + (pdfPages || '1') + ' render on the detail page)')}`);
-  console.log(`  • index.md   ${c.dim('(edit any text here later)')}`);
   console.log(`\nIt appears in the ${c.b(category)} gallery at ${c.b('/' + category)}.`);
   console.log(c.dim('\nNext: `npm run dev` to preview, then commit + push to publish.\n'));
   closeIO();
