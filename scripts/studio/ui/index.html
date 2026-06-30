@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio Studio</title>
+  <link rel="stylesheet" href="/studio.css" />
+</head>
+<body>
+  <header class="bar">
+    <span class="brand">Portfolio Studio</span>
+    <span id="status" class="status"></span>
+  </header>
+  <main class="wrap">
+    <form id="piece-form" class="card">
+      <h2>New piece</h2>
+      <label>Title <span class="req">*</span><input name="title" required /></label>
+      <label>Category <span class="req">*</span>
+        <select name="category" required>
+          <option value="design">Graphic Design</option>
+          <option value="finance">Financial Models</option>
+          <option value="saas">SaaS</option>
+          <option value="personal">Personal Projects</option>
+        </select>
+      </label>
+      <label>Context <span class="req">*</span><textarea name="context" rows="3" required></textarea></label>
+      <label>Role <span class="req">*</span><textarea name="role" rows="2" required></textarea></label>
+      <label>Outcome <span class="req">*</span><textarea name="outcome" rows="2" required></textarea></label>
+      <label>Year <input name="year" placeholder="2025" /></label>
+      <label>Deliverables <input id="deliverables" placeholder="Logo system, Art direction (comma-separated)" /></label>
+      <label>Pull quote <textarea name="pullQuote" rows="2"></textarea></label>
+      <label class="check"><input type="checkbox" id="draft" /> Save as draft (hidden until ready)</label>
+
+      <fieldset><legend>Cover <span class="req">*</span></legend>
+        <div id="cover-drop" class="drop">Drag a cover image here, or click</div>
+        <input id="cover-input" type="file" accept="image/*" hidden />
+        <div id="cover-preview" class="preview"></div>
+      </fieldset>
+
+      <fieldset><legend>Gallery images</legend>
+        <div id="gallery-drop" class="drop">Drag images here (drag tiles to reorder)</div>
+        <input id="gallery-input" type="file" accept="image/*" multiple hidden />
+        <div id="gallery-list" class="tiles"></div>
+      </fieldset>
+
+      <fieldset><legend>PDF deck</legend>
+        <div id="pdf-drop" class="drop">Drag a PDF here, then click the pages to feature</div>
+        <input id="pdf-input" type="file" accept="application/pdf" hidden />
+        <div id="pdf-pages" class="tiles"></div>
+      </fieldset>
+
+      <button id="create" type="submit">Create piece</button>
+      <p id="form-msg" class="msg"></p>
+    </form>
+
+    <section id="result" class="card hidden">
+      <h2>Created</h2>
+      <p><a id="preview-link" target="_blank" rel="noopener">Open preview</a></p>
+      <p id="warnings" class="warn"></p>
+      <button id="publish">Publish to live site</button>
+      <p id="publish-msg" class="msg"></p>
+    </section>
+  </main>
+  <script type="module" src="/studio.js"></script>
+</body>
+</html>
