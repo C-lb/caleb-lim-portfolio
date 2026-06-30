@@ -7,7 +7,10 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
+import matter from 'gray-matter';
 import { createPiece } from '../lib/createPiece.mjs';
+import { PIECES_DIR, exists } from '../lib/pieceCore.mjs';
+import { readPiece } from '../lib/updatePiece.mjs';
 import { uncommittedCount, publish } from './git.mjs';
 import { rasterizeAllPages } from '../lib/pdf-thumbs.mjs';
 
@@ -102,6 +105,40 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
+  });
+
+  app.get('/api/pieces', async (_req, res) => {
+    try {
+      const out = [];
+      for (const slug of await fs.readdir(PIECES_DIR).catch(() => [])) {
+        const idx = path.join(PIECES_DIR, slug, 'index.md');
+        if (!(await exists(idx))) continue;
+        const { data } = matter(await fs.readFile(idx, 'utf8'));
+        out.push({ slug, title: data.title ?? slug, category: data.category ?? '', draft: data.draft === true, order: Number.isFinite(data.order) ? data.order : 0 });
+      }
+      out.sort((a, b) => a.category.localeCompare(b.category) || a.order - b.order);
+      res.json(out.map(({ order, ...p }) => p));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+  });
+
+  app.get('/api/pieces/:slug', async (req, res) => {
+    try {
+      const slug = path.basename(req.params.slug);
+      const p = await readPiece(slug);
+      res.json({
+        ...p,
+        heroUrl: `/api/pieces/${slug}/asset/hero.webp`,
+        galleryUrls: p.gallery.map((n) => `/api/pieces/${slug}/asset/${n}`),
+      });
+    } catch (err) { res.status(/not found/i.test(err.message) ? 404 : 500).json({ error: err.message }); }
+  });
+
+  app.get('/api/pieces/:slug/asset/:file', async (req, res) => {
+    const slug = path.basename(req.params.slug);
+    const file = path.basename(req.params.file);
+    if (file !== 'hero.webp' && !/^gallery-\d+\.webp$/.test(file)) return res.status(404).end();
+    try { res.type('image/webp').send(await fs.readFile(path.join(PIECES_DIR, slug, file))); }
+    catch { res.status(404).end(); }
   });
 
   app.use(express.static(UI_DIR));

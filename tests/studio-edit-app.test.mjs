@@ -1,0 +1,89 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import sharp from 'sharp';
+import { createApp } from '../scripts/studio/app.mjs';
+import { createPiece } from '../scripts/lib/createPiece.mjs';
+import { PIECES_DIR } from '../scripts/lib/pieceCore.mjs';
+import { OUTPUT_DIR, SOURCE_PDF_DIR } from '../scripts/lib/pdf-thumbs.mjs';
+
+function listen(app) {
+  return new Promise((resolve) => {
+    const server = app.listen(0, '127.0.0.1', () => resolve({ server, port: server.address().port }));
+  });
+}
+async function makeImage(file, color = { r: 30, g: 30, b: 30 }) {
+  await sharp({ create: { width: 800, height: 600, channels: 3, background: color } }).png().toFile(file);
+}
+async function nukePiece(slug) {
+  await fs.rm(path.join(PIECES_DIR, slug), { recursive: true, force: true });
+  await fs.rm(path.join(OUTPUT_DIR, slug), { recursive: true, force: true });
+  await fs.rm(path.join(SOURCE_PDF_DIR, `${slug}.pdf`), { force: true });
+}
+async function seed(title, category = 'design', gallery = 0) {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'edit-seed-'));
+  const hero = path.join(tmp, 'c.png'); await makeImage(hero);
+  const gPaths = [];
+  for (let i = 0; i < gallery; i++) { const g = path.join(tmp, `g${i}.png`); await makeImage(g, { r: i * 30, g: 60, b: 90 }); gPaths.push(g); }
+  const { slug } = await createPiece({ title, category, role: 'r', outcome: 'o', context: 'c', heroPath: hero, galleryPaths: gPaths });
+  await fs.rm(tmp, { recursive: true, force: true });
+  return slug;
+}
+
+test('GET /api/pieces lists existing pieces', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('List Me One');
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces`);
+    assert.equal(res.status, 200);
+    const list = await res.json();
+    assert.ok(Array.isArray(list));
+    const mine = list.find((p) => p.slug === slug);
+    assert.ok(mine, 'seeded piece present');
+    assert.equal(mine.title, 'List Me One');
+    assert.equal(mine.category, 'design');
+    assert.equal(mine.draft, false);
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+test('GET /api/pieces/:slug returns the manifest with asset URLs', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('Get Me Two', 'design', 2);
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}`);
+    assert.equal(res.status, 200);
+    const p = await res.json();
+    assert.equal(p.title, 'Get Me Two');
+    assert.equal(p.heroUrl, `/api/pieces/${slug}/asset/hero.webp`);
+    assert.deepEqual(p.galleryUrls, [
+      `/api/pieces/${slug}/asset/gallery-01.webp`,
+      `/api/pieces/${slug}/asset/gallery-02.webp`,
+    ]);
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+test('GET /api/pieces/:slug 404s for a missing piece', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/nope-nope`);
+    assert.equal(res.status, 404);
+  } finally { server.close(); }
+});
+
+test('GET /api/pieces/:slug/asset serves hero and rejects junk filenames', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('Asset Me Three');
+  try {
+    const ok = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}/asset/hero.webp`);
+    assert.equal(ok.status, 200);
+    assert.equal(ok.headers.get('content-type'), 'image/webp');
+    const bad = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}/asset/index.md`);
+    assert.equal(bad.status, 404);
+  } finally { await nukePiece(slug); server.close(); }
+});
