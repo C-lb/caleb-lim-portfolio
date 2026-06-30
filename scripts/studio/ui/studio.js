@@ -75,7 +75,6 @@ function renderPdf() {
 
 // ---- Mode switching ----
 function setMode(mode) {
-  const editing = mode === 'edit-loaded';
   $('#mode-new').classList.toggle('active', mode === 'new');
   $('#mode-edit').classList.toggle('active', mode !== 'new');
   $('#edit-list').classList.toggle('hidden', mode !== 'edit');
@@ -85,7 +84,7 @@ function setMode(mode) {
 
 function resetForm() {
   state.editing = null; state.cover = null; state.gallery = []; state.pdf = { stagingId: null, thumbs: [], selected: [] }; pdfRemoved = false;
-  $('#piece-form').reset(); $('#cover-preview').innerHTML = ''; $('#gallery-list').innerHTML = ''; $('#pdf-pages').innerHTML = '';
+  $('#piece-form').reset(); $('#cover-preview').innerHTML = ''; $('#gallery-list').innerHTML = ''; $('#pdf-pages').innerHTML = ''; $('#pdf-clear')?.remove();
   $('#pdf-drop').textContent = 'Drag a PDF here, then click the pages to feature';
   $('#form-title').textContent = 'New piece'; $('#create').textContent = 'Create piece';
   $('#result').classList.add('hidden'); $('#form-msg').textContent = '';
