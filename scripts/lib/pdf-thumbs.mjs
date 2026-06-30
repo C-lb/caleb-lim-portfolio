@@ -115,3 +115,32 @@ export async function rasterizePiece({ slug, sourcePdfPath, pdfPaginate, fullPdf
   await fs.writeFile(cachePath, JSON.stringify(cacheData, null, 2));
   return cacheData;
 }
+
+// Preview-only: render every page to webp thumbnails in an arbitrary out dir.
+// Lower quality/size than rasterizePiece — these are throwaway picker thumbnails.
+export async function rasterizeAllPages(pdfPath, outDir, { longEdge = 1400, quality = 68 } = {}) {
+  const data = new Uint8Array(await fs.readFile(pdfPath));
+  const doc = await getDocument({
+    data, cMapUrl: CMAP_URL, cMapPacked: true, standardFontDataUrl: STANDARD_FONT_DATA_URL,
+  }).promise;
+  await fs.mkdir(outDir, { recursive: true });
+  const pages = [];
+  for (let n = 1; n <= doc.numPages; n++) {
+    const page = await doc.getPage(n);
+    const viewport = page.getViewport({ scale: RENDER_SCALE });
+    const cf = doc.canvasFactory;
+    const ctx = cf.create(viewport.width, viewport.height);
+    await page.render({ canvasContext: ctx.context, viewport }).promise;
+    const png = ctx.canvas.toBuffer('image/png');
+    page.cleanup();
+    const webp = await sharp(png)
+      .resize({ width: longEdge, height: longEdge, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality }).toBuffer();
+    const file = `page-${n}.webp`;
+    await fs.writeFile(path.join(outDir, file), webp);
+    const meta = await sharp(webp).metadata();
+    pages.push({ n, file, w: meta.width, h: meta.height });
+  }
+  await doc.cleanup();
+  return pages;
+}

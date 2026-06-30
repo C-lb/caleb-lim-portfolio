@@ -6,8 +6,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import crypto from 'node:crypto';
 import { createPiece } from '../lib/createPiece.mjs';
 import { uncommittedCount } from './git.mjs';
+import { rasterizeAllPages } from '../lib/pdf-thumbs.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UI_DIR = path.join(__dirname, 'ui');
@@ -29,11 +31,14 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
     const tempPaths = [];
     try {
       const b = req.body;
+      // Collect ALL uploaded file paths before any early-return guards so the
+      // finally block can clean them up even if the cover check fails.
+      for (const files of Object.values(req.files ?? {})) {
+        for (const f of files) tempPaths.push(f.path);
+      }
       const cover = req.files?.cover?.[0];
       if (!cover) return res.status(400).json({ error: 'Cover image is required.' });
       const galleryFiles = req.files?.gallery ?? [];
-      for (const f of [cover, ...galleryFiles]) tempPaths.push(f.path);
-
       const pdfPath = b.pdfStagingId ? stagingPdfPath(b.pdfStagingId) : null;
       const pdfPages = parseJsonArray(b.pdfPages);
       const deliverables = parseJsonArray(b.deliverables).map(String).filter(Boolean);
@@ -54,6 +59,31 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
     } finally {
       for (const p of tempPaths) fs.rm(p, { force: true }).catch(() => {});
     }
+  });
+
+  app.post('/api/pdf/preview', upload.single('pdf'), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: 'No PDF uploaded.' });
+      const stagingId = crypto.randomUUID();
+      const dir = stagingDir(stagingId);
+      await fs.mkdir(dir, { recursive: true });
+      await fs.rename(req.file.path, path.join(dir, 'source.pdf'));
+      const pages = await rasterizeAllPages(path.join(dir, 'source.pdf'), path.join(dir, 'thumbs'));
+      res.json({
+        stagingId,
+        pageCount: pages.length,
+        thumbs: pages.map((p) => ({ n: p.n, w: p.w, h: p.h, url: `/api/pdf/preview/${stagingId}/${p.file}` })),
+      });
+    } catch (err) {
+      res.status(500).json({ error: `Could not read that PDF: ${err.message}` });
+    }
+  });
+
+  app.get('/api/pdf/preview/:id/:file', async (req, res) => {
+    const file = path.basename(req.params.file);
+    const fp = path.join(stagingDir(req.params.id), 'thumbs', file);
+    try { res.type('image/webp').send(await fs.readFile(fp)); }
+    catch { res.status(404).end(); }
   });
 
   app.get('/api/status', async (_req, res) => {
