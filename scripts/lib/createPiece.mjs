@@ -6,6 +6,7 @@ import path from 'node:path';
 import os from 'node:os';
 import sharp from 'sharp';
 import matter from 'gray-matter';
+import { rasterizePiece, copySourcePdf, canonicalFullPdfHref } from './pdf-thumbs.mjs';
 
 export const PIECES_DIR = path.resolve('src/content/pieces');
 const CATEGORIES = ['design', 'finance', 'personal', 'saas'];
@@ -90,6 +91,7 @@ export async function createPiece(input) {
     await fs.writeFile(path.join(tmpDir, 'index.md'), fm.join('\n'), 'utf8');
 
     // Atomic move into place
+    await fs.mkdir(PIECES_DIR, { recursive: true });
     await fs.rename(tmpDir, finalDir);
   } catch (err) {
     await fs.rm(tmpDir, { recursive: true, force: true });
@@ -103,7 +105,37 @@ export async function createPiece(input) {
   return { slug, dir: finalDir, warnings };
 }
 
-// Stubs replaced in Task 3.
-async function writeGallery(_tmpDir, _galleryPaths) { return []; }
-async function attachPdf(_args) { /* no-op until Task 3 */ }
-async function rasterizeIfPdf(_args) { /* no-op until Task 3 */ }
+async function writeGallery(tmpDir, galleryPaths) {
+  const names = [];
+  for (let i = 0; i < galleryPaths.length; i++) {
+    const name = `gallery-${String(i + 1).padStart(2, '0')}.webp`;
+    await sharp(galleryPaths[i]).rotate().resize(HERO_OPTS).webp({ quality: 82 })
+      .toFile(path.join(tmpDir, name));
+    names.push(name);
+  }
+  return names;
+}
+
+async function attachPdf({ fm, tmpDir, slug, pdfPath, pdfPages, warnings }) {
+  if (!pdfPath || !(await exists(pdfPath))) return;
+  await fs.copyFile(pdfPath, path.join(tmpDir, 'source.pdf'));
+  const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
+  fm.push(`pdfPaginate: [${(pages.length ? pages : [1]).join(', ')}]`);
+  fm.push(`fullPdf: ${JSON.stringify(canonicalFullPdfHref(slug))}`);
+  if (!pages.length) warnings.push('No PDF pages selected; defaulted to page 1.');
+}
+
+async function rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, warnings }) {
+  if (!pdfPath) return;
+  const sourcePdfPath = path.join(finalDir, 'source.pdf');
+  const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
+  try {
+    await rasterizePiece({
+      slug, sourcePdfPath,
+      pdfPaginate: pages.length ? pages : [1],
+      fullPdf: canonicalFullPdfHref(slug),
+    });
+  } catch (err) {
+    warnings.push(`PDF thumbnails could not be generated now (${err.message}); the build will retry.`);
+  }
+}

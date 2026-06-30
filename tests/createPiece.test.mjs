@@ -96,3 +96,63 @@ test('rejects an unknown category', async () => {
     /category/i
   );
 });
+
+import { rasterizePiece as _r } from '../scripts/lib/pdf-thumbs.mjs'; // ensures lib present
+import { PDFDocument } from 'pdf-lib';
+import { OUTPUT_DIR, SOURCE_PDF_DIR } from '../scripts/lib/pdf-thumbs.mjs';
+
+test('writes ordered gallery images', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cp-'));
+  const hero = path.join(tmp, 'cover.png');
+  const g1 = path.join(tmp, 'a.png');
+  const g2 = path.join(tmp, 'b.png');
+  await makeImage(hero); await makeImage(g1, { r: 10, g: 90, b: 200 }); await makeImage(g2, { r: 20, g: 200, b: 90 });
+  let slug;
+  try {
+    const res = await createPiece({
+      title: 'Gallery Piece', category: 'design', role: 'r', outcome: 'o', context: 'c',
+      heroPath: hero, galleryPaths: [g1, g2],
+    });
+    slug = res.slug;
+    const dir = path.join(PIECES_DIR, slug);
+    await assert.doesNotReject(fs.access(path.join(dir, 'gallery-01.webp')));
+    await assert.doesNotReject(fs.access(path.join(dir, 'gallery-02.webp')));
+    const { data } = matter(await fs.readFile(path.join(dir, 'index.md'), 'utf8'));
+    assert.deepEqual(data.gallery, ['./gallery-01.webp', './gallery-02.webp']);
+  } finally {
+    if (slug) await cleanup(slug);
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('attaches a PDF: source.pdf, pdfPaginate, fullPdf, and rasterized thumbs', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cp-'));
+  const hero = path.join(tmp, 'cover.png');
+  await makeImage(hero);
+  const pdfPath = path.join(tmp, 'deck.pdf');
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < 3; i++) doc.addPage([612, 792]).drawText(`P${i + 1}`, { x: 72, y: 700, size: 40 });
+  await fs.writeFile(pdfPath, await doc.save());
+  let slug;
+  try {
+    const res = await createPiece({
+      title: 'Deck Piece', category: 'finance', role: 'r', outcome: 'o', context: 'c',
+      heroPath: hero, pdfPath, pdfPages: [2, 3],
+    });
+    slug = res.slug;
+    const dir = path.join(PIECES_DIR, slug);
+    await assert.doesNotReject(fs.access(path.join(dir, 'source.pdf')));
+    const { data } = matter(await fs.readFile(path.join(dir, 'index.md'), 'utf8'));
+    assert.deepEqual(data.pdfPaginate, [2, 3]);
+    assert.equal(data.fullPdf, `/source-pdfs/${slug}.pdf`);
+    await assert.doesNotReject(fs.access(path.join(OUTPUT_DIR, slug, 'cover.webp')));
+    await assert.doesNotReject(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)));
+  } finally {
+    if (slug) {
+      await cleanup(slug);
+      await fs.rm(path.join(OUTPUT_DIR, slug), { recursive: true, force: true });
+      await fs.rm(path.join(SOURCE_PDF_DIR, `${slug}.pdf`), { force: true });
+    }
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
