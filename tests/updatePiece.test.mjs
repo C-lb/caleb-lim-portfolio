@@ -220,5 +220,7 @@ test('updatePiece clears the gallery on an empty plan', async () => {
     assert.deepEqual(p.gallery, []);
     const raw = await fs.readFile(path.join(PIECES_DIR, slug, 'index.md'), 'utf8');
     assert.doesNotMatch(raw, /gallery:/);
+    await assert.rejects(fs.access(path.join(PIECES_DIR, slug, 'gallery-01.webp')), 'gallery-01 removed from disk');
+    await assert.rejects(fs.access(path.join(PIECES_DIR, slug, 'gallery-02.webp')), 'gallery-02 removed from disk');
   } finally { await nukePiece(slug); }
 });
