@@ -20,3 +20,5 @@ samples/*
 /.planning/phases/05-mobile-performance-accessibility/lighthouse/*.html
 /.planning/phases/05-mobile-performance-accessibility/lighthouse/*.json
 !/.planning/phases/05-mobile-performance-accessibility/lighthouse/*-summary.json
+
+.studio-tmp/

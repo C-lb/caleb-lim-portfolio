@@ -8,7 +8,7 @@ import { PDFDocument } from 'pdf-lib';
 import { createPiece } from '../scripts/lib/createPiece.mjs';
 import { PIECES_DIR } from '../scripts/lib/pieceCore.mjs';
 import { OUTPUT_DIR, SOURCE_PDF_DIR } from '../scripts/lib/pdf-thumbs.mjs';
-import { readPiece } from '../scripts/lib/updatePiece.mjs';
+import { readPiece, updatePiece } from '../scripts/lib/updatePiece.mjs';
 
 async function makeImage(file, color = { r: 200, g: 120, b: 40 }) {
   await sharp({ create: { width: 1200, height: 800, channels: 3, background: color } }).png().toFile(file);
@@ -58,4 +58,97 @@ test('readPiece returns fields, ordered gallery, and pdf manifest', async () => 
 
 test('readPiece throws for a missing slug', async () => {
   await assert.rejects(() => readPiece('does-not-exist-xyz'), /not found/i);
+});
+
+const baseFields = (over = {}) => ({
+  title: 'Base Title', category: 'design', role: 'role one', outcome: 'outcome one',
+  context: 'context one', year: '2025', deliverables: ['One'], pullQuote: '', draft: false, ...over,
+});
+
+async function seedPiece(over = {}) {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-seed-'));
+  const hero = path.join(tmp, 'c.png');
+  await makeImage(hero, { r: 50, g: 50, b: 50 });
+  const res = await createPiece({
+    title: over.title ?? 'Base Title', category: over.category ?? 'design',
+    role: 'role one', outcome: 'outcome one', context: 'context one', year: '2025',
+    deliverables: ['One'], heroPath: hero, draft: over.draft ?? false,
+  });
+  await fs.rm(tmp, { recursive: true, force: true });
+  return res.slug;
+}
+
+test('updatePiece changes text but leaves hero.webp byte-identical', async () => {
+  const slug = await seedPiece();
+  try {
+    const before = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    const res = await updatePiece({
+      slug, fields: baseFields({ title: 'Base Title', role: 'role TWO', outcome: 'outcome TWO', context: 'context TWO' }),
+      cover: null, galleryPlan: [], pdfPlan: { action: 'keep' },
+    });
+    assert.equal(res.slug, slug);
+    const after = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    assert.ok(before.equals(after), 'hero.webp unchanged');
+    const p = await readPiece(slug);
+    assert.equal(p.role, 'role TWO');
+    assert.equal(p.outcome, 'outcome TWO');
+    assert.equal(p.context, 'context TWO');
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece replaces the cover when a new one is given', async () => {
+  const slug = await seedPiece();
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'up-cov-'));
+  try {
+    const before = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    const newCover = path.join(tmp, 'new.png');
+    await makeImage(newCover, { r: 250, g: 10, b: 10 });
+    await updatePiece({ slug, fields: baseFields(), cover: newCover, galleryPlan: [], pdfPlan: { action: 'keep' } });
+    const after = await fs.readFile(path.join(PIECES_DIR, slug, 'hero.webp'));
+    assert.ok(!before.equals(after), 'hero.webp replaced');
+  } finally { await nukePiece(slug); await fs.rm(tmp, { recursive: true, force: true }); }
+});
+
+test('updatePiece keeps the slug stable when the title changes', async () => {
+  const slug = await seedPiece();
+  try {
+    await updatePiece({ slug, fields: baseFields({ title: 'A Totally New Title' }), cover: null, galleryPlan: [], pdfPlan: { action: 'keep' } });
+    await assert.doesNotReject(fs.access(path.join(PIECES_DIR, slug, 'index.md')), 'dir name unchanged');
+    const p = await readPiece(slug);
+    assert.equal(p.title, 'A Totally New Title');
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece strips em dashes on update', async () => {
+  const slug = await seedPiece();
+  try {
+    await updatePiece({ slug, fields: baseFields({ outcome: 'Saved time — lots' }), cover: null, galleryPlan: [], pdfPlan: { action: 'keep' } });
+    const raw = await fs.readFile(path.join(PIECES_DIR, slug, 'index.md'), 'utf8');
+    assert.ok(!/[—–]/.test(raw));
+    assert.match(raw, /Saved time - lots/);
+  } finally { await nukePiece(slug); }
+});
+
+test('updatePiece re-appends order when category changes', async () => {
+  // Seed two finance pieces so nextOrder(finance) is 3, then move a design piece to finance.
+  const f1 = await seedPiece({ title: 'Fin One', category: 'finance' });
+  const f2 = await seedPiece({ title: 'Fin Two', category: 'finance' });
+  const d1 = await seedPiece({ title: 'Des One', category: 'design' });
+  try {
+    await updatePiece({ slug: d1, fields: baseFields({ title: 'Des One', category: 'finance' }), cover: null, galleryPlan: [], pdfPlan: { action: 'keep' } });
+    const moved = await readPiece(d1);
+    const f2order = (await readPiece(f2)).order;
+    assert.equal(moved.category, 'finance');
+    assert.ok(moved.order > f2order, `re-appended (order ${moved.order} > ${f2order})`);
+  } finally { await nukePiece(f1); await nukePiece(f2); await nukePiece(d1); }
+});
+
+test('updatePiece rejects an unknown category', async () => {
+  const slug = await seedPiece();
+  try {
+    await assert.rejects(
+      () => updatePiece({ slug, fields: baseFields({ category: 'nope' }), cover: null, galleryPlan: [], pdfPlan: { action: 'keep' } }),
+      /category/i,
+    );
+  } finally { await nukePiece(slug); }
 });
