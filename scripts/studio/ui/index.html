@@ -12,8 +12,16 @@
     <span id="status" class="status"></span>
   </header>
   <main class="wrap">
+    <nav class="modes">
+      <button type="button" id="mode-new" class="mode active">New piece</button>
+      <button type="button" id="mode-edit" class="mode">Edit existing</button>
+    </nav>
+    <section id="edit-list" class="card hidden">
+      <h2>Edit existing</h2>
+      <div id="pieces"></div>
+    </section>
     <form id="piece-form" class="card">
-      <h2>New piece</h2>
+      <h2 id="form-title">New piece</h2>
       <label>Title <span class="req">*</span><input name="title" required /></label>
       <label>Category <span class="req">*</span>
         <select name="category" required>

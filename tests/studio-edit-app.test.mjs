@@ -190,3 +190,16 @@ test('PUT /api/pieces/:slug 400s on an empty required field', async () => {
     assert.equal(res.status, 400);
   } finally { await nukePiece(slug); server.close(); }
 });
+
+test('studio UI serves the edit-mode hooks', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  try {
+    const html = await (await fetch(`http://127.0.0.1:${port}/`)).text();
+    assert.match(html, /id="mode-edit"/);
+    assert.match(html, /id="edit-list"/);
+    const js = await (await fetch(`http://127.0.0.1:${port}/studio.js`)).text();
+    assert.match(js, /galleryPlanAndFiles/);
+    assert.match(js, /\/api\/pieces\//);
+  } finally { server.close(); }
+});
