@@ -46,8 +46,12 @@ export async function updatePiece({ slug, fields, cover = null, galleryPlan = []
       const item = galleryPlan[i];
       const name = `gallery-${String(i + 1).padStart(2, '0')}.webp`;
       const dest = path.join(tmpDir, name);
-      if (item.kind === 'keep') await fs.copyFile(path.join(dir, item.name), dest);
-      else await optimizeImage(item.path, dest);
+      if (item.kind === 'keep') {
+        if (!/^gallery-\d+\.webp$/.test(item.name)) throw new Error(`Invalid gallery image name: ${item.name}`);
+        await fs.copyFile(path.join(dir, item.name), dest);
+      } else {
+        await optimizeImage(item.path, dest);
+      }
       galleryNames.push(name);
     }
 
@@ -79,15 +83,23 @@ export async function updatePiece({ slug, fields, cover = null, galleryPlan = []
     throw err;
   }
 
-  // Atomic swap: backup the live dir, move the new one in, drop the backup.
-  const backup = `${dir}.bak-${crypto.randomUUID()}`;
-  await fs.rename(dir, backup);
+  // Atomic swap: back the live dir up under the repo-local staging root (NOT a
+  // sibling inside src/content/pieces, which the Astro content glob would load
+  // and which is not gitignored), move the new dir in, then drop the backup.
+  const backup = path.join(STAGING_ROOT, `${slug}.bak-${crypto.randomUUID()}`);
   try {
+    await fs.rename(dir, backup);
     await fs.rename(tmpDir, dir);
   } catch (err) {
-    await fs.rename(backup, dir).catch(() => {});
+    // If the live dir was moved to backup but the swap-in failed, restore it;
+    // if even that fails, name where the data is so it isn't lost silently.
+    let note = '';
+    if ((await exists(backup)) && !(await exists(dir))) {
+      try { await fs.rename(backup, dir); }
+      catch { note = ` The original piece is preserved at ${backup} and must be restored manually.`; }
+    }
     await fs.rm(tmpDir, { recursive: true, force: true });
-    throw err;
+    throw new Error(`${err.message}${note}`);
   }
   await fs.rm(backup, { recursive: true, force: true });
 
