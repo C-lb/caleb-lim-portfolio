@@ -1,7 +1,7 @@
 const $ = (s) => document.querySelector(s);
 const state = { cover: null, gallery: [], pdf: { stagingId: null, thumbs: [], selected: [] } };
 
-function wireDrop(dropId, inputId, onFiles, multiple) {
+function wireDrop(dropId, inputId, onFiles) {
   const drop = $(dropId), input = $(inputId);
   drop.addEventListener('click', () => input.click());
   input.addEventListener('change', () => onFiles([...input.files]));
@@ -20,7 +20,7 @@ wireDrop('#cover-drop', '#cover-input', (files) => {
 wireDrop('#gallery-drop', '#gallery-input', (files) => {
   state.gallery.push(...files.filter((f) => f.type.startsWith('image/')));
   renderGallery();
-}, true);
+});
 
 function renderGallery() {
   const list = $('#gallery-list');
@@ -52,7 +52,7 @@ wireDrop('#pdf-drop', '#pdf-input', async (files) => {
   if (!res.ok) { $('#pdf-drop').textContent = 'Could not read that PDF. Try another.'; return; }
   const data = await res.json();
   state.pdf = { stagingId: data.stagingId, thumbs: data.thumbs, selected: [] };
-  $('#pdf-drop').textContent = `${data.pageCount} pages — click the ones to feature (in order)`;
+  $('#pdf-drop').textContent = `${data.pageCount} pages. Click the ones to feature, in order.`;
   renderPdf();
 });
 
