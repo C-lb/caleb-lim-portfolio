@@ -141,6 +141,25 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
     catch { res.status(404).end(); }
   });
 
+  app.get('/api/pieces/:slug/pdf-thumbs', async (req, res) => {
+    const slug = path.basename(req.params.slug);
+    const sourcePdf = path.join(PIECES_DIR, slug, 'source.pdf');
+    if (!(await exists(sourcePdf))) return res.status(404).json({ error: 'This piece has no PDF.' });
+    try {
+      const { data } = matter(await fs.readFile(path.join(PIECES_DIR, slug, 'index.md'), 'utf8'));
+      const stagingId = crypto.randomUUID();
+      const dir = stagingDir(stagingId);
+      await fs.mkdir(dir, { recursive: true });
+      const pages = await rasterizeAllPages(sourcePdf, path.join(dir, 'thumbs'));
+      res.json({
+        stagingId,
+        pageCount: pages.length,
+        selected: Array.isArray(data.pdfPaginate) ? data.pdfPaginate : [],
+        thumbs: pages.map((p) => ({ n: p.n, w: p.w, h: p.h, url: `/api/pdf/preview/${stagingId}/${p.file}` })),
+      });
+    } catch (err) { res.status(500).json({ error: `Could not read that PDF: ${err.message}` }); }
+  });
+
   app.use(express.static(UI_DIR));
   return app;
 }

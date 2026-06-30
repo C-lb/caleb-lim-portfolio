@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import sharp from 'sharp';
+import { PDFDocument } from 'pdf-lib';
 import { createApp } from '../scripts/studio/app.mjs';
 import { createPiece } from '../scripts/lib/createPiece.mjs';
 import { PIECES_DIR } from '../scripts/lib/pieceCore.mjs';
@@ -85,5 +86,42 @@ test('GET /api/pieces/:slug/asset serves hero and rejects junk filenames', async
     assert.equal(ok.headers.get('content-type'), 'image/webp');
     const bad = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}/asset/index.md`);
     assert.equal(bad.status, 404);
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+async function seedPdf(title, pages = [1, 2, 3]) {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'edit-pdf-'));
+  const hero = path.join(tmp, 'c.png'); await makeImage(hero);
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < 3; i++) doc.addPage([612, 792]).drawText(`P${i + 1}`, { x: 72, y: 700, size: 40 });
+  const pdf = path.join(tmp, 'd.pdf'); await fs.writeFile(pdf, await doc.save());
+  const { slug } = await createPiece({ title, category: 'finance', role: 'r', outcome: 'o', context: 'c', heroPath: hero, pdfPath: pdf, pdfPages: pages });
+  await fs.rm(tmp, { recursive: true, force: true });
+  return slug;
+}
+
+test('GET /api/pieces/:slug/pdf-thumbs returns thumbs and current selection', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seedPdf('Thumbs Me', [2, 3]);
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}/pdf-thumbs`);
+    assert.equal(res.status, 200);
+    const { pageCount, thumbs, selected } = await res.json();
+    assert.equal(pageCount, 3);
+    assert.equal(thumbs.length, 3);
+    assert.deepEqual(selected, [2, 3]);
+    const t = await fetch(`http://127.0.0.1:${port}${thumbs[0].url}`);
+    assert.equal(t.status, 200);
+  } finally { await nukePiece(slug); server.close(); }
+});
+
+test('GET /api/pieces/:slug/pdf-thumbs 404s when the piece has no PDF', async () => {
+  const app = createApp({ repoRoot: process.cwd() });
+  const { server, port } = await listen(app);
+  const slug = await seed('No Pdf Here');
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/pieces/${slug}/pdf-thumbs`);
+    assert.equal(res.status, 404);
   } finally { await nukePiece(slug); server.close(); }
 });
