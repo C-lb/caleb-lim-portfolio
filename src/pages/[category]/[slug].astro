@@ -55,7 +55,7 @@ interface Props {
   next: NeighbourRef | null;
 }
 const { piece, prev, next } = Astro.props;
-const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, pullQuote } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, pullQuote, gallery } = piece.data;
 const slug = piece.id;
 
 // Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
@@ -144,6 +144,21 @@ const metaLabel: Record<Category, string> = {
       <span class="label outcome-label">Outcome</span>
       <p>{outcome}</p>
     </section>
+
+    {/* Gallery: uploaded images, full-width stack, after the story, before PDF slides. */}
+    {gallery && gallery.length > 0 && (
+      <section class="gallery">
+        {gallery.map((img, i) => (
+          <Image
+            src={img}
+            alt={`${title} - image ${i + 1}`}
+            class="gallery-img"
+            loading="lazy"
+            sizes="(max-width: 960px) 100vw, 960px"
+          />
+        ))}
+      </section>
+    )}
 
     {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
     {/* Width/height sourced from .cache.json for CLS prevention. Render order = pdfPaginate order (D-09). */}
@@ -366,6 +381,17 @@ const metaLabel: Record<Category, string> = {
     line-height: var(--lh-bio);
     color: var(--paper);
     margin: 0;
+  }
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    margin-bottom: var(--sp-8);
+  }
+  .gallery-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
   }
   .paginated-pages {
     display: flex;

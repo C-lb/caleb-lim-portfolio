@@ -15,6 +15,8 @@ const pieces = defineCollection({
     outcome: z.string().min(1),
     context: z.string().min(1),
     hero: image(),
+    gallery: z.array(image()).optional()
+      .describe('Ordered gallery images shown on the piece page, colocated as ./gallery-NN.webp in display order.'),
     order: z.number().int().min(1),
     draft: z.boolean().default(false),
     // D-07: Phase 2 migration — boolean → number[]; 1-indexed page numbers (Pitfall 4)
