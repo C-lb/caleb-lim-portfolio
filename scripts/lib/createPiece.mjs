@@ -100,7 +100,8 @@ export async function createPiece(input) {
   }
 
   // PDF raster outputs land in public/ (Task 3); done after the dir is in place.
-  await rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, warnings });
+  // Drafts skip public/ writes — their page 404s and the build skips them too.
+  await rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, draft, warnings });
 
   return { slug, dir: finalDir, warnings };
 }
@@ -125,8 +126,12 @@ async function attachPdf({ fm, tmpDir, slug, pdfPath, pdfPages, warnings }) {
   if (!pages.length) warnings.push('No PDF pages selected; defaulted to page 1.');
 }
 
-async function rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, warnings }) {
+async function rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, draft, warnings }) {
   if (!pdfPath) return;
+  if (draft) {
+    warnings.push('Draft piece: PDF thumbnails will be generated when you remove draft and rebuild.');
+    return;
+  }
   const sourcePdfPath = path.join(finalDir, 'source.pdf');
   const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
   try {

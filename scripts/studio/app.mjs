@@ -20,7 +20,7 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
   const upload = multer({
     storage: multer.diskStorage({
       destination: (_req, _file, cb) => cb(null, os.tmpdir()),
-      filename: (_req, file, cb) => cb(null, `studio-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.originalname}`),
+      filename: (_req, file, cb) => cb(null, `studio-${Date.now()}-${Math.random().toString(36).slice(2)}-${path.basename(file.originalname)}`),
     }),
     limits: { fileSize: 25 * 1024 * 1024 },
   });

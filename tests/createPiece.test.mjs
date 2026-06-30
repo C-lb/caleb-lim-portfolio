@@ -156,3 +156,39 @@ test('attaches a PDF: source.pdf, pdfPaginate, fullPdf, and rasterized thumbs', 
     await fs.rm(tmp, { recursive: true, force: true });
   }
 });
+
+test('draft piece with PDF: keeps source.pdf in piece dir + frontmatter, skips public/ artifacts', async () => {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cp-draft-'));
+  const hero = path.join(tmp, 'cover.png');
+  await makeImage(hero);
+  const pdfPath = path.join(tmp, 'draft.pdf');
+  const doc = await PDFDocument.create();
+  for (let i = 0; i < 2; i++) doc.addPage([612, 792]).drawText(`Draft${i + 1}`, { x: 72, y: 700, size: 40 });
+  await fs.writeFile(pdfPath, await doc.save());
+  let slug;
+  try {
+    const res = await createPiece({
+      title: 'Draft PDF Piece', category: 'design', role: 'r', outcome: 'o', context: 'c',
+      draft: true, heroPath: hero, pdfPath, pdfPages: [1, 2],
+    });
+    slug = res.slug;
+    const dir = path.join(PIECES_DIR, slug);
+    // source.pdf must exist inside the piece dir (not publicly served)
+    await assert.doesNotReject(fs.access(path.join(dir, 'source.pdf')));
+    // frontmatter must have pdfPaginate and fullPdf
+    const { data } = matter(await fs.readFile(path.join(dir, 'index.md'), 'utf8'));
+    assert.ok(Array.isArray(data.pdfPaginate) && data.pdfPaginate.length > 0, 'pdfPaginate set');
+    assert.ok(typeof data.fullPdf === 'string' && data.fullPdf.length > 0, 'fullPdf set');
+    // public/ artifacts must NOT exist
+    await assert.rejects(fs.access(path.join(OUTPUT_DIR, slug)), 'pdf-thumbs dir should not exist for drafts');
+    await assert.rejects(fs.access(path.join(SOURCE_PDF_DIR, `${slug}.pdf`)), 'source-pdfs copy should not exist for drafts');
+  } finally {
+    if (slug) {
+      await cleanup(slug);
+      // defensive cleanup in case the fix wasn't applied yet
+      await fs.rm(path.join(OUTPUT_DIR, slug), { recursive: true, force: true });
+      await fs.rm(path.join(SOURCE_PDF_DIR, `${slug}.pdf`), { force: true });
+    }
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+});
