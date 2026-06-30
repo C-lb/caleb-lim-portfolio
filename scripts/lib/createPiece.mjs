@@ -1,51 +1,17 @@
 // scripts/lib/createPiece.mjs
-// Single source of truth for writing a gallery piece to disk. Used by the studio
-// server and the new-piece CLI. Optimizes images, writes index.md, returns the slug.
+// Single source of truth for writing a NEW gallery piece to disk. Used by the studio
+// server and the new-piece CLI. Shares image + frontmatter helpers with updatePiece
+// via pieceCore.mjs.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import sharp from 'sharp';
-import matter from 'gray-matter';
-import { rasterizePiece, copySourcePdf, canonicalFullPdfHref } from './pdf-thumbs.mjs';
+import {
+  PIECES_DIR, CATEGORIES, slugify, exists, optimizeImage, buildFrontmatter,
+  nextOrder, uniqueSlug,
+} from './pieceCore.mjs';
+import { rasterizePiece, canonicalFullPdfHref } from './pdf-thumbs.mjs';
 
-export const PIECES_DIR = path.resolve('src/content/pieces');
-const CATEGORIES = ['design', 'finance', 'personal', 'saas'];
-
-export const slugify = (s) =>
-  String(s).toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim()
-    .replace(/\s+/g, '-').replace(/-+/g, '-').slice(0, 60);
-
-const dedash = (s) => String(s).replace(/[—–]/g, '-');
-
-const HERO_OPTS = { width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true };
-
-async function exists(p) { try { await fs.access(p); return true; } catch { return false; } }
-
-async function nextOrder(category) {
-  if (!(await exists(PIECES_DIR))) return 1;
-  let max = 0;
-  for (const slug of await fs.readdir(PIECES_DIR)) {
-    const idx = path.join(PIECES_DIR, slug, 'index.md');
-    if (!(await exists(idx))) continue;
-    try {
-      const { data } = matter(await fs.readFile(idx, 'utf8'));
-      if (data.category === category && Number.isFinite(data.order)) max = Math.max(max, data.order);
-    } catch { /* skip unreadable */ }
-  }
-  return max + 1;
-}
-
-async function uniqueSlug(title) {
-  const base = slugify(title) || 'piece';
-  let slug = base, n = 2;
-  while (await exists(path.join(PIECES_DIR, slug))) slug = `${base}-${n++}`;
-  return slug;
-}
-
-const blockScalar = (key, val) => {
-  const lines = dedash(val).trim().split('\n');
-  return `${key}: |\n${lines.map((l) => '  ' + l).join('\n')}`;
-};
+export { PIECES_DIR, slugify };
 
 export async function createPiece(input) {
   const {
@@ -68,29 +34,31 @@ export async function createPiece(input) {
   const finalDir = path.join(PIECES_DIR, slug);
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `piece-${slug}-`));
 
+  // Resolve gallery + pdf into the temp dir, then serialize frontmatter once.
+  let pdf = null;
   try {
-    // Cover
-    await sharp(heroPath).rotate().resize(HERO_OPTS).webp({ quality: 82 })
-      .toFile(path.join(tmpDir, 'hero.webp'));
+    await optimizeImage(heroPath, path.join(tmpDir, 'hero.webp'));
 
-    // Gallery (Task 3 fills this in)
-    const galleryNames = await writeGallery(tmpDir, galleryPaths);
-
-    // Frontmatter (PDF fields filled by Task 3)
-    const fm = ['---', `title: ${JSON.stringify(dedash(title))}`, `category: ${category}`,
-      `order: ${order}`, `draft: ${draft === true}`];
-    if (year) fm.push(`year: ${JSON.stringify(dedash(year))}`);
-    fm.push('hero: "./hero.webp"');
-    if (galleryNames.length) fm.push(`gallery: ${JSON.stringify(galleryNames.map((n) => `./${n}`))}`);
-    if (Array.isArray(deliverables) && deliverables.length) {
-      fm.push(`deliverables: ${JSON.stringify(deliverables.map(dedash))}`);
+    const galleryNames = [];
+    for (let i = 0; i < galleryPaths.length; i++) {
+      const name = `gallery-${String(i + 1).padStart(2, '0')}.webp`;
+      await optimizeImage(galleryPaths[i], path.join(tmpDir, name));
+      galleryNames.push(name);
     }
-    if (pullQuote) fm.push(`pullQuote: ${JSON.stringify(dedash(pullQuote))}`);
-    await attachPdf({ fm, tmpDir, slug, pdfPath, pdfPages, warnings });
-    fm.push(blockScalar('context', context), blockScalar('role', role), blockScalar('outcome', outcome), '---', '');
-    await fs.writeFile(path.join(tmpDir, 'index.md'), fm.join('\n'), 'utf8');
 
-    // Atomic move into place
+    if (pdfPath && (await exists(pdfPath))) {
+      await fs.copyFile(pdfPath, path.join(tmpDir, 'source.pdf'));
+      const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
+      if (!pages.length) warnings.push('No PDF pages selected; defaulted to page 1.');
+      pdf = { paginate: pages.length ? pages : [1], fullPdf: canonicalFullPdfHref(slug) };
+    }
+
+    const md = buildFrontmatter({
+      title, category, order, draft, year, gallery: galleryNames,
+      deliverables, pullQuote, pdf, context, role, outcome,
+    });
+    await fs.writeFile(path.join(tmpDir, 'index.md'), md, 'utf8');
+
     await fs.mkdir(PIECES_DIR, { recursive: true });
     await fs.rename(tmpDir, finalDir);
   } catch (err) {
@@ -99,48 +67,19 @@ export async function createPiece(input) {
     throw err;
   }
 
-  // PDF raster outputs land in public/ (Task 3); done after the dir is in place.
   // Drafts skip public/ writes — their page 404s and the build skips them too.
-  await rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, draft, warnings });
+  if (pdf && draft) {
+    warnings.push('Draft piece: PDF thumbnails will be generated when you remove draft and rebuild.');
+  } else if (pdf) {
+    try {
+      await rasterizePiece({
+        slug, sourcePdfPath: path.join(finalDir, 'source.pdf'),
+        pdfPaginate: pdf.paginate, fullPdf: pdf.fullPdf,
+      });
+    } catch (err) {
+      warnings.push(`PDF thumbnails could not be generated now (${err.message}); the build will retry.`);
+    }
+  }
 
   return { slug, dir: finalDir, warnings };
-}
-
-async function writeGallery(tmpDir, galleryPaths) {
-  const names = [];
-  for (let i = 0; i < galleryPaths.length; i++) {
-    const name = `gallery-${String(i + 1).padStart(2, '0')}.webp`;
-    await sharp(galleryPaths[i]).rotate().resize(HERO_OPTS).webp({ quality: 82 })
-      .toFile(path.join(tmpDir, name));
-    names.push(name);
-  }
-  return names;
-}
-
-async function attachPdf({ fm, tmpDir, slug, pdfPath, pdfPages, warnings }) {
-  if (!pdfPath || !(await exists(pdfPath))) return;
-  await fs.copyFile(pdfPath, path.join(tmpDir, 'source.pdf'));
-  const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
-  fm.push(`pdfPaginate: [${(pages.length ? pages : [1]).join(', ')}]`);
-  fm.push(`fullPdf: ${JSON.stringify(canonicalFullPdfHref(slug))}`);
-  if (!pages.length) warnings.push('No PDF pages selected; defaulted to page 1.');
-}
-
-async function rasterizeIfPdf({ slug, finalDir, pdfPath, pdfPages, draft, warnings }) {
-  if (!pdfPath) return;
-  if (draft) {
-    warnings.push('Draft piece: PDF thumbnails will be generated when you remove draft and rebuild.');
-    return;
-  }
-  const sourcePdfPath = path.join(finalDir, 'source.pdf');
-  const pages = (pdfPages ?? []).map(Number).filter((x) => Number.isInteger(x) && x > 0);
-  try {
-    await rasterizePiece({
-      slug, sourcePdfPath,
-      pdfPaginate: pages.length ? pages : [1],
-      fullPdf: canonicalFullPdfHref(slug),
-    });
-  } catch (err) {
-    warnings.push(`PDF thumbnails could not be generated now (${err.message}); the build will retry.`);
-  }
 }
