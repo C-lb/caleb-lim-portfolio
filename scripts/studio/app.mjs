@@ -62,9 +62,10 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
   });
 
   app.post('/api/pdf/preview', upload.single('pdf'), async (req, res) => {
+    let stagingId;
     try {
       if (!req.file) return res.status(400).json({ error: 'No PDF uploaded.' });
-      const stagingId = crypto.randomUUID();
+      stagingId = crypto.randomUUID();
       const dir = stagingDir(stagingId);
       await fs.mkdir(dir, { recursive: true });
       await fs.rename(req.file.path, path.join(dir, 'source.pdf'));
@@ -75,6 +76,7 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
         thumbs: pages.map((p) => ({ n: p.n, w: p.w, h: p.h, url: `/api/pdf/preview/${stagingId}/${p.file}` })),
       });
     } catch (err) {
+      if (stagingId) await fs.rm(stagingDir(stagingId), { recursive: true, force: true }).catch(() => {});
       res.status(500).json({ error: `Could not read that PDF: ${err.message}` });
     }
   });
