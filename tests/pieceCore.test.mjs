@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { buildFrontmatter } from '../scripts/lib/pieceCore.mjs';
 
-test('buildFrontmatter emits fields in order with block scalars', () => {
+test('buildFrontmatter emits fields in exact order and format', () => {
   const md = buildFrontmatter({
     title: 'Hello World', category: 'design', order: 3, draft: false,
     year: '2025', gallery: ['gallery-01.webp', 'gallery-02.webp'],
@@ -10,31 +10,39 @@ test('buildFrontmatter emits fields in order with block scalars', () => {
     pdf: { paginate: [1, 4], fullPdf: '/source-pdfs/hello-world.pdf' },
     context: 'Ctx line', role: 'Role line', outcome: 'Outcome line',
   });
-  assert.match(md, /^---\n/);
-  assert.match(md, /title: "Hello World"\n/);
-  assert.match(md, /category: design\n/);
-  assert.match(md, /order: 3\n/);
-  assert.match(md, /draft: false\n/);
-  assert.match(md, /year: "2025"\n/);
-  assert.match(md, /hero: "\.\/hero\.webp"\n/);
-  assert.match(md, /gallery: \["\.\/gallery-01\.webp","\.\/gallery-02\.webp"\]\n/);
-  assert.match(md, /deliverables: \["Logo","Art direction"\]\n/);
-  assert.match(md, /pullQuote: "A quote"\n/);
-  assert.match(md, /pdfPaginate: \[1, 4\]\n/);
-  assert.match(md, /fullPdf: "\/source-pdfs\/hello-world\.pdf"\n/);
-  assert.match(md, /context: \|\n  Ctx line\n/);
-  assert.match(md, /role: \|\n  Role line\n/);
-  assert.match(md, /outcome: \|\n  Outcome line\n/);
-  assert.match(md, /\n---\n$/);
+  const expected = `---
+title: "Hello World"
+category: design
+order: 3
+draft: false
+year: "2025"
+hero: "./hero.webp"
+gallery: ["./gallery-01.webp","./gallery-02.webp"]
+deliverables: ["Logo","Art direction"]
+pullQuote: "A quote"
+pdfPaginate: [1, 4]
+fullPdf: "/source-pdfs/hello-world.pdf"
+context: |
+  Ctx line
+role: |
+  Role line
+outcome: |
+  Outcome line
+---
+`;
+  assert.equal(md, expected);
 });
 
 test('buildFrontmatter strips em and en dashes from text fields', () => {
   const md = buildFrontmatter({
     title: 'A — B', category: 'saas', order: 1, draft: true,
+    year: '2024–2025', deliverables: ['Brand — system'],
     context: 'Ran 2024–2025', role: 'r', outcome: 'Cut costs — a lot',
   });
   assert.ok(!/[—–]/.test(md), 'no em/en dashes remain');
   assert.match(md, /title: "A - B"/);
+  assert.match(md, /year: "2024-2025"/);
+  assert.match(md, /"Brand - system"/);
   assert.match(md, /Ran 2024-2025/);
   assert.match(md, /Cut costs - a lot/);
 });
