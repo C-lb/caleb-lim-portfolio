@@ -13,6 +13,7 @@
     "pdf-poc": "node scripts/pdf-poc.mjs",
     "pdf-preprocess": "node scripts/pdf-preprocess.mjs",
     "prebuild": "node scripts/pdf-preprocess.mjs",
+    "test": "node --test",
     "test:smoke": "bash scripts/verify-build.sh",
     "verify:anti-ai": "bash scripts/verify-anti-ai-tells.sh"
   },
@@ -25,7 +26,9 @@
     "pdfjs-dist": "^5.7.284"
   },
   "devDependencies": {
+    "express": "^5.2.1",
     "gray-matter": "^4.0.3",
+    "multer": "^2.2.0",
     "pdf-lib": "^1.17.1",
     "sharp": "^0.34.5",
     "typescript": "^5.6.3"
