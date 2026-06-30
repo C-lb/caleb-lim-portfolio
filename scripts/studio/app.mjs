@@ -8,7 +8,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { createPiece } from '../lib/createPiece.mjs';
-import { uncommittedCount } from './git.mjs';
+import { uncommittedCount, publish } from './git.mjs';
 import { rasterizeAllPages } from '../lib/pdf-thumbs.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -91,6 +91,17 @@ export function createApp({ repoRoot = process.cwd() } = {}) {
   app.get('/api/status', async (_req, res) => {
     try { res.json({ uncommitted: await uncommittedCount(repoRoot) }); }
     catch (err) { res.status(500).json({ error: err.message }); }
+  });
+
+  app.post('/api/publish', async (req, res) => {
+    try {
+      const title = (req.body?.title || '').trim();
+      const message = title ? `Add piece: ${title}` : 'Add portfolio piece';
+      const result = await publish({ cwd: repoRoot, message });
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   app.use(express.static(UI_DIR));
