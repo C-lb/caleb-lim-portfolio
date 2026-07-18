@@ -70,14 +70,17 @@ const multi = pieces.length > 1;
 )}
 
 <style>
-  .pc { display: flex; flex-direction: column; gap: var(--sp-5); margin: var(--sp-8) 0; }
+  /* min-width/contain: the track is as wide as ALL slides laid side by side. Without
+     these, that intrinsic width propagates through grid/flex ancestors (min-width:auto)
+     and stretches the whole page sideways once there are enough pieces. */
+  .pc { display: flex; flex-direction: column; gap: var(--sp-5); margin: var(--sp-8) 0; min-width: 0; max-width: 100%; }
   .pc-eyebrow {
     font-family: var(--sans); font-size: var(--fs-h3); font-weight: 700;
     letter-spacing: -0.01em; text-align: center;
     color: var(--paper);
   }
   .pc--light .pc-eyebrow { color: var(--ink); }
-  .pc-viewport { width: 100%; overflow: hidden; }
+  .pc-viewport { width: 100%; overflow: hidden; contain: inline-size; }
   .pc-track {
     display: flex; gap: var(--sp-5); padding: var(--sp-4) 0; list-style: none; margin: 0;
     transition: transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1); will-change: transform;
