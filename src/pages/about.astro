@@ -23,16 +23,34 @@ const aboutPhotos = [
   <article class="about">
     <a href="/" class="b-cat-back">← Splash</a>
     <h1>Caleb Lim</h1>
-    <p class="bio">
-      I'm Caleb, and I don't pick a lane. I sit between financial models,
-      brand strategy, and graphic design, plus the side projects that don't
-      fit anywhere, because the work that excites me rarely fits a job spec.
-      Numbers in the morning, type at night, a campaign brief in between.
-      I'd rather hold the pitch deck, the brand mark, and the model behind
-      it than hand any of them off. This site is part of that argument: I
-      built it, wrote it, and picked every type pairing myself. Pick the
-      room that fits your role; the work inside is the case.
-    </p>
+    {/* Bio + photos side by side: the introduction sits beside a compact photo
+        column, and the layout is the same shape on desktop and phone (photos
+        just scale down). */}
+    <div class="about-lead">
+      <p class="bio">
+        I'm Caleb, and I don't pick a lane. I sit between financial models,
+        brand strategy, and graphic design, plus the side projects that don't
+        fit anywhere, because the work that excites me rarely fits a job spec.
+        Numbers in the morning, type at night, a campaign brief in between.
+        I'd rather hold the pitch deck, the brand mark, and the model behind
+        it than hand any of them off. This site is part of that argument: I
+        built it, wrote it, and picked every type pairing myself. Pick the
+        room that fits your role; the work inside is the case.
+      </p>
+      <section class="about-photos-track" aria-label="Photos of Caleb">
+        {aboutPhotos.map((photo) => (
+          <figure class="about-photo">
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              widths={[240, 480]}
+              sizes="(max-width: 600px) 30vw, 170px"
+            />
+            <figcaption class="about-photo-cap">{photo.caption}</figcaption>
+          </figure>
+        ))}
+      </section>
+    </div>
 
     {/* Values pills — six attribute chips sourced from the bio's voice (owner mentality,
         cross-functional, etc.). Each pill subtly rotated for editorial rhythm matching the
@@ -47,23 +65,6 @@ const aboutPhotos = [
         <li class="values-pill">Thrives in Ambiguity</li>
         <li class="values-pill">Adaptive</li>
       </ul>
-    </section>
-
-    {/* Personality photos — the three "lane" portraits (design / hosting / impact),
-        the same set the splash carousel uses. Horizontally scrollable; centered when
-        the row fits, scroll-snaps when it overflows (see the script at file end). */}
-    <section class="about-photos-track" aria-label="Photos of Caleb">
-      {aboutPhotos.map((photo) => (
-        <figure class="about-photo">
-          <Image
-            src={photo.src}
-            alt={photo.alt}
-            widths={[240, 480]}
-            sizes="(max-width: 600px) 70vw, 32vw"
-          />
-          <figcaption class="about-photo-cap">{photo.caption}</figcaption>
-        </figure>
-      ))}
     </section>
 
     <p class="resume-link">
@@ -98,41 +99,36 @@ const aboutPhotos = [
     gap: var(--sp-5);
   }
 
-  /* Photo wireframes — horizontally scrollable carousel of placeholder figures.
-     Centered when the row fits the viewport; scroll-snaps + scrollbar styling when
-     it overflows. Initial scroll position is centered via the inline script at the
-     end of this file. Each wireframe stays uniform (no --wide variant) so the
-     carousel has a consistent rhythm. */
-  .about-photos-track {
+  /* Bio beside a compact photo column — the same shape at every breakpoint;
+     only the photo size steps down on phones. */
+  .about-lead {
     display: flex;
-    gap: var(--sp-3);
+    align-items: center; /* bio centres against the taller photo column */
+    gap: var(--sp-6);
     margin: var(--sp-2) 0;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    justify-content: center;       /* centers when content fits without scroll */
-    padding: 0 var(--sp-2) var(--sp-3);
-    scrollbar-width: thin;
-    scrollbar-color: var(--terracotta) transparent;
   }
-  .about-photos-track::-webkit-scrollbar { height: 6px; }
-  .about-photos-track::-webkit-scrollbar-thumb {
-    background: var(--terracotta);
-    border-radius: 999px;
+  .about-lead .bio {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .about-photos-track {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
   }
   .about-photo {
-    flex: 0 0 auto;            /* fixed size, never stretches to fill the row */
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
-    scroll-snap-align: center;
+    gap: var(--sp-1);
   }
   /* Fixed square frame. object-fit: cover crops to fill without distorting, so a
      landscape or portrait source both sit cleanly in the same box. Soft raised
      surface, no hard border (lit top edge + diffuse ink-tinted drop shadow). */
   .about-photo :global(img) {
-    width: 240px;
-    height: 240px;
+    width: 150px;
+    height: 150px;
     object-fit: cover;
     object-position: center;
     border-radius: 8px;
@@ -150,12 +146,10 @@ const aboutPhotos = [
     text-align: center;
   }
   @media (max-width: 600px) {
+    .about-lead { gap: var(--sp-4); }
     .about-photo :global(img) {
-      width: 200px;
-      height: 200px;
-    }
-    .about-photos-track {
-      justify-content: flex-start;  /* swipeable from leftmost on narrow screens */
+      width: 104px;
+      height: 104px;
     }
   }
   /* Raised pill (anti-vibecode): no stroke — lifted surface + lit top edge +
@@ -196,9 +190,9 @@ const aboutPhotos = [
   .about h1 {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: var(--fs-cat);
-    line-height: var(--lh-cat);
-    letter-spacing: -0.04em;
+    font-size: clamp(30px, 4vw, 52px); /* same compact title scale as room/detail pages */
+    line-height: 1;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
     color: var(--ink);
     margin: 0;
@@ -361,15 +355,6 @@ const aboutPhotos = [
 </style>
 
 <script>
-  // On load, if the photo carousel overflows the viewport (typically narrower
-  // screens), pre-scroll it to the centre so the middle wireframe is the
-  // "initial" view. When the row fits without overflow, CSS justify-content: center
-  // already centres the track and this script is a no-op.
-  const track = document.querySelector<HTMLElement>('.about-photos-track');
-  if (track && track.scrollWidth > track.clientWidth) {
-    track.scrollLeft = (track.scrollWidth - track.clientWidth) / 2;
-  }
-
   // OPEN-TO-ROLES island hand-off: when arrived via /about?to=contact, force the
   // page to the top first, then auto-scroll DELIBERATELY SLOWLY to the contact
   // section so the user reads the bio on the way down. We can't use
