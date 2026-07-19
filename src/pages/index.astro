@@ -969,11 +969,13 @@ void DISCIPLINE_ACCENT;
       width: 34vw;
       aspect-ratio: 4 / 5;
     }
-    .b-name h1 { font-size: clamp(30px, 10vw, 52px); }
+    /* Fill the column: the name runs from just under the typing line down to
+       the same baseline the portrait bottom sets. */
+    .b-name h1 { font-size: clamp(38px, 13.5vw, 60px); }
     .b-name h1 .im { font-size: 18px; }
     /* Reserve two lines: greetings wrap in the narrow column and the name must
        not jump as the typed line grows/shrinks. */
-    .b-greeting { font-size: 15px; min-height: 2.6em; }
+    .b-greeting { font-size: 15px; min-height: 2.6em; margin-bottom: var(--sp-1); }
     /* Carousel controls scaled to the compact portrait card. */
     .b-portrait .bp-arrow { width: 22px; height: 22px; font-size: 13px; }
     .b-portrait .bp-arrow-prev { left: 4px; }
