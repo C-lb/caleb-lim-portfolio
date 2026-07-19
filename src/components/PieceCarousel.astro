@@ -1,19 +1,28 @@
 ---
-// Coverflow carousel: the centered piece is enlarged and named; neighbors are
-// scaled down and dimmed. Auto-advances every 3s (paused on hover/focus, stopped
-// under reduced motion). Each item is a link to the piece. Graceful 1..N: empty
-// renders nothing, a single piece renders centered and static.
+// Circular coverflow: each slide is a designed cover (the project's logo + a
+// framed hero screenshot on a flat section-colour background) with the name in a
+// per-project display font and the description as a subcaption. The centered slide
+// is enlarged and named. Loops infinitely (cloned slides, see the script). Auto-
+// advances every 3s (paused on hover/focus, stopped under reduced motion). Graceful
+// 1..N: empty renders nothing, a single piece renders centered and static.
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import { DISCIPLINE_ACCENT } from '../styles/disciplines.ts';
+import { carouselStyle } from '../styles/carouselStyle.ts';
 
 interface Props {
   pieces: CollectionEntry<'pieces'>[];
-  accent: string;
+  accent: string;              // controls/dots accent for this context
   theme?: 'dark' | 'light';
   label?: string;
 }
 const { pieces, accent, theme = 'dark', label } = Astro.props;
 const multi = pieces.length > 1;
+
+function splitTitle(t: string): { name: string; sub: string | null } {
+  const i = t.indexOf(' - ');
+  return i === -1 ? { name: t, sub: null } : { name: t.slice(0, i), sub: t.slice(i + 3) };
+}
 ---
 {pieces.length > 0 && (
   <section
@@ -26,29 +35,48 @@ const multi = pieces.length > 1;
     {label && <span class="pc-eyebrow">{label}</span>}
     <div class="pc-viewport">
       <ul class="pc-track" data-pc-track>
-        {pieces.map((p, i) => (
-          <li class="pc-slide">
-            <a
-              class="pc-item"
-              href={`/${p.data.category}/${p.id}`}
-              data-pc-item
-              aria-current={i === 0 ? 'true' : 'false'}
-              aria-label={`View ${p.data.title}`}
-            >
-              <figure class="pc-fig">
-                <Image
-                  src={p.data.hero}
-                  alt={p.data.title}
-                  class="pc-cover"
-                  widths={[300, 600]}
-                  sizes="(max-width: 700px) 62vw, 320px"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                />
-              </figure>
-              <span class="pc-name">{p.data.title}</span>
-            </a>
-          </li>
-        ))}
+        {pieces.map((p, i) => {
+          const st = carouselStyle(p.id);
+          const cover = DISCIPLINE_ACCENT[p.data.category];
+          const { name, sub } = splitTitle(p.data.title);
+          return (
+            <li class="pc-slide">
+              <a
+                class="pc-item"
+                href={`/${p.data.category}/${p.id}`}
+                data-pc-item
+                aria-current={i === 0 ? 'true' : 'false'}
+                aria-label={`View ${name}`}
+              >
+                <div class="cover" style={`--cover:${cover}`}>
+                  {st.logo && (
+                    <div class="logo">
+                      <img
+                        class:list={['logomark', st.shape]}
+                        src={st.logo}
+                        alt={`${name} logo`}
+                        style={st.logoBg ? `background:${st.logoBg}` : undefined}
+                      />
+                    </div>
+                  )}
+                  <div class="shot">
+                    <Image
+                      src={p.data.hero}
+                      alt={`${name} preview`}
+                      widths={[300, 600]}
+                      sizes="(max-width: 700px) 40vw, 200px"
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                    />
+                  </div>
+                </div>
+                <figcaption>
+                  <span class="pname" style={`font-family:${st.font};font-weight:${st.weight};--mult:${st.mult}`}>{name}</span>
+                  {sub && <span class="psub">{sub}</span>}
+                </figcaption>
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
     {multi && (
@@ -58,7 +86,7 @@ const multi = pieces.length > 1;
         </button>
         <ul class="pc-dots" data-pc-dots>
           {pieces.map((p, i) => (
-            <li><button class="pc-dot" type="button" data-pc-dot={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Show ${p.data.title}`}></button></li>
+            <li><button class="pc-dot" type="button" data-pc-dot={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Show ${splitTitle(p.data.title).name}`}></button></li>
           ))}
         </ul>
         <button class="pc-arrow" type="button" data-pc-next aria-label="Next piece">
@@ -88,34 +116,59 @@ const multi = pieces.length > 1;
   .pc-slide { flex: 0 0 auto; list-style: none; }
   .pc-item {
     display: flex; flex-direction: column; gap: var(--sp-3); align-items: center;
-    width: clamp(190px, 42vw, 320px); text-decoration: none; color: var(--paper);
+    width: clamp(200px, 44vw, 340px); text-decoration: none;
     opacity: 0.45; transform: scale(0.82);
     transition: transform 0.45s ease, opacity 0.45s ease;
   }
-  .pc--light .pc-item { color: var(--ink); }
   .pc-item[aria-current="true"] { opacity: 1; transform: scale(1); }
-  .pc-fig {
-    margin: 0; width: 100%; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden;
-    background: rgba(0, 0, 0, 0.25);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 40px -24px rgba(0,0,0,0.7);
+
+  /* cover: flat section-colour background, logo left, framed screenshot right */
+  .cover {
+    position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 18px;
+    overflow: hidden; isolation: isolate; background: var(--cover);
+    display: flex; align-items: center; gap: 14px; padding: 16px 16px 16px 18px;
+    box-shadow: 0 20px 44px -26px rgba(0,0,0,.7);
   }
-  .pc--light .pc-fig {
-    background: rgba(0, 0, 0, 0.06);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 18px 38px -24px rgba(10,10,10,0.4);
+  .cover > * { position: relative; z-index: 1; }
+  .logo { flex: 0 0 auto; aspect-ratio: 1; height: 53%; width: auto; display: grid; place-items: center; }
+  .logomark {
+    width: auto; height: auto; object-fit: contain; max-width: 100%; max-height: 100%;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.30));
   }
-  .pc-item[aria-current="true"] .pc-fig {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 30px 60px -26px rgba(0,0,0,0.85);
+  .logomark.tile {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 26%;
+    filter: none; box-shadow: 0 6px 16px -5px rgba(0,0,0,.45);
   }
-  .pc--light .pc-item[aria-current="true"] .pc-fig {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 30px 56px -26px rgba(10,10,10,0.5);
+  .logomark.circle {
+    width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 50%;
+    filter: none; box-shadow: 0 6px 16px -5px rgba(0,0,0,.45);
   }
-  .pc-cover { width: 100%; height: 100%; object-fit: cover; }
-  .pc-name {
-    font-family: var(--sans); font-weight: 700; font-size: var(--fs-ttl);
-    line-height: 1.1; letter-spacing: -0.01em; text-align: center;
-    opacity: 0; transition: opacity 0.45s ease; max-width: 30ch;
+  .shot {
+    flex: 1 1 0; height: 100%; display: flex; align-items: center; justify-content: center;
+    border-radius: 14px; padding: 8px;
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1);
+    border: 1px solid rgba(255,255,255,.26);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 16px 34px -18px rgba(0,0,0,.5);
   }
-  .pc-item[aria-current="true"] .pc-name { opacity: 1; }
+  .shot :global(img) {
+    max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;
+    display: block; border-radius: 7px; box-shadow: 0 6px 16px -6px rgba(0,0,0,.5);
+  }
+
+  figcaption { display: flex; flex-direction: column; gap: 3px; align-items: center; text-align: center; }
+  .pname {
+    font-size: calc(clamp(24px, 3.6vw, 34px) * var(--mult)); line-height: 1.02;
+    letter-spacing: -0.01em; text-wrap: balance;
+    opacity: 0; transition: opacity 0.45s ease;
+  }
+  .psub { font-family: var(--sans); font-weight: 400; font-size: 13.5px; opacity: 0; transition: opacity 0.45s ease; }
+  .pc-item[aria-current="true"] .pname, .pc-item[aria-current="true"] .psub { opacity: 1; }
+  .pc--dark .pname { color: var(--paper); }
+  .pc--light .pname { color: var(--ink); }
+  .pc--dark .psub { color: rgba(242,235,219,0.72); }
+  .pc--light .psub { color: var(--ink-dim, #5f584a); }
+
   .pc-controls { display: flex; align-items: center; justify-content: center; gap: var(--sp-4); }
   .pc-arrow {
     width: 40px; height: 40px; border-radius: 999px; border: none; cursor: pointer;
@@ -151,10 +204,10 @@ const multi = pieces.length > 1;
   .pc-dot[aria-current="true"]::before { background: var(--accent); transform: scale(1.25); }
   .pc-dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 50%; }
   @media (prefers-reduced-motion: reduce) {
-    .pc-track, .pc-item, .pc-name, .pc-arrow, .pc-dot::before { transition: none; }
+    .pc-track, .pc-item, .pname, .psub, .pc-arrow, .pc-dot::before { transition: none; }
   }
   @media (max-width: 700px) {
-    .pc-item { width: clamp(150px, 62vw, 240px); }
+    .pc-item { width: clamp(160px, 64vw, 260px); }
   }
 </style>
 
@@ -162,40 +215,83 @@ const multi = pieces.length > 1;
   function initPc(root) {
     const viewport = root.querySelector('.pc-viewport');
     const track = root.querySelector('[data-pc-track]');
-    const slides = Array.from(root.querySelectorAll('.pc-slide'));
-    const items = Array.from(root.querySelectorAll('[data-pc-item]'));
+    const realSlides = Array.from(root.querySelectorAll('.pc-slide'));
     const dots = Array.from(root.querySelectorAll('[data-pc-dot]'));
     const prev = root.querySelector('[data-pc-prev]');
     const next = root.querySelector('[data-pc-next]');
-    const count = slides.length;
+    const count = realSlides.length;
     if (count === 0) return;
-    let active = 0;
-    let timer = null;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    function render() {
-      const slide = slides[active];
-      const offset = viewport.clientWidth / 2 - (slide.offsetLeft + slide.offsetWidth / 2);
-      track.style.transform = `translateX(${offset}px)`;
-      items.forEach((it, i) => it.setAttribute('aria-current', i === active ? 'true' : 'false'));
-      dots.forEach((d, i) => d.setAttribute('aria-current', i === active ? 'true' : 'false'));
+    // Single piece: static, centered, no clones/controls.
+    if (count === 1) {
+      const only = realSlides[0];
+      const center = () => {
+        const off = viewport.clientWidth / 2 - (only.offsetLeft + only.offsetWidth / 2);
+        track.style.transform = `translateX(${off}px)`;
+      };
+      only.querySelector('[data-pc-item]')?.setAttribute('aria-current', 'true');
+      requestAnimationFrame(center);
+      window.addEventListener('resize', center);
+      return;
     }
-    function go(i) { active = (i % count + count) % count; render(); }
-    function stop() { if (timer) { clearInterval(timer); timer = null; } }
-    function start() { stop(); if (!reduce.matches && count > 1) timer = setInterval(() => go(active + 1), 3000); }
 
-    if (prev) prev.addEventListener('click', () => { go(active - 1); start(); });
-    if (next) next.addEventListener('click', () => { go(active + 1); start(); });
-    dots.forEach((d, i) => d.addEventListener('click', () => { go(i); start(); }));
-    items.forEach((it, i) => it.addEventListener('focus', () => go(i)));
+    // Multi: clone the set on both sides for a seamless loop.
+    const mkClones = () => realSlides.map((s) => {
+      const c = s.cloneNode(true);
+      c.setAttribute('aria-hidden', 'true');
+      c.querySelectorAll('a,button,[tabindex]').forEach((el) => el.setAttribute('tabindex', '-1'));
+      c.querySelectorAll('[data-pc-item]').forEach((el) => el.removeAttribute('data-pc-item'));
+      return c;
+    });
+    const before = mkClones(), after = mkClones();
+    before.forEach((c) => track.insertBefore(c, realSlides[0]));
+    after.forEach((c) => track.appendChild(c));
+
+    const all = Array.from(track.querySelectorAll('.pc-slide')); // length 3*count
+    let active = count;            // first real slide (middle copy)
+    let animate = true;
+
+    const realIndex = () => ((active - count) % count + count) % count;
+    function paint() {
+      const slide = all[active];
+      const off = viewport.clientWidth / 2 - (slide.offsetLeft + slide.offsetWidth / 2);
+      track.style.transition = animate ? '' : 'none';
+      track.style.transform = `translateX(${off}px)`;
+      all.forEach((s, i) => s.querySelector('.pc-item')?.setAttribute('aria-current', i === active ? 'true' : 'false'));
+      const ri = realIndex();
+      dots.forEach((d, i) => d.setAttribute('aria-current', i === ri ? 'true' : 'false'));
+    }
+    function rebase() {
+      // After a transition, if we've drifted out of the middle copy, jump back silently.
+      if (active < count || active >= count * 2) {
+        animate = false;
+        active = count + realIndex();
+        paint();
+        void track.offsetWidth;        // force reflow so the next move animates
+        animate = true;
+      }
+    }
+    track.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') rebase(); });
+
+    let timer = null;
+    function go(delta) { animate = true; active += delta; paint(); }
+    function toReal(ri) { animate = true; active = count + ri; paint(); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function start() { stop(); if (!reduce.matches) timer = setInterval(() => go(1), 3000); }
+
+    if (prev) prev.addEventListener('click', () => { go(-1); start(); });
+    if (next) next.addEventListener('click', () => { go(1); start(); });
+    dots.forEach((d, i) => d.addEventListener('click', () => { toReal(i); start(); }));
+    root.querySelectorAll('[data-pc-item]').forEach((it, i) => it.addEventListener('focus', () => { toReal(i); }));
     root.addEventListener('pointerenter', stop);
     root.addEventListener('pointerleave', start);
     root.addEventListener('focusin', stop);
     root.addEventListener('focusout', start);
-    window.addEventListener('resize', render);
+    window.addEventListener('resize', () => { animate = false; paint(); animate = true; });
     if (reduce.addEventListener) reduce.addEventListener('change', start);
 
-    requestAnimationFrame(() => { render(); start(); });
+    requestAnimationFrame(() => { paint(); start(); });
   }
   document.querySelectorAll('[data-pc]').forEach(initPc);
 </script>
