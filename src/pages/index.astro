@@ -139,7 +139,7 @@ void DISCIPLINE_ACCENT;
         <span class="bb-tint" aria-hidden="true"></span>
         <span class="bb-edge" aria-hidden="true"></span>
         <div class="b-bio-head">
-          <h2>About Me</h2>
+          <h2>ABOUT ME</h2>
         </div>
         <p>Four lanes: brand and design, financial models, product, and side projects. Pick the room that matches the role you are hiring for. If something fits, come say hi.</p>
       </a>
@@ -1683,6 +1683,23 @@ void DISCIPLINE_ACCENT;
         start();
       }
     });
+    // Touch swipe: horizontal drags step the carousel (vertical drags stay
+    // page scrolls). Passive listeners — we never block scrolling.
+    let swipeX: number | null = null;
+    let swipeY: number | null = null;
+    root.addEventListener('touchstart', (e) => {
+      swipeX = e.touches[0].clientX;
+      swipeY = e.touches[0].clientY;
+    }, { passive: true });
+    root.addEventListener('touchend', (e) => {
+      if (swipeX === null || swipeY === null) return;
+      const dx = e.changedTouches[0].clientX - swipeX;
+      const dy = e.changedTouches[0].clientY - swipeY;
+      swipeX = swipeY = null;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) go(index + 1, 'forward'); else go(index - 1, 'backward');
+      start();
+    }, { passive: true });
     // Pause cycling while the user is hovering (they're studying a slide); resume
     // immediately when they leave.
     root.addEventListener('mouseenter', stop);

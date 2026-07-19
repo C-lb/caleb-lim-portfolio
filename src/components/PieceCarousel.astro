@@ -250,6 +250,11 @@ function splitTitle(t: string): { name: string; sub: string | null } {
   }
   @media (max-width: 700px) {
     .pc-item { width: clamp(160px, 64vw, 260px); }
+    /* Compact cover: shrink the outer padding and the nested screenshot frame
+       so the preview clears the card edge instead of clipping against it. */
+    .cover { padding: 9px 10px 9px 12px; gap: 9px; }
+    .shot { padding: 4px; border-radius: 9px; }
+    .logo { height: 44%; }
   }
 </style>
 
@@ -360,6 +365,23 @@ function splitTitle(t: string): { name: string; sub: string | null } {
         setTimeout(() => { wheelLock = false; }, 450);
       }
     }, { passive: false });
+
+    // Touch swipe: horizontal drags step the carousel; vertical drags stay
+    // page scrolls (passive listeners, no scroll blocking).
+    let swipeX = null, swipeY = null;
+    viewport.addEventListener('touchstart', (e) => {
+      swipeX = e.touches[0].clientX;
+      swipeY = e.touches[0].clientY;
+    }, { passive: true });
+    viewport.addEventListener('touchend', (e) => {
+      if (swipeX === null) return;
+      const dx = e.changedTouches[0].clientX - swipeX;
+      const dy = e.changedTouches[0].clientY - swipeY;
+      swipeX = swipeY = null;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+      go(dx < 0 ? 1 : -1);
+      start();
+    }, { passive: true });
 
     if (prev) prev.addEventListener('click', () => { go(-1); start(); });
     if (next) next.addEventListener('click', () => { go(1); start(); });

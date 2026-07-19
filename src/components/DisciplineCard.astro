@@ -38,9 +38,8 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
   <span class="bc-tint" aria-hidden="true"></span>
   <span class="bc-edge" aria-hidden="true"></span>
 
-  {/* Top row: card number (left) and discipline icon (right), aligned. */}
+  {/* Top row: discipline icon on the right. */}
   <div class="bc-top">
-    <span class="b-card-no">0{index} / 04</span>
     <span class="bc-icon" aria-hidden="true">
       {category === 'design' && (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -145,19 +144,11 @@ const cls = `b-card k${k}${isEmpty ? ' is-empty' : ''}`;
     opacity: 0.78;
   }
 
-  /* Top row — number left, icon right, vertically centred on the same line. */
+  /* Top row — icon rides the right edge. */
   .bc-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-  }
-  .b-card-no {
-    font-family: var(--mono);
-    font-size: var(--fs-card-no);
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    opacity: 0.8;
+    justify-content: flex-end;
   }
   .bc-icon {
     display: inline-flex;
