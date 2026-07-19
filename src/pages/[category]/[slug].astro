@@ -55,7 +55,7 @@ interface Props {
   next: NeighbourRef | null;
 }
 const { piece, prev, next } = Astro.props;
-const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, pullQuote, gallery } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, gallery } = piece.data;
 const slug = piece.id;
 
 // Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
@@ -80,6 +80,12 @@ const accent = DISCIPLINE_ACCENT[category as Category];
 const splitAt = title.indexOf(' - ');
 const titleName = splitAt === -1 ? title : title.slice(0, splitAt);
 const titleSub = splitAt === -1 ? null : title.slice(splitAt + 3);
+
+// Short names for the top pager links ("← Remy" instead of the full title).
+const shortName = (t: string) => {
+  const i = t.indexOf(' - ');
+  return i === -1 ? t : t.slice(0, i);
+};
 
 // Hero mosaic: instead of one over-scaled hero, show up to 4 pieces of media at
 // once (hero + gallery shots + PDF pages) inside a viewport-height grid.
@@ -114,7 +120,19 @@ const metaLabel: Record<Category, string> = {
 <Base title={`${title} — Caleb Lim`} bg="ink" description={context}>
   <article class="detail" style={`--accent: ${accent}`}>
     <header class="detail-head">
-      <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
+      <div class="head-nav">
+        <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
+        {(prev || next) && (
+          <nav class="head-pager" aria-label="other pieces in this discipline">
+            {prev && (
+              <a class="head-pager-link" href={`/${prev.category}/${prev.slug}`} rel="prev">← {shortName(prev.title)}</a>
+            )}
+            {next && (
+              <a class="head-pager-link" href={`/${next.category}/${next.slug}`} rel="next">{shortName(next.title)} →</a>
+            )}
+          </nav>
+        )}
+      </div>
       <h1>{titleName}</h1>
       {titleSub && <p class="detail-sub">{titleSub}</p>}
       <div class="meta-strip">
@@ -169,14 +187,6 @@ const metaLabel: Record<Category, string> = {
       </div>
     </section>
 
-    {/* Tier 2: pull-quote. Large editorial line, one accent eyebrow only. */}
-    {pullQuote && (
-      <blockquote class="pull-quote">
-        <span class="pq-mark" aria-hidden="true">"</span>
-        <p>{pullQuote}</p>
-      </blockquote>
-    )}
-
     {/* Tier 2: Outcome lifted out of the equal stack into the page's payoff band. */}
     <section class="outcome-band">
       <span class="label outcome-label">Outcome</span>
@@ -221,24 +231,6 @@ const metaLabel: Record<Category, string> = {
       </p>
     )}
 
-    {/* PIECE-05 prev/next pager — same-discipline only, hide at edges (O-1, Pitfall P-3). */}
-    {/* Back-pill (line 52) already satisfies the "Back to Category" half — do NOT duplicate (Pitfall P-2). */}
-    {(prev || next) && (
-      <nav class="detail-pager" aria-label="other pieces in this discipline">
-        {prev ? (
-          <a class="pager-link prev" href={`/${prev.category}/${prev.slug}`} rel="prev">
-            <span class="pager-dir">← previous</span>
-            <span class="pager-title">{prev.title}</span>
-          </a>
-        ) : <span />}
-        {next ? (
-          <a class="pager-link next" href={`/${next.category}/${next.slug}`} rel="next">
-            <span class="pager-dir">next →</span>
-            <span class="pager-title">{next.title}</span>
-          </a>
-        ) : <span />}
-      </nav>
-    )}
   </article>
 </Base>
 
@@ -250,9 +242,48 @@ const metaLabel: Record<Category, string> = {
   }
   /* Text blocks keep a readable measure while media runs the full 1200px. */
   .narrative,
-  .pull-quote,
   .outcome-band {
     max-width: 860px;
+  }
+  .head-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+  .head-pager {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  /* Same raised-pill treatment as the back pill, quieter surface. */
+  .head-pager-link {
+    display: inline-block;
+    background: rgba(242, 235, 219, 0.06);
+    color: var(--paper);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 10px 24px -16px rgba(0, 0, 0, 0.6);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .head-pager-link:hover {
+      background: var(--paper);
+      color: var(--ink);
+    }
+  }
+  .head-pager-link:focus-visible {
+    outline: 3px solid var(--paper);
+    outline-offset: 3px;
   }
   .detail-head {
     border-top: 4px solid var(--accent);
@@ -448,29 +479,6 @@ const metaLabel: Record<Category, string> = {
     line-height: var(--lh-bio);
   }
 
-  /* Pull-quote: one accent moment (the mark), neutral ink text, generous air. */
-  .pull-quote {
-    margin: var(--sp-10) 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-  }
-  .pull-quote .pq-mark {
-    font-family: var(--sans);
-    font-size: var(--fs-card);
-    font-weight: 800;
-    line-height: 1;
-    color: var(--accent);
-  }
-  .pull-quote p {
-    font-family: var(--sans);
-    font-size: var(--fs-q);
-    line-height: var(--lh-tight);
-    letter-spacing: -0.02em;
-    color: var(--paper);
-    margin: 0;
-  }
-
   /* Outcome payoff band: raised surface on dark canvas (lighter than bg), soft
      diffuse shadow, lit top edge. The page's payoff. */
   .outcome-band {
@@ -542,56 +550,8 @@ const metaLabel: Record<Category, string> = {
     outline-offset: 2px;
   }
 
-  .detail-pager {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-6);
-    margin-top: var(--sp-8);
-    padding-top: var(--sp-5);
-    border-top: 1px solid rgba(242, 235, 219, 0.14);
-  }
-  .pager-link {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    color: var(--paper);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-  .pager-link.next {
-    text-align: right;
-    align-items: flex-end;
-  }
-  .pager-dir {
-    font-family: var(--mono);
-    font-size: var(--fs-mono);
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--paper);
-    opacity: 0.6;
-  }
-  .pager-title {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: var(--fs-body); /* was 16px; migrated to --fs-body (15.5px) per 05-TOKEN-MAP */
-    line-height: var(--lh-bio);
-    color: var(--paper);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-  }
-  /* D-06 Touch-hover gate (Plan 05-07 Task 1). Pager-link descendant color
-     change gated; :focus-visible outline stays outside. */
-  @media (hover: hover) and (pointer: fine) {
-    .pager-link:hover .pager-title { color: var(--accent); }
-  }
-  .pager-link:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
-  }
   @media (prefers-reduced-motion: reduce) {
-    .pager-link { transition: none; }
+    .head-pager-link { transition: none; }
   }
 
   /* Case-study titles run long ("Remy - photo-first calorie tracker"); keep
@@ -623,9 +583,6 @@ const metaLabel: Record<Category, string> = {
     .hero-mosaic[data-count="2"] .mosaic-cell {
       aspect-ratio: 16 / 10;
     }
-    .detail-pager { grid-template-columns: 1fr; gap: var(--sp-5); }
-    .pager-link.next { text-align: left; align-items: flex-start; }
-    .pull-quote { margin: var(--sp-8) 0; }
     .outcome-band { padding: var(--sp-5); }
     .meta-strip { gap: var(--sp-2); }
   }

@@ -108,6 +108,7 @@ function splitTitle(t: string): { name: string; sub: string | null } {
     color: var(--paper);
   }
   .pc--light .pc-eyebrow { color: var(--ink); }
+  .pc--light .cover { background: color-mix(in oklab, var(--cover) 45%, #efe8d8); }
   .pc-viewport { width: 100%; overflow: hidden; contain: inline-size; }
   .pc-track {
     display: flex; gap: var(--sp-5); padding: var(--sp-4) 0; list-style: none; margin: 0;
@@ -122,10 +123,17 @@ function splitTitle(t: string): { name: string; sub: string | null } {
   }
   .pc-item[aria-current="true"] { opacity: 1; transform: scale(1); }
 
-  /* cover: flat section-colour background, logo left, framed screenshot right */
+  /* Only the active card and its immediate neighbours are visible; anything
+     further out fades to nothing so a small set never shows the same piece
+     twice at once. */
+  .pc-item[data-pos="far"] { opacity: 0; pointer-events: none; }
+
+  /* cover: muted section-colour background (accent toned toward the theme
+     surface so cards sit quietly on the canvas), logo left, screenshot right */
   .cover {
     position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 18px;
-    overflow: hidden; isolation: isolate; background: var(--cover);
+    overflow: hidden; isolation: isolate;
+    background: color-mix(in oklab, var(--cover) 40%, #1b1813);
     display: flex; align-items: center; gap: 14px; padding: 16px 16px 16px 18px;
     box-shadow: 0 20px 44px -26px rgba(0,0,0,.7);
   }
@@ -258,7 +266,17 @@ function splitTitle(t: string): { name: string; sub: string | null } {
       const off = viewport.clientWidth / 2 - (slide.offsetLeft + slide.offsetWidth / 2);
       track.style.transition = animate ? '' : 'none';
       track.style.transform = `translateX(${off}px)`;
-      all.forEach((s, i) => s.querySelector('.pc-item')?.setAttribute('aria-current', i === active ? 'true' : 'false'));
+      all.forEach((s, i) => {
+        const it = s.querySelector('.pc-item');
+        if (!it) return;
+        it.setAttribute('aria-current', i === active ? 'true' : 'false');
+        // Distance from the active slide: only the active card and its direct
+        // neighbours stay visible (with 2 pieces, only the right neighbour, so
+        // the same piece never shows on both sides at once).
+        const d = i - active;
+        const visible = d === 0 || d === 1 || (d === -1 && count > 2);
+        it.setAttribute('data-pos', visible ? String(Math.abs(d)) : 'far');
+      });
       const ri = realIndex();
       dots.forEach((d, i) => d.setAttribute('aria-current', i === ri ? 'true' : 'false'));
     }

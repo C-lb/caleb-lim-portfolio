@@ -62,16 +62,26 @@ const { title, role, context, outcome, hero } = piece.data;
       0 24px 56px -30px rgba(0, 0, 0, 0.75);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
   }
+  /* Tall app screenshots were cover-cropping into a dark blob; contain the
+     whole shot on a muted accent surface instead (same treatment as the
+     carousel covers). */
   .feat-thumb {
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.25);
+    background: color-mix(in oklab, var(--accent) 40%, #1b1813);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-5);
   }
   .feat-cover {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 16px 34px -18px rgba(0, 0, 0, 0.6);
     transition: transform 0.35s ease;
   }
   .feat-body {
