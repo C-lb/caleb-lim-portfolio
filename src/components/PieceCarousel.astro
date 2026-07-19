@@ -298,6 +298,28 @@ function splitTitle(t: string): { name: string; sub: string | null } {
     function stop() { if (timer) { clearInterval(timer); timer = null; } }
     function start() { stop(); if (!reduce.matches) timer = setInterval(() => go(1), 3000); }
 
+    // Trackpad horizontal scroll advances the carousel. Vertical deltas pass
+    // through untouched so normal page scrolling over the carousel still works;
+    // a short lock keeps one swipe from firing several steps mid-transition.
+    let wheelAcc = 0;
+    let wheelLock = false;
+    let wheelIdle = null;
+    viewport.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelAcc += e.deltaX;
+      if (wheelIdle) clearTimeout(wheelIdle);
+      wheelIdle = setTimeout(() => { wheelAcc = 0; }, 200);
+      if (Math.abs(wheelAcc) > 60) {
+        go(wheelAcc > 0 ? 1 : -1);
+        start();
+        wheelAcc = 0;
+        wheelLock = true;
+        setTimeout(() => { wheelLock = false; }, 450);
+      }
+    }, { passive: false });
+
     if (prev) prev.addEventListener('click', () => { go(-1); start(); });
     if (next) next.addEventListener('click', () => { go(1); start(); });
     dots.forEach((d, i) => d.addEventListener('click', () => { toReal(i); start(); }));
