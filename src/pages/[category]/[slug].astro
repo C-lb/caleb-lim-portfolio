@@ -480,6 +480,12 @@ const metaLabel: Record<Category, string> = {
     .pager-link { transition: none; }
   }
 
+  /* Case-study titles run long ("Remy - photo-first calorie tracker"); even the
+     phone-scaled --fs-cat wraps them to 4+ lines, so they get a smaller size
+     than the one-or-two-word room headers that share the token. */
+  @media (max-width: 700px) {
+    .detail h1 { font-size: clamp(28px, 8.5vw, 38px); }
+  }
   @media (max-width: 900px) {
     .detail { padding: var(--sp-5); }
     .detail-pager { grid-template-columns: 1fr; gap: var(--sp-5); }

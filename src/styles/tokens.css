@@ -70,6 +70,15 @@
   --sp-10: 64px;
 }
 
+/* Phones: the 56px --fs-cat floor overwhelms a 390px screen (a room header fills
+   half the first viewport; a long case-study title wraps to 5 lines). Below 700px
+   the size tracks the viewport instead. */
+@media (max-width: 700px) {
+  :root {
+    --fs-cat: clamp(40px, 11vw, 56px);
+  }
+}
+
 /* Minimal reset (hand-rolled per RESEARCH.md alternatives note — no modern-normalize dep) */
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
