@@ -75,6 +75,19 @@ const paginatedPages = pdfPaginate && thumbCache
 
 const accent = DISCIPLINE_ACCENT[category as Category];
 
+// Hero mosaic: instead of one over-scaled hero, show up to 4 pieces of media at
+// once (hero + gallery shots + PDF pages) inside a viewport-height grid.
+// Media consumed here is excluded from the gallery / paginated stacks below.
+const galleryImgs = gallery ?? [];
+const MOSAIC_MAX = 4;
+const galleryUsed = Math.min(galleryImgs.length, MOSAIC_MAX - 1);
+const pagesUsed = Math.min(paginatedPages.length, MOSAIC_MAX - 1 - galleryUsed);
+const mosaicAssets = [hero, ...galleryImgs.slice(0, galleryUsed)];
+const mosaicPages = paginatedPages.slice(0, pagesUsed);
+const mosaicCount = mosaicAssets.length + mosaicPages.length;
+const restGallery = galleryImgs.slice(galleryUsed);
+const restPages = paginatedPages.slice(pagesUsed);
+
 // UI-SPEC.md "Detail page copy" line 303 — back-pill label per discipline.
 // 2026-05-18 (UAT): Title-cased to match the rest of the site's chrome — was lowercase.
 const backLabel: Record<Category, string> = {
@@ -108,16 +121,34 @@ const metaLabel: Record<Category, string> = {
       </div>
     </header>
 
-    {/* PIECE-01: large hero rendered via Astro's optimized image component, NEVER an iframe-PDF */}
-    {/* Phase 5 Plan 05-04: priority + sizes — this is the detail-page LCP element,
-        always above the fold. The paginated PDF slides below stay lazy (FOUND-02). */}
-    <Image
-      src={hero}
-      alt={title}
-      class="detail-hero"
-      priority
-      sizes="(max-width: 960px) 100vw, 960px"
-    />
+    {/* PIECE-01: hero media rendered via Astro's optimized image component, NEVER an iframe-PDF */}
+    {/* Hero mosaic: up to 4 media cells in a viewport-height grid so more of the
+        product is visible at once and nothing gets upscaled blurry. First cell is
+        the LCP element (priority); the rest lazy-load. */}
+    <div class="hero-mosaic" data-count={mosaicCount}>
+      {mosaicAssets.map((img, i) => (
+        <div class="mosaic-cell">
+          <Image
+            src={img}
+            alt={i === 0 ? title : `${title} - image ${i + 1}`}
+            priority={i === 0}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            sizes="(max-width: 900px) 100vw, 640px"
+          />
+        </div>
+      ))}
+      {mosaicPages.map((p) => (
+        <div class="mosaic-cell mosaic-page">
+          <img
+            src={`/generated/pdf-thumbs/${slug}/${p.file}`}
+            width={p.w}
+            height={p.h}
+            alt={`${title} — page ${p.n}`}
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
 
     {/* Tier 2: narrative body. Context as the lead (situation), Role as action. */}
     <section class="narrative">
@@ -146,12 +177,12 @@ const metaLabel: Record<Category, string> = {
     </section>
 
     {/* Gallery: uploaded images, full-width stack, after the story, before PDF slides. */}
-    {gallery && gallery.length > 0 && (
+    {restGallery.length > 0 && (
       <section class="gallery">
-        {gallery.map((img, i) => (
+        {restGallery.map((img, i) => (
           <Image
             src={img}
-            alt={`${title} - image ${i + 1}`}
+            alt={`${title} - image ${galleryUsed + i + 1}`}
             class="gallery-img"
             loading="lazy"
             sizes="(max-width: 960px) 100vw, 960px"
@@ -162,9 +193,9 @@ const metaLabel: Record<Category, string> = {
 
     {/* PIECE-04: paginated <img> sequence (plain HTML img tag, NOT Astro's optimized image component — Pitfall 1: that component cannot resolve public/ paths). */}
     {/* Width/height sourced from .cache.json for CLS prevention. Render order = pdfPaginate order (D-09). */}
-    {paginatedPages.length > 0 && (
+    {restPages.length > 0 && (
       <section class="paginated-pages">
-        {paginatedPages.map((p) => (
+        {restPages.map((p) => (
           <img
             src={`/generated/pdf-thumbs/${slug}/${p.file}`}
             width={p.w}
@@ -206,9 +237,15 @@ const metaLabel: Record<Category, string> = {
 
 <style>
   .detail {
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: var(--sp-6);
+  }
+  /* Text blocks keep a readable measure while media runs the full 1200px. */
+  .narrative,
+  .pull-quote,
+  .outcome-band {
+    max-width: 860px;
   }
   .detail-head {
     border-top: 4px solid var(--accent);
@@ -251,15 +288,18 @@ const metaLabel: Record<Category, string> = {
     outline: 3px solid var(--paper);
     outline-offset: 3px;
   }
+  /* Detail titles get their own scale, well below the room-header --fs-cat
+     (which peaks at 130px and overwhelms multi-word case-study names). */
   .detail h1 {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: var(--fs-cat);
-    line-height: var(--lh-cat);
-    letter-spacing: -0.04em;
+    font-size: clamp(30px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
     color: var(--paper);
     margin: 0;
+    max-width: 20ch;
   }
   .meta-strip {
     display: flex;
@@ -295,11 +335,65 @@ const metaLabel: Record<Category, string> = {
       inset 0 1px 0 rgba(255, 255, 255, 0.06),
       0 6px 14px -10px rgba(0, 0, 0, 0.6);
   }
-  .detail-hero {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
+  /* Hero mosaic: fills the viewport width and caps at ~68vh so the media band
+     and the start of the story share the first screen. Cells crop with
+     object-fit: cover from the top (app screens carry their signal up top);
+     full uncropped images still appear in the stacks below. */
+  .hero-mosaic {
+    display: grid;
+    gap: var(--sp-3);
     margin-bottom: var(--sp-8);
+  }
+  .mosaic-cell {
+    overflow: hidden;
+    border-radius: 8px;
+    background: rgba(242, 235, 219, 0.04);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 34px -18px rgba(0, 0, 0, 0.55);
+  }
+  .mosaic-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+  }
+  /* PDF pages are tall documents: cover-cropping shows a meaningless corner,
+     so contain the whole page inside the cell instead. */
+  .mosaic-page img {
+    object-fit: contain;
+    object-position: center;
+    padding: var(--sp-2);
+  }
+  .hero-mosaic[data-count="1"] {
+    grid-template-columns: 1fr;
+  }
+  .hero-mosaic[data-count="1"] .mosaic-cell {
+    aspect-ratio: 16 / 9;
+    max-height: 68vh;
+  }
+  .hero-mosaic[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero-mosaic[data-count="2"] .mosaic-cell {
+    aspect-ratio: 4 / 3;
+    max-height: 68vh;
+  }
+  .hero-mosaic[data-count="3"],
+  .hero-mosaic[data-count="4"] {
+    height: min(68vh, 640px);
+  }
+  .hero-mosaic[data-count="3"] {
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .hero-mosaic[data-count="3"] .mosaic-cell:first-child {
+    grid-row: span 2;
+  }
+  .hero-mosaic[data-count="4"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
   }
   .narrative {
     display: flex;
@@ -480,14 +574,35 @@ const metaLabel: Record<Category, string> = {
     .pager-link { transition: none; }
   }
 
-  /* Case-study titles run long ("Remy - photo-first calorie tracker"); even the
-     phone-scaled --fs-cat wraps them to 4+ lines, so they get a smaller size
-     than the one-or-two-word room headers that share the token. */
+  /* Case-study titles run long ("Remy - photo-first calorie tracker"); keep
+     them compact on phones. */
   @media (max-width: 700px) {
-    .detail h1 { font-size: clamp(28px, 8.5vw, 38px); }
+    .detail h1 { font-size: clamp(26px, 7.5vw, 34px); }
   }
   @media (max-width: 900px) {
     .detail { padding: var(--sp-5); }
+    /* Mosaic collapses to a 2-up grid with natural rows; single image stays full. */
+    .hero-mosaic[data-count="3"],
+    .hero-mosaic[data-count="4"] {
+      height: auto;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: none;
+    }
+    .hero-mosaic[data-count="3"] .mosaic-cell,
+    .hero-mosaic[data-count="4"] .mosaic-cell {
+      aspect-ratio: 4 / 5;
+    }
+    .hero-mosaic[data-count="3"] .mosaic-cell:first-child {
+      grid-row: auto;
+      grid-column: span 2;
+      aspect-ratio: 16 / 10;
+    }
+    .hero-mosaic[data-count="2"] {
+      grid-template-columns: 1fr;
+    }
+    .hero-mosaic[data-count="2"] .mosaic-cell {
+      aspect-ratio: 16 / 10;
+    }
     .detail-pager { grid-template-columns: 1fr; gap: var(--sp-5); }
     .pager-link.next { text-align: left; align-items: flex-start; }
     .pull-quote { margin: var(--sp-8) 0; }
