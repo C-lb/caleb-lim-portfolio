@@ -108,7 +108,6 @@ function splitTitle(t: string): { name: string; sub: string | null } {
     color: var(--paper);
   }
   .pc--light .pc-eyebrow { color: var(--ink); }
-  .pc--light .cover { background: color-mix(in oklab, var(--cover) 45%, #efe8d8); }
   .pc-viewport { width: 100%; overflow: hidden; contain: inline-size; }
   .pc-track {
     display: flex; gap: var(--sp-5); padding: var(--sp-4) 0; list-style: none; margin: 0;
@@ -136,12 +135,11 @@ function splitTitle(t: string): { name: string; sub: string | null } {
   .pc.pc-noanim .pname,
   .pc.pc-noanim .psub { transition: none !important; }
 
-  /* cover: muted section-colour background (accent toned toward the theme
-     surface so cards sit quietly on the canvas), logo left, screenshot right */
+  /* cover: flat section-colour background, logo left, framed screenshot right */
   .cover {
     position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 18px;
     overflow: hidden; isolation: isolate;
-    background: color-mix(in oklab, var(--cover) 40%, #1b1813);
+    background: var(--cover);
     display: flex; align-items: center; gap: 14px; padding: 16px 16px 16px 18px;
     box-shadow: 0 20px 44px -26px rgba(0,0,0,.7);
   }

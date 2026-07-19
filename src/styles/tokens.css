@@ -7,6 +7,7 @@
   /* Color tokens — palette refresh 2026-05-18 (earthy-muted, olive/umber direction). */
   --paper:      #f2ebdb;  /* warm cream (was #f4ebd9 — slightly cooler mix) */
   --ink:        #0a0a0a;
+  --canvas:     #171310;  /* warm near-black — dark-page background (body.bg-ink); --ink stays the text/true-black token */
   --design:     #c9187e;  /* magenta — DEDICATED Graphic Design accent */
   --umber:      #8c6326;  /* warm umber — splash decorative accent (greeting caret, question arrow/smile); freed from --design when graphic design moved to magenta, keeps the splash's warm rhythm off the discipline colour */
   --acid:       #dc972a;  /* deep gold — Personal accent (was #e8a82a turmeric) */

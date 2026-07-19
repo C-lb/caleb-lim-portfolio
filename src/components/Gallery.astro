@@ -66,13 +66,13 @@ const { pieces, category } = Astro.props;
       0 18px 40px -26px rgba(0, 0, 0, 0.7);
     transition: transform 0.22s ease, box-shadow 0.22s ease;
   }
-  /* Contain the whole screenshot on a muted accent surface (matches the
+  /* Contain the whole screenshot on the section-colour surface (matches the
      featured card + carousel covers) instead of cover-cropping tall shots
      into a zoomed blob. --accent inherits from the .b-category wrapper. */
   .g-thumb {
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: color-mix(in oklab, var(--accent, #8c6326) 40%, #1b1813);
+    background: var(--accent, #8c6326);
     display: flex;
     align-items: center;
     justify-content: center;
