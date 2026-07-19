@@ -49,6 +49,11 @@ function splitTitle(t: string): { name: string; sub: string | null } {
                 aria-label={`View ${name}`}
               >
                 <div class="cover" style={`--cover:${cover}`}>
+                  {/* Liquid-glass layers (refraction → accent-tinted body → lit
+                      bevel), same stack as the splash discipline cards. */}
+                  <span class="cv-warp" aria-hidden="true"></span>
+                  <span class="cv-tint" aria-hidden="true"></span>
+                  <span class="cv-edge" aria-hidden="true"></span>
                   {st.logo && (
                     <div class="logo">
                       <img
@@ -135,15 +140,38 @@ function splitTitle(t: string): { name: string; sub: string | null } {
   .pc.pc-noanim .pname,
   .pc.pc-noanim .psub { transition: none !important; }
 
-  /* cover: flat section-colour background, logo left, framed screenshot right */
+  /* cover: liquid-glass panel carrying the section colour in its tint (same
+     four-layer stack as the splash discipline cards; #glass-distortion lives in
+     Base.astro), logo left, framed screenshot right. Non-Chromium browsers skip
+     the refraction and fall back to frosted blur + tint, which is intended. */
   .cover {
     position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 18px;
     overflow: hidden; isolation: isolate;
-    background: var(--cover);
     display: flex; align-items: center; gap: 14px; padding: 16px 16px 16px 18px;
     box-shadow: 0 20px 44px -26px rgba(0,0,0,.7);
   }
-  .cover > * { position: relative; z-index: 1; }
+  .cover > .logo, .cover > .shot { position: relative; z-index: 3; }
+  .cv-warp {
+    position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+    backdrop-filter: blur(3px) saturate(1.3);
+    -webkit-backdrop-filter: blur(3px) saturate(1.3);
+    filter: url(#glass-distortion);
+    pointer-events: none;
+  }
+  .cv-tint {
+    position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+    background: color-mix(in srgb, var(--cover) 62%, transparent);
+    pointer-events: none;
+  }
+  .cv-edge {
+    position: absolute; inset: 0; z-index: 2; border-radius: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    box-shadow:
+      inset 1.5px 1.5px 1px rgba(255, 255, 255, 0.40),
+      inset -1px -1px 1px rgba(255, 255, 255, 0.16),
+      inset 0 0 22px rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+  }
   .logo { flex: 0 0 auto; aspect-ratio: 1; height: 53%; width: auto; display: grid; place-items: center; }
   .logomark {
     width: auto; height: auto; object-fit: contain; max-width: 100%; max-height: 100%;

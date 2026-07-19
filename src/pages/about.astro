@@ -147,10 +147,13 @@ const aboutPhotos = [
   }
   @media (max-width: 600px) {
     .about-lead { gap: var(--sp-4); }
+    /* Photos column moves to the LEFT of the introduction on phones. */
+    .about-photos-track { order: -1; }
     .about-photo :global(img) {
-      width: 104px;
-      height: 104px;
+      width: 84px;
+      height: 84px;
     }
+    .about-photo-cap { font-size: 9px; letter-spacing: 0.08em; }
   }
   /* Raised pill (anti-vibecode): no stroke — lifted surface + lit top edge +
      soft drop shadow. Horizontal padding is 2x the vertical. */
