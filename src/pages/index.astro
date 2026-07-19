@@ -924,15 +924,15 @@ void DISCIPLINE_ACCENT;
   /* Mobile collapse @ ≤900px (sketch lines 615-626) */
   @media (max-width: 900px) {
     .b-splash { padding: var(--sp-5); }
+    /* Same shape as desktop: small portrait on the left, name beside it. */
     .b-hero {
-      grid-template-columns: 1fr;
+      grid-template-columns: auto 1fr;
       min-height: 0;
     }
-    /* Reset the 12-col spans so the hero stacks in one column. */
     .b-hero > .b-portrait,
     .b-hero > .b-name,
     .b-hero > .b-bio { grid-column: auto; }
-    .b-portrait { aspect-ratio: 4/3; transform: none; }
+    .b-portrait { aspect-ratio: 4/5; transform: none; width: min(200px, 32vw); }
     .b-cards { grid-template-columns: 1fr 1fr !important; }
     .b-cards > :global(.b-card) { grid-column: span 1; }
     /* 2026-05-18 (UAT): keep the question + arrow on the same flex row even on
@@ -960,14 +960,16 @@ void DISCIPLINE_ACCENT;
      Each card snaps; the next peeks (flex-basis 80%) so the swipe affordance reads,
      and a thin terracotta scrollbar reinforces it. No JS — native scroll-snap. */
   @media (max-width: 700px) {
-    /* Portrait fills the top of the screen but stays inset from the edges — it spans
-       the full content width (not the 260px cap) with a tall portrait crop, keeping
-       the splash padding as a margin on all sides and its rounded corners + shadow. */
+    /* Compact portrait beside the name (mirrors the desktop hero) instead of a
+       full-width card. Name type steps down to share the row. */
     .b-portrait {
       max-width: none;
-      width: 100%;
+      width: 34vw;
       aspect-ratio: 4 / 5;
     }
+    .b-name h1 { font-size: clamp(30px, 10vw, 52px); }
+    .b-name h1 .im { font-size: 18px; }
+    .b-greeting { font-size: 15px; }
     .b-cards {
       display: flex;
       overflow-x: auto;
