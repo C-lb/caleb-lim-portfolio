@@ -176,7 +176,10 @@ function splitTitle(t: string): { name: string; sub: string | null } {
       inset 0 0 22px rgba(255, 255, 255, 0.05);
     pointer-events: none;
   }
-  .logo { flex: 0 0 auto; aspect-ratio: 1; height: 53%; width: auto; display: grid; place-items: center; }
+  /* Width-based sizing (not % heights): iOS Safari resolves percentage heights
+     inside an aspect-ratio box inconsistently, which let the nested frame
+     overrun the cover padding. Widths always resolve. */
+  .logo { flex: 0 0 auto; aspect-ratio: 1; width: 27%; height: auto; display: grid; place-items: center; }
   .logomark {
     width: auto; height: auto; object-fit: contain; max-width: 100%; max-height: 100%;
     filter: drop-shadow(0 4px 10px rgba(0,0,0,.30));
@@ -190,17 +193,22 @@ function splitTitle(t: string): { name: string; sub: string | null } {
     filter: none; box-shadow: 0 6px 16px -5px rgba(0,0,0,.45);
   }
   .shot {
-    flex: 1 1 0; height: 100%; min-width: 0; min-height: 0; overflow: hidden;
+    flex: 1 1 0; align-self: stretch; min-width: 0; min-height: 0; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
+    position: relative;
     border-radius: 14px; padding: 8px;
     background: rgba(255,255,255,.14);
     backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1);
     border: 1px solid rgba(255,255,255,.26);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 16px 34px -18px rgba(0,0,0,.5);
   }
+  /* Absolutely positioned: percentage sizes on an abs-positioned element
+     resolve against the positioned .shot box in every engine, so the
+     screenshot can never outgrow its frame. object-fit keeps the aspect. */
   .shot :global(img) {
-    max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;
-    display: block; border-radius: 7px; box-shadow: 0 6px 16px -6px rgba(0,0,0,.5);
+    position: absolute; inset: 8px;
+    width: calc(100% - 16px); height: calc(100% - 16px); object-fit: contain;
+    display: block; border-radius: 7px;
   }
 
   figcaption { display: flex; flex-direction: column; gap: 3px; align-items: center; text-align: center; }
@@ -259,7 +267,8 @@ function splitTitle(t: string): { name: string; sub: string | null } {
        so the preview clears the card edge instead of clipping against it. */
     .cover { padding: 9px 10px 9px 12px; gap: 9px; }
     .shot { padding: 4px; border-radius: 9px; }
-    .logo { height: 44%; }
+    .shot :global(img) { inset: 5px; width: calc(100% - 10px); height: calc(100% - 10px); }
+    .logo { width: 25%; }
   }
 </style>
 
