@@ -128,6 +128,14 @@ function splitTitle(t: string): { name: string; sub: string | null } {
      twice at once. */
   .pc-item[data-pos="far"] { opacity: 0; pointer-events: none; }
 
+  /* Set by the script during the silent loop-seam jump: the rebase teleports
+     the track and re-assigns visible neighbours in one frame, so nothing may
+     animate or the seam flickers. */
+  .pc.pc-noanim .pc-track,
+  .pc.pc-noanim .pc-item,
+  .pc.pc-noanim .pname,
+  .pc.pc-noanim .psub { transition: none !important; }
+
   /* cover: muted section-colour background (accent toned toward the theme
      surface so cards sit quietly on the canvas), logo left, screenshot right */
   .cover {
@@ -281,19 +289,26 @@ function splitTitle(t: string): { name: string; sub: string | null } {
       dots.forEach((d, i) => d.setAttribute('aria-current', i === ri ? 'true' : 'false'));
     }
     function rebase() {
-      // After a transition, if we've drifted out of the middle copy, jump back silently.
-      if (active < count || active >= count * 2) {
-        animate = false;
-        active = count + realIndex();
-        paint();
-        void track.offsetWidth;        // force reflow so the next move animates
-        animate = true;
-      }
+      // If we've drifted out of the middle copy, jump back silently. The
+      // pc-noanim class also freezes the slide opacity transitions — without it
+      // the jump swaps which physical clones are the visible neighbours and
+      // they fade back in (a visible flicker at the loop seam).
+      if (active >= count && active < count * 2) return;
+      root.classList.add('pc-noanim');
+      animate = false;
+      active = count + realIndex();
+      paint();
+      void track.offsetWidth;          // force reflow so the next move animates
+      animate = true;
+      root.classList.remove('pc-noanim');
     }
     track.addEventListener('transitionend', (e) => { if (e.propertyName === 'transform') rebase(); });
 
     let timer = null;
-    function go(delta) { animate = true; active += delta; paint(); }
+    // Rebase before every step: fast wheel/arrow input can interrupt the
+    // transition so transitionend never fires, leaving us stranded in a clone
+    // copy near the end of the track.
+    function go(delta) { rebase(); animate = true; active += delta; paint(); }
     function toReal(ri) { animate = true; active = count + ri; paint(); }
     function stop() { if (timer) { clearInterval(timer); timer = null; } }
     function start() { stop(); if (!reduce.matches) timer = setInterval(() => go(1), 3000); }
