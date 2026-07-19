@@ -6,6 +6,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { Category } from '../content/categories';
 import { DISCIPLINE_ACCENT } from '../styles/disciplines';
+import { carouselStyle } from '../styles/carouselStyle.ts';
 
 interface Props {
   piece: CollectionEntry<'pieces'>;
@@ -14,6 +15,9 @@ interface Props {
 const { piece, category } = Astro.props;
 const accent = DISCIPLINE_ACCENT[category];
 const { title, role, context, outcome, hero } = piece.data;
+// Same cover composition as the carousel: logo + framed screenshot fill the
+// muted accent surface instead of leaving a large empty field.
+const st = carouselStyle(piece.id);
 ---
 <a
   href={`/${category}/${piece.id}`}
@@ -22,6 +26,16 @@ const { title, role, context, outcome, hero } = piece.data;
   aria-label={`View ${title}`}
 >
   <div class="feat-thumb">
+    {st.logo && (
+      <div class="feat-logo">
+        <img
+          class:list={['feat-logomark', st.shape]}
+          src={st.logo}
+          alt=""
+          style={st.logoBg ? `background:${st.logoBg}` : undefined}
+        />
+      </div>
+    )}
     <Image
       src={hero}
       alt={title}
@@ -65,18 +79,57 @@ const { title, role, context, outcome, hero } = piece.data;
   /* Tall app screenshots were cover-cropping into a dark blob; contain the
      whole shot on a muted accent surface instead (same treatment as the
      carousel covers). */
+  /* No aspect-ratio here: with align-items stretch it forced the thumb wider
+     than its grid track and the surface slid under the text column. Height
+     comes from the stretched row; the phone aspect returns in the stacked
+     mobile layout below. */
   .feat-thumb {
-    aspect-ratio: 4 / 3;
     overflow: hidden;
     background: color-mix(in oklab, var(--accent) 40%, #1b1813);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--sp-5);
     padding: var(--sp-5);
   }
-  .feat-cover {
+  .feat-logo {
+    flex: 0 0 auto;
+    aspect-ratio: 1;
+    height: clamp(96px, 12vw, 150px);
+    display: grid;
+    place-items: center;
+  }
+  .feat-logomark {
+    width: auto;
+    height: auto;
     max-width: 100%;
     max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  }
+  .feat-logomark.tile {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 26%;
+    filter: none;
+    box-shadow: 0 6px 16px -5px rgba(0, 0, 0, 0.45);
+  }
+  .feat-logomark.circle {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: none;
+    box-shadow: 0 6px 16px -5px rgba(0, 0, 0, 0.45);
+  }
+  /* Fixed cap, not a percentage: the thumb's height derives from the row, so a
+     percentage max-height is circular and lets the image render at intrinsic
+     size. */
+  .feat-cover {
+    max-width: 100%;
+    max-height: 520px;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -164,6 +217,8 @@ const { title, role, context, outcome, hero } = piece.data;
   /* Stack on tablet/phone: image on top, body below, with more vertical air. */
   @media (max-width: 900px) {
     .feat { grid-template-columns: 1fr; gap: var(--sp-4); }
+    .feat-thumb { aspect-ratio: 4 / 3; }
+    .feat-cover { max-height: 100%; }
     .feat-body { padding: 0 var(--sp-5) var(--sp-5); gap: var(--sp-4); }
   }
 </style>

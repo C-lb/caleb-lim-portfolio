@@ -14,7 +14,6 @@ interface Props {
   category: Category;
 }
 const { pieces, category } = Astro.props;
-const total = pieces.length;
 ---
 <ul class="gallery" role="list">
   {pieces.map((piece, i) => (
@@ -31,7 +30,6 @@ const total = pieces.length;
           />
         </div>
         <div class="g-meta">
-          <span class="g-tag">{String(i + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
           <h3 class="g-ttl">{piece.data.title}</h3>
           <span class="g-role">{piece.data.role}</span>
           <span class="g-cue">View piece →</span>
@@ -95,14 +93,6 @@ const total = pieces.length;
     flex-direction: column;
     gap: var(--sp-2);
     padding: var(--sp-4);
-  }
-  .g-tag {
-    font-family: var(--mono);
-    font-size: var(--fs-mono);
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    opacity: 0.6;
   }
   .g-ttl {
     font-family: var(--sans);

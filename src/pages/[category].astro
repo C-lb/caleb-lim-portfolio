@@ -76,9 +76,6 @@ const readyLabel: Record<Category, string> = {
     <header class="b-cat-head">
       <a href="/" class="b-cat-back">← Splash</a>
       <h2>{label}{isEmpty && <em> soon</em>}</h2>
-      <span class="b-cat-meta">
-        {isEmpty ? <strong>COMING SOON</strong> : <strong>UPDATED MAY 2026</strong>}
-      </span>
     </header>
 
     <DisciplineNav current={category} />
@@ -117,10 +114,10 @@ const readyLabel: Record<Category, string> = {
     min-height: calc(100vh - 120px);
   }
   .b-cat-head {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: end;
-    gap: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-4);
     padding-bottom: var(--sp-5);
     /* Neutral hairline (was #333) — calmer, tied to the paper ink rather than a
        one-off grey. */
@@ -139,8 +136,7 @@ const readyLabel: Record<Category, string> = {
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    align-self: end;
-    justify-self: start;
+    align-self: flex-start;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.6),
       inset 0 -1px 0 rgba(10, 10, 10, 0.18),
@@ -160,12 +156,14 @@ const readyLabel: Record<Category, string> = {
     outline: 3px solid var(--paper);
     outline-offset: 3px;
   }
+  /* Room headers share the detail-page title scale (was --fs-cat, which peaked
+     at 130px and dominated the viewport). */
   .b-category h2 {
     font-family: var(--sans);
     font-weight: 800;
-    font-size: var(--fs-cat);
-    line-height: var(--lh-cat);
-    letter-spacing: -0.04em;
+    font-size: clamp(30px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.03em;
     text-transform: uppercase;
     color: var(--paper);
     margin: 0;
@@ -177,22 +175,6 @@ const readyLabel: Record<Category, string> = {
     color: var(--accent);
     text-transform: none;
   }
-  .b-cat-meta {
-    font-family: var(--mono);
-    font-size: var(--fs-mono);
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--paper);
-    opacity: 0.8;
-    justify-self: end;
-    align-self: end;
-  }
-  .b-cat-meta strong {
-    color: var(--accent); /* flow discipline accent (was hard-coded lime; phase-exit palette swap) */
-    font-weight: 600;
-  }
-
   /* Coming-soon stub (empty discipline). Anti-vibecode neutral surface on the
      dark category canvas: one raised panel lighter than the bg, the discipline
      accent reserved for the single primary "ready work" link. No second hue, no
@@ -286,7 +268,6 @@ const readyLabel: Record<Category, string> = {
 
   @media (max-width: 900px) {
     .b-category { padding: var(--sp-5); }
-    .b-cat-head { grid-template-columns: 1fr; gap: var(--sp-2); align-items: start; }
-    .b-cat-meta { justify-self: start; }
+    .b-cat-head { gap: var(--sp-3); }
   }
 </style>
