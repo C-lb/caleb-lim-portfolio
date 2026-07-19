@@ -602,14 +602,16 @@ void DISCIPLINE_ACCENT;
     opacity: 0.92;
     margin: 0 0 var(--sp-3);
     min-height: 1.3em; /* reserve a line so the name doesn't jump while typing */
-    display: flex;
-    align-items: center;
+    /* Block flow (not flex): long greetings wrap instead of clipping, and the
+       inline caret follows the last typed character onto the new line. */
+    display: block;
   }
   .greet-caret {
     display: inline-block;
     width: 2px;
     height: 1.05em;
     margin-left: 4px;
+    vertical-align: text-bottom;
     background: var(--umber);
     animation: caret-blink 1s steps(1) infinite;
   }
@@ -969,7 +971,17 @@ void DISCIPLINE_ACCENT;
     }
     .b-name h1 { font-size: clamp(30px, 10vw, 52px); }
     .b-name h1 .im { font-size: 18px; }
-    .b-greeting { font-size: 15px; }
+    /* Reserve two lines: greetings wrap in the narrow column and the name must
+       not jump as the typed line grows/shrinks. */
+    .b-greeting { font-size: 15px; min-height: 2.6em; }
+    /* Carousel controls scaled to the compact portrait card. */
+    .b-portrait .bp-arrow { width: 22px; height: 22px; font-size: 13px; }
+    .b-portrait .bp-arrow-prev { left: 4px; }
+    .b-portrait .bp-arrow-next { right: 4px; }
+    .b-portrait .bp-dots { bottom: 6px; padding: 2px 5px; gap: 2px; }
+    .b-portrait .bp-dot { width: 13px; height: 13px; }
+    .b-portrait .bp-dot::before { width: 5px; height: 5px; }
+    .b-portrait .bp-caption { left: 8px; bottom: 30px; font-size: 8px; letter-spacing: 0.12em; }
     .b-cards {
       display: flex;
       overflow-x: auto;
@@ -983,6 +995,10 @@ void DISCIPLINE_ACCENT;
          of the shadows. Bottom padding is the largest since the shadow falls down. */
       margin-inline: calc(-1 * var(--sp-5));
       padding: var(--sp-5) var(--sp-5) var(--sp-8);
+      /* The block padding above exists only so the clip box clears the card
+         shadows; pull it back out so the visual gap between bands stays equal
+         to the splash grid gap. */
+      margin-block: calc(-1 * var(--sp-5)) calc(-1 * var(--sp-8));
       scroll-padding-inline: var(--sp-5);
       /* Scrollbar hidden: the peeking next card is the swipe affordance, and a
          visible bar would float low under the bottom padding. */
