@@ -7,7 +7,7 @@
   /* Color tokens — palette refresh 2026-05-18 (earthy-muted, olive/umber direction). */
   --paper:      #f2ebdb;  /* warm cream (was #f4ebd9 — slightly cooler mix) */
   --ink:        #0a0a0a;
-  --design:     #8c6326;  /* deep ochre/umber — DEDICATED Graphic Design accent (NEW token; previously Design rode --terracotta) */
+  --design:     #c9187e;  /* magenta — DEDICATED Graphic Design accent */
   --acid:       #dc972a;  /* deep gold — Personal accent (was #e8a82a turmeric) */
   --cobalt:     #8ba1a9;  /* silvered blue-gray — Finance accent (was #2e6e8f weathered cerulean) */
   --terracotta: #82785d;  /* olive-khaki — interactive accent: hover/focus/link feedback across about.astro + topbar nav-link hover (re-classified Phase 5 D-17(b) — was 'decorative only'; UI-REVIEW counted 16 load-bearing uses) */

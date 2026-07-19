@@ -5,7 +5,7 @@ import type { Category } from '../content/categories';
 // Hexes mirror tokens.css; earthy-muted palette refresh 2026-05-18.
 // Design got its own dedicated token (was sharing --terracotta).
 export const DISCIPLINE_ACCENT: Record<Category, string> = {
-  design:    '#8c6326',  // deep ochre/umber       — k1 (NEW dedicated token --design)
+  design:    '#c9187e',  // magenta — Graphic Design accent
   finance:   '#8ba1a9',  // silvered blue-gray     — k2 (--cobalt)
   personal:  '#dc972a',  // deep gold              — k3 (--acid)
   saas: '#536644',  // dark forest sage       — k4 (--plum)

@@ -1,7 +1,7 @@
 ---
 title: "PVL - Overseas Community Project marketing campaign"
-category: saas
-order: 1
+category: design
+order: 2
 draft: false
 year: "2025"
 hero: "./hero.webp"
