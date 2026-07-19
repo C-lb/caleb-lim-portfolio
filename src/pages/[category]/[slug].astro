@@ -75,6 +75,12 @@ const paginatedPages = pdfPaginate && thumbCache
 
 const accent = DISCIPLINE_ACCENT[category as Category];
 
+// Split "Name - descriptor" titles the same way PieceCarousel.astro does:
+// the name is the display heading, the descriptor becomes its own subheading.
+const splitAt = title.indexOf(' - ');
+const titleName = splitAt === -1 ? title : title.slice(0, splitAt);
+const titleSub = splitAt === -1 ? null : title.slice(splitAt + 3);
+
 // Hero mosaic: instead of one over-scaled hero, show up to 4 pieces of media at
 // once (hero + gallery shots + PDF pages) inside a viewport-height grid.
 // Media consumed here is excluded from the gallery / paginated stacks below.
@@ -109,7 +115,8 @@ const metaLabel: Record<Category, string> = {
   <article class="detail" style={`--accent: ${accent}`}>
     <header class="detail-head">
       <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
-      <h1>{title}</h1>
+      <h1>{titleName}</h1>
+      {titleSub && <p class="detail-sub">{titleSub}</p>}
       <div class="meta-strip">
         <span class="meta-disc">{metaLabel[category as Category]}</span>
         {year && (<><span class="meta-dot">·</span><span class="meta-year">{year}</span></>)}
@@ -300,6 +307,19 @@ const metaLabel: Record<Category, string> = {
     color: var(--paper);
     margin: 0;
     max-width: 20ch;
+  }
+  /* Subheading: the descriptor half of "Name - descriptor" titles. Sentence
+     case, quieter weight, sits tight under the display name. */
+  .detail-sub {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: clamp(18px, 2.2vw, 26px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    opacity: 0.85;
+    margin: calc(var(--sp-2) - var(--sp-4)) 0 0;
+    max-width: 44ch;
   }
   .meta-strip {
     display: flex;
