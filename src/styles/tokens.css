@@ -8,6 +8,7 @@
   --paper:      #f2ebdb;  /* warm cream (was #f4ebd9 — slightly cooler mix) */
   --ink:        #0a0a0a;
   --design:     #c9187e;  /* magenta — DEDICATED Graphic Design accent */
+  --umber:      #8c6326;  /* warm umber — splash decorative accent (greeting caret, question arrow/smile); freed from --design when graphic design moved to magenta, keeps the splash's warm rhythm off the discipline colour */
   --acid:       #dc972a;  /* deep gold — Personal accent (was #e8a82a turmeric) */
   --cobalt:     #8ba1a9;  /* silvered blue-gray — Finance accent (was #2e6e8f weathered cerulean) */
   --terracotta: #82785d;  /* olive-khaki — interactive accent: hover/focus/link feedback across about.astro + topbar nav-link hover (re-classified Phase 5 D-17(b) — was 'decorative only'; UI-REVIEW counted 16 load-bearing uses) */
