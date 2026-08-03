@@ -5,7 +5,6 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { DISCIPLINE_ACCENT } from '../../styles/disciplines';
 import type { Category } from '../../content/categories';
 
 type Piece = CollectionEntry<'pieces'>;
@@ -73,7 +72,9 @@ const paginatedPages = pdfPaginate && thumbCache
       .filter(Boolean) as Array<{ n: number; w: number; h: number; file: string }>)
   : [];
 
-const accent = DISCIPLINE_ACCENT[category as Category];
+// 2026-08-04: piece pages run greyscale (see the note in [category].astro).
+// DISCIPLINE_ACCENT is still the splash's source of truth, just not used here.
+const accent = 'var(--work-accent)';
 
 // Split "Name - descriptor" titles the same way PieceCarousel.astro does:
 // the name is the display heading, the descriptor becomes its own subheading.
@@ -398,10 +399,13 @@ const metaLabel: Record<Category, string> = {
   .mosaic-cell {
     overflow: hidden;
     border-radius: 8px;
-    background: rgba(242, 235, 219, 0.04);
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 14px 34px -18px rgba(0, 0, 0, 0.55);
+      inset 0 1px 0 var(--glass-lit),
+      inset 0 0 0 1px var(--glass-rim),
+      var(--glass-shadow);
   }
   .mosaic-cell img {
     width: 100%;
@@ -483,7 +487,9 @@ const metaLabel: Record<Category, string> = {
   /* Outcome payoff band: raised surface on dark canvas (lighter than bg), soft
      diffuse shadow, lit top edge. The page's payoff. */
   .outcome-band {
-    background: rgba(242, 235, 219, 0.05);
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border-radius: 12px;
     padding: var(--sp-6);
     margin-bottom: var(--sp-8);
@@ -491,8 +497,9 @@ const metaLabel: Record<Category, string> = {
     flex-direction: column;
     gap: var(--sp-3);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 18px 36px -22px rgba(0, 0, 0, 0.7);
+      inset 0 1px 0 var(--glass-lit),
+      inset 0 0 0 1px var(--glass-rim),
+      var(--glass-shadow);
   }
   .outcome-band .outcome-label {
     color: var(--accent);

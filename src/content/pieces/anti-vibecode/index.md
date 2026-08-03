@@ -1,0 +1,26 @@
+---
+title: "Anti-vibecode - a house standard for interface work"
+category: personal
+order: 5
+draft: false
+year: "2026"
+hero: "./hero.png"
+gallery: ["./gallery-01.png"]
+deliverables: ["Written standard", "Token sheet and component CSS", "Live reference page", "Automated checks"]
+pullQuote: "One accent, neutral rest, flat controls, room to breathe."
+context: |
+  AI-assisted interfaces have a recognisable look: five competing colours,
+  neon gradients, hard borders, cramped spacing, buttons with a shine on
+  them. Anti-vibecode is the written rule set that prevents it. Sixteen
+  non-negotiables cover colour, spacing, type, buttons, icons, states and
+  collision, each one a default with the reasoning attached, so the rule
+  gets applied rather than recited.
+role: |
+  Wrote the standard, built the token sheet and component CSS it ships
+  with, and built the reference page that renders every rule from those
+  same tokens, so the page cannot drift from the sheet it documents.
+outcome: |
+  It is the design contract every interface here is built against,
+  including this site. Public and reusable rather than living in one
+  person's head.
+---

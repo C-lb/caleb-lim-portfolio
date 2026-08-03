@@ -5,7 +5,6 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { Category } from '../content/categories';
-import { DISCIPLINE_ACCENT } from '../styles/disciplines';
 import { carouselStyle } from '../styles/carouselStyle.ts';
 
 interface Props {
@@ -13,7 +12,6 @@ interface Props {
   category: Category;
 }
 const { piece, category } = Astro.props;
-const accent = DISCIPLINE_ACCENT[category];
 const { title, role, context, outcome, hero } = piece.data;
 // Same cover composition as the carousel: logo + framed screenshot fill the
 // muted accent surface instead of leaving a large empty field.
@@ -22,7 +20,6 @@ const st = carouselStyle(piece.id);
 <a
   href={`/${category}/${piece.id}`}
   class="feat"
-  style={`--accent: ${accent}`}
   aria-label={`View ${title}`}
 >
   <div class="feat-thumb">
@@ -58,8 +55,10 @@ const st = carouselStyle(piece.id);
 </a>
 
 <style>
-  /* Raised neutral card on the dark category canvas. Soft shadow, no stroke,
-     no side accent. Accent appears only on the eyebrow + cue (one identity mark). */
+  /* Glass card on the dark category canvas. Translucent fill lighter than the
+     canvas, lit bevel and rim instead of a stroke, soft diffuse shadow, no side
+     accent. The frame is greyscale; the screenshot and logo keep their colour and
+     are the only colour in the view. */
   .feat {
     display: grid;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
@@ -70,11 +69,14 @@ const st = carouselStyle(piece.id);
     overflow: hidden;
     text-decoration: none;
     color: var(--paper);
-    background: rgba(242, 235, 219, 0.05);
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 24px 56px -30px rgba(0, 0, 0, 0.75);
-    transition: transform 0.22s ease, box-shadow 0.22s ease;
+      inset 0 1px 0 var(--glass-lit),
+      inset 0 0 0 1px var(--glass-rim),
+      var(--glass-shadow);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
   }
   /* Tall app screenshots were cover-cropping into a dark blob; contain the
      whole shot on a muted accent surface instead (same treatment as the
@@ -85,7 +87,7 @@ const st = carouselStyle(piece.id);
      mobile layout below. */
   .feat-thumb {
     overflow: hidden;
-    background: var(--accent);
+    background: var(--work-canvas);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -112,7 +114,6 @@ const st = carouselStyle(piece.id);
     height: 100%;
     object-fit: cover;
     border-radius: 26%;
-    filter: none;
     box-shadow: 0 6px 16px -5px rgba(0, 0, 0, 0.45);
   }
   .feat-logomark.circle {
@@ -121,7 +122,6 @@ const st = carouselStyle(piece.id);
     aspect-ratio: 1;
     object-fit: cover;
     border-radius: 50%;
-    filter: none;
     box-shadow: 0 6px 16px -5px rgba(0, 0, 0, 0.45);
   }
   /* Fixed cap, not a percentage: the thumb's height derives from the row, so a
@@ -149,7 +149,8 @@ const st = carouselStyle(piece.id);
     font-weight: 600;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--paper);
+    opacity: 0.62;
   }
   .feat-ttl {
     font-family: var(--sans);
@@ -201,9 +202,11 @@ const st = carouselStyle(piece.id);
   @media (hover: hover) and (pointer: fine) {
     .feat:hover {
       transform: translateY(-3px);
+      background: var(--glass-fill-hi);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        0 32px 64px -28px rgba(0, 0, 0, 0.85);
+        inset 0 1px 0 var(--glass-lit),
+        inset 0 0 0 1px var(--glass-rim),
+        var(--glass-shadow-hi);
     }
     .feat:hover .feat-cover { transform: scale(1.03); }
   }

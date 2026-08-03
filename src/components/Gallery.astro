@@ -51,7 +51,8 @@ const { pieces, category } = Astro.props;
   }
   .gallery > li { min-width: 0; }
 
-  /* Neutral raised card on the dark category canvas — soft, no stroke. */
+  /* Glass card on the dark category canvas: translucent fill lighter than the
+     canvas, a lit top bevel and rim instead of a stroke, soft diffuse shadow. */
   .g-card {
     display: flex;
     flex-direction: column;
@@ -60,19 +61,22 @@ const { pieces, category } = Astro.props;
     overflow: hidden;
     text-decoration: none;
     color: var(--paper);
-    background: rgba(242, 235, 219, 0.05);
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 18px 40px -26px rgba(0, 0, 0, 0.7);
-    transition: transform 0.22s ease, box-shadow 0.22s ease;
+      inset 0 1px 0 var(--glass-lit),
+      inset 0 0 0 1px var(--glass-rim),
+      var(--glass-shadow);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
   }
-  /* Contain the whole screenshot on the section-colour surface (matches the
+  /* Contain the whole screenshot on the neutral work surface (matches the
      featured card + carousel covers) instead of cover-cropping tall shots
-     into a zoomed blob. --accent inherits from the .b-category wrapper. */
+     into a zoomed blob. */
   .g-thumb {
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: var(--accent, #8c6326);
+    background: var(--work-canvas);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,9 +125,11 @@ const { pieces, category } = Astro.props;
   @media (hover: hover) and (pointer: fine) {
     .g-card:hover {
       transform: translateY(-3px);
+      background: var(--glass-fill-hi);
       box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.07),
-        0 26px 50px -24px rgba(0, 0, 0, 0.8);
+        inset 0 1px 0 var(--glass-lit),
+        inset 0 0 0 1px var(--glass-rim),
+        var(--glass-shadow-hi);
     }
     .g-card:hover .g-cover { transform: scale(1.03); }
   }

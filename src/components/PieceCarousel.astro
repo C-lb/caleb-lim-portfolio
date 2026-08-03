@@ -7,7 +7,6 @@
 // 1..N: empty renders nothing, a single piece renders centered and static.
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { DISCIPLINE_ACCENT } from '../styles/disciplines.ts';
 import { carouselStyle } from '../styles/carouselStyle.ts';
 
 interface Props {
@@ -37,7 +36,11 @@ function splitTitle(t: string): { name: string; sub: string | null } {
       <ul class="pc-track" data-pc-track>
         {pieces.map((p, i) => {
           const st = carouselStyle(p.id);
-          const cover = DISCIPLINE_ACCENT[p.data.category];
+          // 2026-08-04: the cover PADDING runs greyscale on every surface, splash
+          // included. The glass stack (refraction, tint, bevel) is unchanged; only
+          // the tint it carries went neutral, so a row of covers reads as one
+          // material. The logo and screenshot inside keep their own colour.
+          const cover = 'var(--work-accent)';
           const { name, sub } = splitTitle(p.data.title);
           return (
             <li class="pc-slide">

@@ -67,6 +67,59 @@ const aboutPhotos = [
       </ul>
     </section>
 
+    {/* Skills — grouped so a recruiter can scan the one column that matches their
+        role rather than reading a flat wall of tools. Same pill treatment as Values
+        (one chip system on this page), but these are grouped and labelled, because
+        "Supabase" means nothing without knowing it sits under Engineering. */}
+    <section class="skills" aria-labelledby="skills-h">
+      <h2 id="skills-h" class="values-h">Skills</h2>
+      <div class="skills-groups">
+        <div class="skills-group">
+          <h3 class="skills-group-h">Design</h3>
+          <ul class="values-list">
+            <li class="values-pill">Brand identity</li>
+            <li class="values-pill">Design systems</li>
+            <li class="values-pill">Product UI</li>
+            <li class="values-pill">Art direction</li>
+            <li class="values-pill">Figma</li>
+            <li class="values-pill">Adobe CC</li>
+          </ul>
+        </div>
+        <div class="skills-group">
+          <h3 class="skills-group-h">Building</h3>
+          <ul class="values-list">
+            <li class="values-pill">TypeScript</li>
+            <li class="values-pill">React and Next.js</li>
+            <li class="values-pill">Astro</li>
+            <li class="values-pill">Swift and SwiftUI</li>
+            <li class="values-pill">Supabase and Postgres</li>
+            <li class="values-pill">Python</li>
+          </ul>
+        </div>
+        <div class="skills-group">
+          <h3 class="skills-group-h">AI</h3>
+          <ul class="values-list">
+            <li class="values-pill">LLM product design</li>
+            <li class="values-pill">Agent workflows</li>
+            <li class="values-pill">Prompt and eval design</li>
+            <li class="values-pill">Vision and OCR pipelines</li>
+            <li class="values-pill">Retrieval</li>
+          </ul>
+        </div>
+        <div class="skills-group">
+          <h3 class="skills-group-h">Analysis and operations</h3>
+          <ul class="values-list">
+            <li class="values-pill">Financial modelling</li>
+            <li class="values-pill">Excel and Sheets</li>
+            <li class="values-pill">SQL</li>
+            <li class="values-pill">Marketing campaigns</li>
+            <li class="values-pill">Event operations</li>
+            <li class="values-pill">Stakeholder comms</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <p class="resume-link">
       <a href="/caleb-lim-resume.pdf" download>Download resume (PDF) →</a>
     </p>
@@ -242,6 +295,38 @@ const aboutPhotos = [
     opacity: 0.7;
     margin: 0 0 var(--sp-2); /* 2026-05-18 (UAT): tightened bottom margin so heading sits closer to its pills */
   }
+  /* Skills. Two columns on desktop, one on phone. The gap is deliberately larger
+     than the pill gap so a group reads as a unit before the pills inside it do. */
+  .skills {
+    margin: var(--sp-5) 0 var(--sp-4);
+  }
+  .skills-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-5) var(--sp-6);
+    margin-top: var(--sp-4);
+  }
+  .skills-group { min-width: 0; }
+  .skills-group-h {
+    font-family: var(--sans);
+    font-size: var(--fs-tile-role);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    color: var(--ink);
+    opacity: 0.55;
+    /* Own line, clear of the pills below: the label names the group, it never
+       shares a line with it. */
+    display: block;
+    margin: 0 0 var(--sp-3);
+  }
+  @media (max-width: 700px) {
+    .skills-groups {
+      grid-template-columns: 1fr;
+      gap: var(--sp-5);
+    }
+  }
+
   .values-list {
     list-style: none;
     padding: 0;

@@ -69,6 +69,39 @@
   --sp-6:  32px;
   --sp-8:  48px;
   --sp-10: 64px;
+
+  /* Work-surface tokens (2026-08-04). The splash and about page keep the warm
+     coloured palette; every surface that presents a PIECE (category rooms, piece
+     pages, gallery tiles, carousel covers, featured card) drops to greyscale and
+     picks up a glass material instead. Rationale: the screenshots are the colour
+     in those views, and a per-discipline accent behind six different product
+     palettes was fighting them. One neutral system lets the work carry the hue.
+
+     --work-accent replaces DISCIPLINE_ACCENT on those surfaces only. Do NOT use it
+     on the splash — the discipline cards still read by colour. */
+  --work-accent:  #3a3a3d;  /* neutral graphite, stands in for the discipline hue */
+  /* Sits ABOVE --canvas (#171310) in lightness, not below: a screenshot panel is a
+     surface on the page, and a dark-mode surface darker than its canvas reads as a
+     hole punched in the page rather than a card lying on it. */
+  --work-canvas:  #242428;  /* the surface a piece screenshot sits on */
+
+  /* Glass material. Translucent fill LIGHTER than the canvas (dark-mode rule:
+     surfaces rise by lightness), a lit rim instead of a stroke, and a soft diffuse
+     shadow. Deliberately the blur-and-bevel glass the portrait frame already uses,
+     not the SVG-displacement liquid-glass recipe: these tile up to a dozen per
+     view and a displacement filter per card is a real scroll cost. */
+  --glass-fill:    rgba(255, 255, 255, 0.055);
+  --glass-fill-hi: rgba(255, 255, 255, 0.085);  /* hover step */
+  --glass-rim:     rgba(255, 255, 255, 0.14);
+  --glass-lit:     rgba(255, 255, 255, 0.30);   /* top bevel highlight */
+  --glass-blur:    blur(14px) saturate(1.15);
+  --glass-shadow:      0 22px 48px -30px rgba(0, 0, 0, 0.80);
+  --glass-shadow-hi:   0 32px 64px -28px rgba(0, 0, 0, 0.88);
+
+  /* Screenshots and logos keep their own colour (Caleb, 2026-08-04). The greyscale
+     is the FRAME, not the work: surfaces, padding, glass and pills go neutral so the
+     product art is the only colour in the view. Do not add a grayscale filter to
+     .g-cover, .feat-cover, .logomark or the mosaic images. */
 }
 
 /* Phones: the 56px --fs-cat floor overwhelms a 390px screen (a room header fills
