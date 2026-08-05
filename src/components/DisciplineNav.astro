@@ -99,15 +99,15 @@ const navLabel: Record<Category, string> = {
     opacity: 0.7;
   }
   .disc-link.is-soon { opacity: 0.78; }
-  /* Current discipline: accent-tinted surface + lit accent dot. The accent token
-     is the site's one identity colour, so marking location with it stays within
-     the single-accent rule. */
+  /* Current discipline: greyscale like the rest of the chrome (2026-08-06,
+     owner call) — a lighter neutral surface + full-strength paper dot marks
+     location without reintroducing the discipline colours. */
   .disc-link.is-current {
-    background: color-mix(in oklab, var(--accent) 28%, transparent);
+    background: rgba(242, 235, 219, 0.18);
     opacity: 1;
   }
   .disc-link.is-current .disc-dot {
-    background: var(--accent);
+    background: var(--paper);
     opacity: 1;
   }
   /* The current chip is the page you're already on — keep it visible as a marker

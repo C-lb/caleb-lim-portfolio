@@ -6,6 +6,7 @@ import type { CollectionEntry } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Category } from '../../content/categories';
+import { shortForm } from '../../lib/shortform';
 
 type Piece = CollectionEntry<'pieces'>;
 interface NeighbourRef {
@@ -180,18 +181,18 @@ const metaLabel: Record<Category, string> = {
     <section class="narrative">
       <div class="cro-block">
         <span class="label">Context</span>
-        <p class="lead">{context}</p>
+        <p class="lead"><span class="sf-full">{context}</span><span class="sf-short">{shortForm(context)}</span></p>
       </div>
       <div class="cro-block">
         <span class="label">Role</span>
-        <p>{role}</p>
+        <p><span class="sf-full">{role}</span><span class="sf-short">{shortForm(role)}</span></p>
       </div>
     </section>
 
     {/* Tier 2: Outcome lifted out of the equal stack into the page's payoff band. */}
     <section class="outcome-band">
       <span class="label outcome-label">Outcome</span>
-      <p>{outcome}</p>
+      <p><span class="sf-full">{outcome}</span><span class="sf-short">{shortForm(outcome)}</span></p>
     </section>
 
     {/* Gallery: uploaded images, full-width stack, after the story, before PDF slides. */}
@@ -241,11 +242,8 @@ const metaLabel: Record<Category, string> = {
     margin: 0 auto;
     padding: var(--sp-6);
   }
-  /* Text blocks keep a readable measure while media runs the full 1200px. */
-  .narrative,
-  .outcome-band {
-    max-width: 860px;
-  }
+  /* Text runs the same full width as the header pills and media (2026-08-06,
+     owner call: no mid-page cut-off; the column ends where the pill row ends). */
   .head-nav {
     display: flex;
     align-items: center;
@@ -388,9 +386,9 @@ const metaLabel: Record<Category, string> = {
       0 6px 14px -10px rgba(0, 0, 0, 0.6);
   }
   /* Hero mosaic: fills the viewport width and caps at ~68vh so the media band
-     and the start of the story share the first screen. Cells crop with
-     object-fit: cover from the top (app screens carry their signal up top);
-     full uncropped images still appear in the stacks below. */
+     and the start of the story share the first screen. Every cell CONTAINS its
+     media whole (2026-08-06, owner call: no cropped screenshots anywhere) on
+     the glass work surface; the cell ratios only shape the grid. */
   .hero-mosaic {
     display: grid;
     gap: var(--sp-3);
@@ -410,16 +408,10 @@ const metaLabel: Record<Category, string> = {
   .mosaic-cell img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: top center;
-    display: block;
-  }
-  /* PDF pages are tall documents: cover-cropping shows a meaningless corner,
-     so contain the whole page inside the cell instead. */
-  .mosaic-page img {
     object-fit: contain;
     object-position: center;
     padding: var(--sp-2);
+    display: block;
   }
   .hero-mosaic[data-count="1"] {
     grid-template-columns: 1fr;

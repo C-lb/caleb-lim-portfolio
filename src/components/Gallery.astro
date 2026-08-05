@@ -8,6 +8,7 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { Category } from '../content/categories';
+import { shortForm } from '../lib/shortform';
 
 interface Props {
   pieces: CollectionEntry<'pieces'>[];
@@ -35,7 +36,7 @@ const isWide = (piece: CollectionEntry<'pieces'>) =>
         </div>
         <div class="g-meta">
           <h3 class="g-ttl">{piece.data.title}</h3>
-          <span class="g-role">{piece.data.role}</span>
+          <span class="g-role"><span class="sf-full">{piece.data.role}</span><span class="sf-short">{shortForm(piece.data.role)}</span></span>
           <span class="g-cue">View piece →</span>
         </div>
       </a>

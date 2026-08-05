@@ -6,6 +6,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import type { Category } from '../content/categories';
 import { carouselStyle } from '../styles/carouselStyle.ts';
+import { shortForm } from '../lib/shortform';
 
 interface Props {
   piece: CollectionEntry<'pieces'>;
@@ -45,10 +46,10 @@ const st = carouselStyle(piece.id);
   <div class="feat-body">
     <span class="feat-eyebrow">Featured work</span>
     <h3 class="feat-ttl">{title}</h3>
-    <p class="feat-role">{role}</p>
+    <p class="feat-role"><span class="sf-full">{role}</span><span class="sf-short">{shortForm(role)}</span></p>
     <dl class="feat-cr">
-      <div><dt>Context</dt><dd>{context}</dd></div>
-      <div><dt>Outcome</dt><dd>{outcome}</dd></div>
+      <div><dt>Context</dt><dd><span class="sf-full">{context}</span><span class="sf-short">{shortForm(context)}</span></dd></div>
+      <div><dt>Outcome</dt><dd><span class="sf-full">{outcome}</span><span class="sf-short">{shortForm(outcome)}</span></dd></div>
     </dl>
     <span class="feat-cue">View piece →</span>
   </div>
