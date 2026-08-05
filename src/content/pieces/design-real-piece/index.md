@@ -1,5 +1,8 @@
 ---
 title: "PVL - Overseas Community Project visual identity"
+shortContext: "PVL, an SMU community service project in Vietnam, had no consistent visual identity across its collateral. I built one from scratch."
+shortRole: "Owned the identity end to end: the logo system, the photoshoot art direction, the shirt prints."
+shortOutcome: "Shipped as the cycle's brand standard, replacing three ad-hoc looks with one durable mark."
 category: design
 order: 1
 draft: false

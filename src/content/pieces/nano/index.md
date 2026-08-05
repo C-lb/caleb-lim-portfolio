@@ -1,5 +1,8 @@
 ---
 title: "nano - pocket audio clip library"
+shortContext: "A pocket library for audio clips: paste a link, the audio is ripped and trimmed on entry, and it lands in a real player."
+shortRole: "Built the whole thing solo, from the SwiftUI app to the self-hosted ripper it pulls audio through."
+shortOutcome: "On TestFlight and in daily use, running entirely on free tiers."
 category: personal
 order: 6
 draft: false

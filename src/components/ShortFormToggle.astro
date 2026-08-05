@@ -19,6 +19,7 @@ const { radius = 999 } = Astro.props;
   data-shortform-toggle
   data-tip="Condense case-study text to the core lines"
 >
+  <span class="sf-dot" aria-hidden="true"></span>
   <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
     <line x1="4" y1="7" x2="20" y2="7" />
     <line x1="4" y1="12" x2="14" y2="12" />
@@ -28,8 +29,10 @@ const { radius = 999 } = Astro.props;
 </button>
 
 <style>
-  /* Same raised-chip family as the pills it sits between: faint surface on the
-     dark canvas, lit top edge, soft shadow, mono uppercase, 2:1 padding. */
+  /* State is colour-coded by owner request (2026-08-06, explicit override of
+     the semantic-colour default): red chip = off, green chip with a soft
+     radiating pulse = on. Same raised-chip family as the pills around it:
+     flat fill, lit top edge, soft diffuse shadow, mono uppercase, 2:1 padding. */
   .sf-toggle {
     display: inline-flex;
     align-items: center;
@@ -38,7 +41,7 @@ const { radius = 999 } = Astro.props;
     border: none;
     border-radius: var(--sf-radius);
     cursor: pointer;
-    background: rgba(242, 235, 219, 0.06);
+    background: #7e332c;
     color: var(--paper);
     font-family: var(--mono);
     font-size: var(--fs-mono);
@@ -47,26 +50,44 @@ const { radius = 999 } = Astro.props;
     text-transform: uppercase;
     white-space: nowrap;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
       0 10px 24px -16px rgba(0, 0, 0, 0.6);
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.25s ease, color 0.25s ease;
   }
   .sf-toggle svg { flex: none; }
-  /* Pressed = on: paper chip, ink text — unmistakable state flip. */
+  /* The dot mirrors the chip state one step brighter, so on/off reads even at
+     a glance from the corner of the eye. */
+  .sf-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e58a80;
+    flex: none;
+    transition: background 0.25s ease;
+  }
+  /* Pressed = on: green chip, brighter dot, soft green pulse radiating out. */
   .sf-toggle[aria-pressed="true"] {
-    background: var(--paper);
-    color: var(--ink);
+    background: #37664a;
+    animation: sf-pulse 1.8s ease-out infinite;
+  }
+  .sf-toggle[aria-pressed="true"] .sf-dot {
+    background: #8fd8a8;
+  }
+  @keyframes sf-pulse {
+    0%   { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 0 rgba(107, 190, 138, 0.45); }
+    70%  { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 12px rgba(107, 190, 138, 0); }
+    100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 0 rgba(107, 190, 138, 0); }
   }
   @media (hover: hover) and (pointer: fine) {
-    .sf-toggle[aria-pressed="false"]:hover {
-      background: rgba(242, 235, 219, 0.13);
-    }
+    .sf-toggle[aria-pressed="false"]:hover { background: #93413a; }
+    .sf-toggle[aria-pressed="true"]:hover  { background: #3f7554; }
   }
   .sf-toggle:focus-visible {
     outline: 2px solid var(--paper);
     outline-offset: 3px;
   }
   @media (prefers-reduced-motion: reduce) {
-    .sf-toggle { transition: none; }
+    .sf-toggle { transition: none; animation: none; }
+    .sf-toggle[aria-pressed="true"] { animation: none; }
   }
 </style>

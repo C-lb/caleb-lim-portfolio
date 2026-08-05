@@ -1,5 +1,8 @@
 ---
 title: "Anti-vibecode - a house standard for interface work"
+shortContext: "The written rule set that keeps AI-assisted interfaces from looking AI-generated: sixteen non-negotiables with the reasoning attached."
+shortRole: "Wrote the standard and built the token sheet, the component CSS, and the reference page that cannot drift from them."
+shortOutcome: "The design contract every interface here is built against, including this site."
 category: personal
 order: 5
 draft: false

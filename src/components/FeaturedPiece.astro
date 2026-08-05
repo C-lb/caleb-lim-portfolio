@@ -13,7 +13,7 @@ interface Props {
   category: Category;
 }
 const { piece, category } = Astro.props;
-const { title, role, context, outcome, hero } = piece.data;
+const { title, role, context, outcome, hero, shortContext, shortRole, shortOutcome } = piece.data;
 // Same cover composition as the carousel: logo + framed screenshot fill the
 // muted accent surface instead of leaving a large empty field.
 const st = carouselStyle(piece.id);
@@ -46,10 +46,10 @@ const st = carouselStyle(piece.id);
   <div class="feat-body">
     <span class="feat-eyebrow">Featured work</span>
     <h3 class="feat-ttl">{title}</h3>
-    <p class="feat-role"><span class="sf-full">{role}</span><span class="sf-short">{shortForm(role)}</span></p>
+    <p class="feat-role"><span class="sf-full">{role}</span><span class="sf-short">{shortRole ?? shortForm(role)}</span></p>
     <dl class="feat-cr">
-      <div><dt>Context</dt><dd><span class="sf-full">{context}</span><span class="sf-short">{shortForm(context)}</span></dd></div>
-      <div><dt>Outcome</dt><dd><span class="sf-full">{outcome}</span><span class="sf-short">{shortForm(outcome)}</span></dd></div>
+      <div><dt>Context</dt><dd><span class="sf-full">{context}</span><span class="sf-short">{shortContext ?? shortForm(context)}</span></dd></div>
+      <div><dt>Outcome</dt><dd><span class="sf-full">{outcome}</span><span class="sf-short">{shortOutcome ?? shortForm(outcome)}</span></dd></div>
     </dl>
     <span class="feat-cue">View piece →</span>
   </div>

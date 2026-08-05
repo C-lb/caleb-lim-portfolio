@@ -1,5 +1,8 @@
 ---
 title: "Jorkmate - swipe-to-apply job matchmaker"
+shortContext: "A hackathon build that treats the job hunt like a dating app: swipe right on a role and an AI agent applies for you."
+shortRole: "Owned the product concept and the React front end under hackathon time pressure."
+shortOutcome: "A working end-to-end demo in a day, with a demo mode that runs anywhere with no server."
 category: personal
 order: 3
 draft: false

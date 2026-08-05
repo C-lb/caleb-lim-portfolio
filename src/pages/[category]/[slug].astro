@@ -56,7 +56,7 @@ interface Props {
   next: NeighbourRef | null;
 }
 const { piece, prev, next } = Astro.props;
-const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, gallery } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, gallery, shortContext, shortRole, shortOutcome } = piece.data;
 const slug = piece.id;
 
 // Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
@@ -183,18 +183,18 @@ const metaLabel: Record<Category, string> = {
     <section class="narrative">
       <div class="cro-block">
         <span class="label">Context</span>
-        <p class="lead"><span class="sf-full">{context}</span><span class="sf-short">{shortForm(context)}</span></p>
+        <p class="lead"><span class="sf-full">{context}</span><span class="sf-short">{shortContext ?? shortForm(context)}</span></p>
       </div>
       <div class="cro-block">
         <span class="label">Role</span>
-        <p><span class="sf-full">{role}</span><span class="sf-short">{shortForm(role)}</span></p>
+        <p><span class="sf-full">{role}</span><span class="sf-short">{shortRole ?? shortForm(role)}</span></p>
       </div>
     </section>
 
     {/* Tier 2: Outcome lifted out of the equal stack into the page's payoff band. */}
     <section class="outcome-band">
       <span class="label outcome-label">Outcome</span>
-      <p><span class="sf-full">{outcome}</span><span class="sf-short">{shortForm(outcome)}</span></p>
+      <p><span class="sf-full">{outcome}</span><span class="sf-short">{shortOutcome ?? shortForm(outcome)}</span></p>
     </section>
 
     {/* Gallery: uploaded images, full-width stack, after the story, before PDF slides. */}
@@ -236,7 +236,52 @@ const metaLabel: Record<Category, string> = {
     )}
 
   </article>
+
+  {/* Lightbox: every media image on the page opens a larger preview. One
+      overlay, filled by the script below from the clicked image's srcset. */}
+  <div class="lightbox" data-lightbox hidden role="dialog" aria-modal="true" aria-label="Image preview">
+    <img alt="" />
+    <button type="button" class="lightbox-close" data-lightbox-close aria-label="Close preview">
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+    </button>
+  </div>
 </Base>
+
+<script>
+  // Click-to-enlarge on every media image. The overlay image reuses the
+  // clicked image's srcset with sizes=92vw so the browser fetches a larger
+  // candidate than the inline layout needed.
+  const lb = document.querySelector<HTMLElement>('[data-lightbox]');
+  const lbImg = lb?.querySelector('img');
+  const open = (img: HTMLImageElement) => {
+    if (!lb || !lbImg) return;
+    lbImg.src = img.currentSrc || img.src;
+    const srcset = img.getAttribute('srcset');
+    if (srcset) { lbImg.setAttribute('srcset', srcset); lbImg.setAttribute('sizes', '92vw'); }
+    else { lbImg.removeAttribute('srcset'); lbImg.removeAttribute('sizes'); }
+    lbImg.alt = img.alt;
+    lb.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+  const close = () => {
+    if (!lb) return;
+    lb.hidden = true;
+    document.body.style.overflow = '';
+  };
+  document
+    .querySelectorAll<HTMLImageElement>('.mosaic-cell img, .gallery-img, .paginated-pages img')
+    .forEach((img) => {
+      img.classList.add('zoomable');
+      img.setAttribute('tabindex', '0');
+      img.setAttribute('role', 'button');
+      img.addEventListener('click', () => open(img));
+      img.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(img); }
+      });
+    });
+  lb?.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+</script>
 
 <style>
   .detail {
@@ -528,6 +573,52 @@ const metaLabel: Record<Category, string> = {
     height: auto;
     border-radius: 6px;
   }
+  /* Lightbox overlay: near-opaque ink scrim, image contained with breathing
+     room, close affordances everywhere (click, X, Esc). Same z as .skip. */
+  :global(img.zoomable) { cursor: zoom-in; }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 8, 6, 0.92);
+    cursor: zoom-out;
+  }
+  .lightbox[hidden] { display: none; }
+  .lightbox img {
+    max-width: 92vw;
+    max-height: 92vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: var(--sp-5);
+    right: var(--sp-5);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(242, 235, 219, 0.1);
+    color: var(--paper);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .lightbox-close:hover { background: rgba(242, 235, 219, 0.2); }
+  }
+  .lightbox-close:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+
   .full-pdf-link {
     margin: var(--sp-6) 0;
   }

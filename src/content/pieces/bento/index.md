@@ -1,5 +1,8 @@
 ---
 title: "Bento - the team toolbox"
+shortContext: "One toolbox app replacing a drawer of one-off utilities for an events team: 13 tools behind one passcode shell."
+shortRole: "Built the whole stack solo, from the tools to the iOS app and the self-healing server setup."
+shortOutcome: "Live and in daily team use on web and iPhone."
 category: saas
 order: 4
 draft: false

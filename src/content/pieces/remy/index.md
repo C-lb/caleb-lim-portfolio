@@ -1,5 +1,8 @@
 ---
 title: "Remy - photo-first calorie tracker"
+shortContext: "Remy makes calorie logging a photo: snap a meal and Claude vision identifies, portions, and files it."
+shortRole: "Designed and shipped the whole product solo, from the nutrition model to the iOS shell."
+shortOutcome: "Live in production and tracking real meals daily, with about 280 automated tests behind it."
 category: personal
 order: 1
 draft: false

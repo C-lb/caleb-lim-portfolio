@@ -1,5 +1,8 @@
 ---
 title: "SafeAI.sg - AI safety centre of excellence"
+shortContext: "SafeAI.sg is Singapore's centre of excellence for AI safety, plus a risk assessment tool that scores proposed AI deployments."
+shortRole: "Designed and built the site end to end, then the risk assessment tool and its abuse controls on top."
+shortOutcome: "The site is live at safeai.sg; the tool is deployed behind a private preview gate."
 category: saas
 order: 5
 draft: false

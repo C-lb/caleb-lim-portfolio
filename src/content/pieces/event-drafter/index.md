@@ -1,5 +1,8 @@
 ---
 title: "Event Drafter - AI event outreach desk"
+shortContext: "An internal tool that runs event outreach end to end: Gmail in, AI-drafted invites and follow-ups out, replies tracked automatically."
+shortRole: "Built solo for a real events team, from the drafting pipeline to the packaged desktop app."
+shortOutcome: "In operation for real event cycles, with hundreds of jobs processed from one dashboard."
 category: saas
 order: 3
 draft: false

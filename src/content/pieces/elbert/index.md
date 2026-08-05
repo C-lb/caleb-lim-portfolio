@@ -1,5 +1,8 @@
 ---
 title: "Elbert - spaced-repetition study app"
+shortContext: "A flashcard app built around FSRS spaced repetition: offline-first, with AI deck generation from pasted notes or a PDF."
+shortRole: "Built solo end to end: the review engine, four study modes, importers, and the AI generation flow."
+shortOutcome: "Live as an installable PWA. Making a deck went from an evening of card writing to pasting notes."
 category: personal
 order: 2
 draft: false

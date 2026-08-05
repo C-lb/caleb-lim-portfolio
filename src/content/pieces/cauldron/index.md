@@ -1,5 +1,8 @@
 ---
 title: "Cauldron - a palette picker that shows its working"
+shortContext: "A palette picker that shows its working: hue harmony, lightness ranking, and contrast checks with the failures marked."
+shortRole: "Built the whole thing, from the palette library to the packaging that makes it a reusable skill."
+shortOutcome: "Public and open source, and the tool behind the colour direction on every other project here."
 category: personal
 order: 4
 draft: false

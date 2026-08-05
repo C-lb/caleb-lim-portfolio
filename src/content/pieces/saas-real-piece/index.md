@@ -1,5 +1,8 @@
 ---
 title: "PVL - Overseas Community Project marketing campaign"
+shortContext: "PVL's marketing had to carry fundraising, recruitment, and cohort comms in one voice on a student budget."
+shortRole: "Led the marketing-side art direction, from the leaders photoshoot to the campaign collateral."
+shortOutcome: "One identity carried the whole cycle. No rebuilds between phases, no off-brand one-offs."
 category: design
 order: 2
 draft: false

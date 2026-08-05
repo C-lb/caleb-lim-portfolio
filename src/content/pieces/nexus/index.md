@@ -1,5 +1,8 @@
 ---
 title: "Nexus - the wisdom exchange"
+shortContext: "A B2B platform where a company describes its problem to an AI and gets matched anonymously with operators who have already solved it."
+shortRole: "Built the whole platform solo: product design, AI scoping and matching, Supabase backend, realtime messaging, native shells."
+shortOutcome: "Live in production with working two-sided flows, confidential by design."
 category: saas
 order: 2
 draft: false

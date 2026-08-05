@@ -36,6 +36,14 @@ const pieces = defineCollection({
       .describe('Short scope tags for the meta strip, e.g. ["Logo system", "Photoshoot art direction", "Shirt prints"]. Keep each 1-4 words.'),
     pullQuote: z.string().optional()
       .describe('One editorial line given large treatment between the narrative and the PDF slides. Lift from the work or the result; one sentence; no em dash.'),
+    // Short-form toggle overrides. When set, these replace the auto-derived
+    // first-sentences condensation (src/lib/shortform.ts) in short-form mode.
+    shortContext: z.string().optional()
+      .describe('Hand-written 1-2 sentence core of context for the short-form toggle.'),
+    shortRole: z.string().optional()
+      .describe('Hand-written 1-2 sentence core of role for the short-form toggle.'),
+    shortOutcome: z.string().optional()
+      .describe('Hand-written 1-2 sentence core of outcome for the short-form toggle.'),
   }),
 });
 
