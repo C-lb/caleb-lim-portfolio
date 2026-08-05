@@ -9,6 +9,7 @@
 import { CATEGORIES, type Category } from '../content/categories';
 import { DISCIPLINE_ACCENT } from '../styles/disciplines';
 import { getCollection } from 'astro:content';
+import ShortFormToggle from './ShortFormToggle.astro';
 
 interface Props {
   current?: Category;
@@ -54,6 +55,7 @@ const navLabel: Record<Category, string> = {
       </a>
     );
   })}
+  <ShortFormToggle radius={10} />
 </nav>
 
 <style>

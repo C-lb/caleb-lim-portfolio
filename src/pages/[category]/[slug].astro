@@ -7,6 +7,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { Category } from '../../content/categories';
 import { shortForm } from '../../lib/shortform';
+import ShortFormToggle from '../../components/ShortFormToggle.astro';
 
 type Piece = CollectionEntry<'pieces'>;
 interface NeighbourRef {
@@ -124,6 +125,7 @@ const metaLabel: Record<Category, string> = {
     <header class="detail-head">
       <div class="head-nav">
         <a href={`/${category}`} class="b-cat-back">{backLabel[category as Category]}</a>
+        <ShortFormToggle />
         {(prev || next) && (
           <nav class="head-pager" aria-label="other pieces in this discipline">
             {prev && (

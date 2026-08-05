@@ -1,0 +1,72 @@
+---
+// Site-wide short-form toggle, rendered inside each page's directional pill
+// row (DisciplineNav on room pages, the back/pager row on case studies).
+// Behaviour lives in Base.astro's global script: it binds every
+// [data-shortform-toggle], flips the root data-shortform attribute, and
+// persists the choice in localStorage. aria-pressed is synced there too.
+interface Props {
+  /* Match the surrounding pills: 999 for the round case-study pills,
+     10 for the squarer room chips. */
+  radius?: number;
+}
+const { radius = 999 } = Astro.props;
+---
+<button
+  type="button"
+  class="sf-toggle"
+  style={`--sf-radius: ${radius}px`}
+  aria-pressed="false"
+  data-shortform-toggle
+  data-tip="Condense case-study text to the core lines"
+>
+  <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="14" y2="12" />
+    <line x1="4" y1="17" x2="9" y2="17" />
+  </svg>
+  <span>Short form</span>
+</button>
+
+<style>
+  /* Same raised-chip family as the pills it sits between: faint surface on the
+     dark canvas, lit top edge, soft shadow, mono uppercase, 2:1 padding. */
+  .sf-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--sf-radius);
+    cursor: pointer;
+    background: rgba(242, 235, 219, 0.06);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: var(--fs-mono);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 10px 24px -16px rgba(0, 0, 0, 0.6);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .sf-toggle svg { flex: none; }
+  /* Pressed = on: paper chip, ink text — unmistakable state flip. */
+  .sf-toggle[aria-pressed="true"] {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .sf-toggle[aria-pressed="false"]:hover {
+      background: rgba(242, 235, 219, 0.13);
+    }
+  }
+  .sf-toggle:focus-visible {
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sf-toggle { transition: none; }
+  }
+</style>
