@@ -14,18 +14,22 @@ interface Props {
   category: Category;
 }
 const { pieces, category } = Astro.props;
+// Landscape desktop-UI shots shrink to illegible strips under contain; give
+// them a top-left detail crop instead (portrait phone shots keep contain).
+const isWide = (piece: CollectionEntry<'pieces'>) =>
+  piece.data.hero.width / piece.data.hero.height > 1.2;
 ---
 <ul class="gallery" role="list">
   {pieces.map((piece, i) => (
     <li>
       <a href={`/${category}/${piece.id}`} class="g-card">
-        <div class="g-thumb">
+        <div class={`g-thumb${isWide(piece) ? ' g-thumb--wide' : ''}`}>
           <Image
             src={piece.data.hero}
             alt={piece.data.title}
             class="g-cover"
             priority={i === 0}
-            widths={[320, 640]}
+            widths={[320, 640, 960]}
             sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 360px"
           />
         </div>
@@ -91,6 +95,23 @@ const { pieces, category } = Astro.props;
     border-radius: 8px;
     box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.6);
     transition: transform 0.35s ease;
+  }
+  /* Detail crop for landscape desktop-UI shots: anchor the top-left corner
+     (app header + first pane, the identifiable bit) and let the rest bleed
+     off; edge-to-edge, so no radius or lifted shadow on the image itself. */
+  .g-thumb--wide {
+    padding: 0;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .g-thumb--wide .g-cover {
+    flex-shrink: 0;
+    width: 155%;
+    max-width: none;
+    max-height: none;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
   }
   .g-meta {
     display: flex;

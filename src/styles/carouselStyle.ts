@@ -10,6 +10,7 @@ export interface CarouselStyle {
 
 const MAP: Record<string, CarouselStyle> = {
   'remy':              { font: '"Dancing Script Variable", cursive', weight: 700, shape: 'tile',   mult: 1.05, logo: '/logos/remy.png' },
+  'nano':              { font: '"Hanken Grotesk Variable", sans-serif', weight: 800, shape: 'tile', mult: 1.0, logo: '/logos/nano.png' },
   'elbert':            { font: '"Bungee", sans-serif',                weight: 400, shape: 'mark',   mult: 0.66, logo: '/logos/elbert.svg' },
   'jorkmate':          { font: '"Unbounded Variable", sans-serif',    weight: 700, shape: 'mark',   mult: 0.64, logo: '/logos/jorkmate.svg' },
   'nexus':             { font: '"Bricolage Grotesque Variable", sans-serif', weight: 600, shape: 'mark', mult: 0.98, logo: '/logos/nexus.svg' },

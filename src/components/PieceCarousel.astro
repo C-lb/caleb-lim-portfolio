@@ -92,11 +92,15 @@ function splitTitle(t: string): { name: string; sub: string | null } {
         <button class="pc-arrow" type="button" data-pc-prev aria-label="Previous piece">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <ul class="pc-dots" data-pc-dots>
-          {pieces.map((p, i) => (
-            <li><button class="pc-dot" type="button" data-pc-dot={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Show ${splitTitle(p.data.title).name}`}></button></li>
-          ))}
-        </ul>
+        {pieces.length <= 7 ? (
+          <ul class="pc-dots" data-pc-dots>
+            {pieces.map((p, i) => (
+              <li><button class="pc-dot" type="button" data-pc-dot={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Show ${splitTitle(p.data.title).name}`}></button></li>
+            ))}
+          </ul>
+        ) : (
+          <span class="pc-count" data-pc-count aria-live="polite">1 / {pieces.length}</span>
+        )}
         <button class="pc-arrow" type="button" data-pc-next aria-label="Next piece">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
@@ -250,6 +254,10 @@ function splitTitle(t: string): { name: string; sub: string | null } {
   .pc-arrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .pc-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 18px; }
   .pc-dots { display: flex; align-items: center; gap: var(--sp-2); list-style: none; margin: 0; }
+  .pc-count {
+    font-family: var(--sans); font-size: var(--fs-tile-role); font-variant-numeric: tabular-nums;
+    color: currentColor; opacity: 0.55; min-width: 4.5ch; text-align: center;
+  }
   .pc-dot {
     width: 24px; height: 24px; padding: 0; border: none; background: transparent;
     cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
@@ -281,6 +289,7 @@ function splitTitle(t: string): { name: string; sub: string | null } {
     const track = root.querySelector('[data-pc-track]');
     const realSlides = Array.from(root.querySelectorAll('.pc-slide'));
     const dots = Array.from(root.querySelectorAll('[data-pc-dot]'));
+    const countEl = root.querySelector('[data-pc-count]');
     const prev = root.querySelector('[data-pc-prev]');
     const next = root.querySelector('[data-pc-next]');
     const count = realSlides.length;
@@ -338,6 +347,7 @@ function splitTitle(t: string): { name: string; sub: string | null } {
       });
       const ri = realIndex();
       dots.forEach((d, i) => d.setAttribute('aria-current', i === ri ? 'true' : 'false'));
+      if (countEl) countEl.textContent = `${ri + 1} / ${count}`;
     }
     function rebase() {
       // If we've drifted out of the middle copy, jump back silently. The
