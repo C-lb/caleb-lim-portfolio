@@ -8,6 +8,8 @@ order: 2
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/nexus.mp4"
+videoPoster: "/videos/nexus.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["AI brief scoping", "Anonymised expert matching", "Supabase backend", "iOS and Android shells"]
 pullQuote: "Start with the problem, not the search."

@@ -5,6 +5,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import sharp from 'sharp';
 import type { Category } from '../../content/categories';
 import { shortForm } from '../../lib/shortform';
 import ShortFormToggle from '../../components/ShortFormToggle.astro';
@@ -56,8 +57,27 @@ interface Props {
   next: NeighbourRef | null;
 }
 const { piece, prev, next } = Astro.props;
-const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, gallery, shortContext, shortRole, shortOutcome } = piece.data;
+const { title, hero, context, role, outcome, category, pdfPaginate, fullPdf, year, deliverables, gallery, shortContext, shortRole, shortOutcome, video, videoPoster } = piece.data;
 const slug = piece.id;
+
+// Launch video orientation: read the poster's dimensions at build time so the
+// box gets a fixed aspect ratio (Safari-proof; the <video> is absolute inside
+// it with object-fit: contain). Landscape fills the width; portrait is capped
+// by height and centred. Falls back to 16:9 when the poster is unreadable.
+let videoW = 16;
+let videoH = 9;
+let videoPortrait = false;
+if (video && videoPoster) {
+  try {
+    const meta = await sharp(path.join(process.cwd(), 'public', videoPoster)).metadata();
+    if (meta.width && meta.height) {
+      videoW = meta.width;
+      videoH = meta.height;
+      videoPortrait = meta.height > meta.width;
+    }
+  } catch { /* keep the 16:9 default */ }
+}
+const videoRatio = `${videoW} / ${videoH}`;
 
 // Read .cache.json sidecar at build time for dimensions (avoids CLS — Pitfall 1)
 let thumbCache: { pages: Array<{ n: number; w: number; h: number; bytes?: number; file: string }> } | null = null;
@@ -149,6 +169,18 @@ const metaLabel: Record<Category, string> = {
         )}
       </div>
     </header>
+
+    {/* Launch video: flat surface above the mosaic. Contain, never crop; no
+        autoplay, no loop. The accent appears only as the hairline under the
+        eyebrow. */}
+    {video && (
+      <section class="brag-video" data-portrait={videoPortrait ? 'true' : undefined}>
+        <span class="label video-label">Launch video</span>
+        <div class="video-box" style={`--video-ar: ${videoRatio}; --video-w: ${videoW}; --video-h: ${videoH}`}>
+          <video controls playsinline preload="metadata" poster={videoPoster} src={video}></video>
+        </div>
+      </section>
+    )}
 
     {/* PIECE-01: hero media rendered via Astro's optimized image component, NEVER an iframe-PDF */}
     {/* Hero mosaic: up to 4 media cells in a viewport-height grid so more of the
@@ -432,6 +464,59 @@ const metaLabel: Record<Category, string> = {
       inset 0 1px 0 rgba(255, 255, 255, 0.06),
       0 6px 14px -10px rgba(0, 0, 0, 0.6);
   }
+  /* Launch video surface: same raised glass as the mosaic cells, flat fill,
+     no glow. Eyebrow is sentence case with a 1px accent hairline beneath it;
+     that hairline is the only place the accent appears in this block. */
+  .brag-video {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-3);
+    margin-bottom: var(--sp-3);
+    border-radius: 8px;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow:
+      inset 0 1px 0 var(--glass-lit),
+      inset 0 0 0 1px var(--glass-rim),
+      var(--glass-shadow);
+  }
+  .brag-video .video-label {
+    display: block;
+    text-transform: none;
+    letter-spacing: 0.08em;
+    padding: var(--sp-1) var(--sp-1) var(--sp-2);
+    border-bottom: 1px solid var(--accent);
+  }
+  /* Fixed aspect-ratio box with the video absolute inside it: Safari resolves
+     this reliably where %-heights on media do not. Landscape spans the width;
+     portrait is capped by height and centred on the surface. */
+  .video-box {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: var(--video-ar, 16 / 9);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--canvas);
+  }
+  .brag-video[data-portrait] .video-box {
+    /* Width derived from the height cap so the box keeps the video's exact
+       ratio; on narrow screens the 100% wins and the ratio shortens it. */
+    width: min(100%, calc(min(72vh, 720px) * var(--video-w, 9) / var(--video-h, 16)));
+    margin: 0 auto;
+  }
+  .video-box video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    background: var(--canvas);
+  }
+
   /* Hero mosaic: fills the viewport width and caps at ~68vh so the media band
      and the start of the story share the first screen. Every cell CONTAINS its
      media whole (2026-08-06, owner call: no cropped screenshots anywhere) on

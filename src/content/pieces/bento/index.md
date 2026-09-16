@@ -8,6 +8,8 @@ order: 4
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/bento.mp4"
+videoPoster: "/videos/bento.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["13 internal tools", "iOS app (TestFlight)", "Certificate and ticket designer", "Self-hosted with watchdog"]
 pullQuote: "Thirteen one-job tools, one search bar, zero SaaS subscriptions."

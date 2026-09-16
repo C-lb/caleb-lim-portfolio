@@ -8,6 +8,8 @@ order: 2
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/elbert.mp4"
+videoPoster: "/videos/elbert.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["FSRS scheduling", "AI card generation", "Offline-first PWA", "CSV and Anki import"]
 pullQuote: "Paste your lecture notes, get a scheduled deck back."

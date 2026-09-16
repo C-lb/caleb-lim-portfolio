@@ -8,6 +8,8 @@ order: 3
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/event-drafter.mp4"
+videoPoster: "/videos/event-drafter.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["Desktop app (Win + macOS)", "LLM-drafted invitations", "RSVP tracking", "Background worker"]
 pullQuote: "One operator runs a whole event's outreach from a single screen."

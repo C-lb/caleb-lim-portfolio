@@ -8,6 +8,8 @@ order: 4
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/cauldron.mp4"
+videoPoster: "/videos/cauldron.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["Open source tool", "Curated palette library", "OKLCH harmony analysis", "Contrast scoring"]
 pullQuote: "Picking a palette is the easy half. Being able to say why is the half that holds up in a review."

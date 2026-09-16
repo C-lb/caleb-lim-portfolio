@@ -16,6 +16,12 @@ const MAP: Record<string, CarouselStyle> = {
   'nexus':             { font: '"Bricolage Grotesque Variable", sans-serif', weight: 600, shape: 'mark', mult: 0.98, logo: '/logos/nexus.svg' },
   'event-drafter':     { font: '"Hanken Grotesk Variable", sans-serif', weight: 600, shape: 'tile', mult: 0.98, logo: '/logos/event-drafter.png', logoBg: '#181818' },
   'bento':             { font: '"DynaPuff Variable", sans-serif',     weight: 600, shape: 'tile',   mult: 0.92, logo: '/logos/bento.png' },
+  'rolemodel':         { font: '"JetBrains Mono Variable", monospace', weight: 700, shape: 'mark', mult: 0.9, logo: null },
+  'scribe':            { font: '"Fraunces Variable", serif',          weight: 600, shape: 'mark',   mult: 1.0,  logo: null },
+  'otto':              { font: '"JetBrains Mono Variable", monospace', weight: 800, shape: 'mark', mult: 1.0, logo: null },
+  'hopper':            { font: '"Bricolage Grotesque Variable", sans-serif', weight: 800, shape: 'mark', mult: 1.0, logo: '/logos/hopper.svg' },
+  'resume-analyser':   { font: '"Zilla Slab", serif',                weight: 600, shape: 'mark',   mult: 0.82, logo: null },
+  'lebbot':            { font: '"Hanken Grotesk Variable", sans-serif', weight: 700, shape: 'mark', mult: 1.0, logo: null },
   'design-real-piece': { font: '"Zilla Slab", serif',                weight: 600, shape: 'circle', mult: 1.0,  logo: '/logos/pvl.png' },
   'saas-real-piece':   { font: '"Zilla Slab", serif',                weight: 600, shape: 'circle', mult: 1.0,  logo: '/logos/pvl.png' },
 };

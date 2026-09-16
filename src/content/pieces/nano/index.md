@@ -8,6 +8,8 @@ order: 6
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/nano.mp4"
+videoPoster: "/videos/nano.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["iOS app on TestFlight", "Link ripping via self-hosted cobalt", "Share extension", "Supabase backend"]
 context: |

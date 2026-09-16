@@ -8,6 +8,8 @@ order: 1
 draft: false
 year: "2026"
 hero: "./hero.png"
+video: "/videos/remy.mp4"
+videoPoster: "/videos/remy.jpg"
 gallery: ["./gallery-01.png"]
 deliverables: ["iOS app on TestFlight", "Claude vision meal logging", "Apple Health integration", "Push and Telegram nudges"]
 pullQuote: "Take a photo of dinner and the log writes itself."

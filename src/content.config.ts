@@ -44,6 +44,12 @@ const pieces = defineCollection({
       .describe('Hand-written 1-2 sentence core of role for the short-form toggle.'),
     shortOutcome: z.string().optional()
       .describe('Hand-written 1-2 sentence core of outcome for the short-form toggle.'),
+    // Launch video (brag skill output). Public paths, served as plain <video>;
+    // the slug page reads the poster's dimensions at build time for orientation.
+    video: z.string().optional()
+      .describe('Public path to the launch video, e.g. /videos/nano.mp4. Renders above the hero mosaic when set.'),
+    videoPoster: z.string().optional()
+      .describe('Public path to the video poster frame, e.g. /videos/nano.jpg.'),
   }),
 });
 
