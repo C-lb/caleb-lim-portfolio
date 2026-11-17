@@ -82,7 +82,19 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     </svg>
     <a href="#main" class="skip">Skip to content</a>
     <header class="topbar">
-      <a href="/" class="brand" aria-current={isHome ? 'page' : undefined} data-tip="You're looking at him, yo!" data-tip-left>caleb lim</a>
+      <div class="brand-group">
+        <a href="/" class="brand" aria-current={isHome ? 'page' : undefined} data-tip="You're looking at him, yo!" data-tip-left>caleb lim</a>
+        {/* Version switch: a link drawn as a toggle, off on this site. It opens the
+            "Meet Caleb Lim" prototype, a static page at public/meet/index.html that
+            is built in ~/projects/portfolio-rebrand-mockup and shows the same switch
+            turned on, linking back here. */}
+        <a href="/meet/" class="ver-switch" aria-label="Switch to the new version of this site" data-tip="Try the new version" data-version-switch>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="5" width="22" height="14" rx="7" />
+            <circle class="knob" cx="8" cy="12" r="3" />
+          </svg>
+        </a>
+      </div>
       <StatusPill />
       <nav aria-label="primary">
         <a href="mailto:caleb.lim.2024@smu.edu.sg" class="nav-link" aria-label="Email Caleb" data-tip="Click to copy" data-copy-email>
@@ -172,6 +184,21 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       // Don't preventDefault — let the browser download the PDF; just confirm.
       resumeLink?.addEventListener('click', () => flashTip(resumeLink, '✓ Saved'));
 
+      // Version switch: slide the knob across first, then open the prototype at
+      // /meet/. Modified clicks (new tab, new window) and reduced motion skip the
+      // slide, so it behaves as the plain link it is.
+      const verSwitch = document.querySelector<HTMLAnchorElement>('[data-version-switch]');
+      verSwitch?.addEventListener('click', (e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        e.preventDefault();
+        verSwitch.classList.add('is-on');
+        window.setTimeout(() => { window.location.href = verSwitch.href; }, 190);
+      });
+      // The browser's Back button restores this page exactly as it was left, knob
+      // and all, so put the knob back to off whenever the page is shown.
+      window.addEventListener('pageshow', () => verSwitch?.classList.remove('is-on'));
+
       // Short-form toggle: flips the root data-shortform attribute (which CSS
       // uses to swap .sf-full / .sf-short spans) and persists the choice. The
       // button lives in each page's pill row (ShortFormToggle.astro), not here;
@@ -242,7 +269,8 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
      both the cream (ink text) and ink (paper text) topbar canvases: a faint chip
      surface, a lit top edge, and a soft drop shadow — no hard stroke. */
   @media (hover: hover) and (pointer: fine) {
-    .topbar nav :is(a, button).nav-link:hover {
+    .topbar nav :is(a, button).nav-link:hover,
+    .topbar .ver-switch:hover {
       background: color-mix(in oklab, currentColor 10%, transparent);
       box-shadow:
         inset 0 1px 0 color-mix(in oklab, currentColor 22%, transparent),
@@ -274,6 +302,41 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
     display: none;
     stroke: currentColor;
     fill: none;
+  }
+  /* Brand + version switch sit together on the left as one group. */
+  .topbar .brand-group {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  /* Version switch — same chip treatment as the nav links (hover rule above),
+     currentColor throughout so it works on both the cream and the dark topbar.
+     The knob sits left (off); .is-on slides it right just before navigating. */
+  .topbar .ver-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 32px;
+    border-radius: 10px;
+    color: inherit;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+  .topbar .ver-switch svg { display: block; }
+  .topbar .ver-switch .knob {
+    fill: currentColor;
+    stroke: none;
+    transition: transform 0.18s ease;
+  }
+  .topbar .ver-switch.is-on .knob { transform: translateX(8px); }
+  .topbar .ver-switch:active { background: color-mix(in oklab, currentColor 16%, transparent); }
+  .topbar .ver-switch:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .topbar .ver-switch,
+    .topbar .ver-switch .knob { transition: none; }
   }
   /* aria-current="page" dim — only ever set on the brand link on splash (Pitfall P-4).
      pointer-events kept ON so the hover tooltip still fires on the home page (the
@@ -357,7 +420,15 @@ const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : As
       row-gap: var(--sp-2);
       padding: var(--sp-4) var(--sp-4);
     }
-    .topbar .brand { order: 1; }
+    .topbar .brand-group { order: 1; }
     .topbar nav { order: 2; }
+    .topbar .ver-switch { width: 44px; height: 44px; }
+  }
+  /* Narrow phones: tighten the top row so the brand, the switch and the five
+     icons still share it down to 360px wide instead of wrapping the icons. */
+  @media (max-width: 400px) {
+    .topbar nav { gap: 2px; }
+    .topbar .brand-group { gap: 2px; }
+    .topbar .ver-switch { width: 36px; }
   }
 </style>
