@@ -1077,7 +1077,9 @@
   var ret = null;                                                      // the card on its way back into the camera: { t: seconds so far }
   // The record player: its record, its tone arm, and the sleeves in the rack behind it.
   var SLEEVE_ART = {"0":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEX///8JCQbnq8SyirLNm71LOELb0NuheZ1kSFUuIyewsK/uoKGjY27biIWDVWPDc3M946vLAAAACXBIWXMAAAsTAAALEwEAmpwYAAABMElEQVR4nNXSoUuDQRjH8QeRN7ztCcIE07kgGG+w7q4aDA/Mdsl/4A3XbOIlYUHwUGHZOBCEw2CyHC7LOEzCwJcDu+PkuQ0MiwbxGz/8nvYA/OtO1gKobGuMMY0s9Y0xpxqqi/BjUkpjjIaqnRbrKa7oEhspCymlBlIWfDbFhBDdon1G00ilDkSpq9RghT3e7Z6vVGqogmnKcG+rbJU65GVeRD8R4n6noPeRlznHmff7R52JEPvePzKmNsc48w+IH96zRQ0bKUxzjvEV8dp7H+Nb1rBpUxtyXnwi3rLkHDTUNLQpteEJ8eYrhPCS5hpqRzS0Nr0jdlJKc2tpDLVzjthHeDW31hIxbjvn3CXRCIf2jIjoeAw1MtISLbNbLZfnQ74lx4hrjaG6W0v/9S/9qm+1/75+6UTqUwAAAABJRU5ErkJggg==","color":16316664},"1":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEVMCQxUCQxbCQtDCg5lDQtuFhORIQt+FAilMhsdERHMzM+ESkTAqqabbm2ukY5FOjq62tLzAAAACXBIWXMAAAsTAAALEwEAmpwYAAABtklEQVR4nG3SMW/TUBAH8ItcBjY/9xP4aoS6tQpLRqyzOrHZZEaIo6jKUtHewhwyMBF18Fd4YkRComlnhqgrSLQd26ESWwaWprp7tpOhN1k//++953uGflfRDmhF/T60tBMIHkdoMeq3AivsUmtozwA9cK7DJuesYohW2Ou1CGsYzGm/rrDW7FQbDDF0qWEE2myWICKm1g8aDDkr2wksmKDlsItC04lbu3muGreWIVX1f6JcFwi9mBHR9bImIo0CBCvk8PJMUaOxIYnIm9l8+T1EY3CI2VCE383my8+lRlOnWIgwv72fL95L6IdE8Zj5w+W/BctRQOfcM8P78xMeSx6+ySVP5Jj3x69nC76Qj5jGEYDb/Ko4mXz5dXD+Qwj18MnTes9w8md/9FvK3I40qF+IIfPBrZQadbhd18+ZDUc3pyVhqucc1NMh82TM/NP7O8Mkezmop3vMzCPvvb+rFJFoczDdGIp88t5/u/iL4JwOqaI8K+SVWYJ6aTrOaigi1dnV1WmZY5gyERVVKB2JXbpNvsFKd++ijdk59eoaLHUJnbL+DD2HSFSEF2uYtWiXtEpqFaH9AQPTtPP64+d/AAAAAElFTkSuQmCC","color":5769224},"2":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEVdTmJjUWhoVG5WRVxGL1YtIUEXFxlOQU5xW3V0QEo8MyqaNkqxoKmKfoSkcjXb2+FXeMeEAAAACXBIWXMAAAsTAAALEwEAmpwYAAACLUlEQVR4nEXQsW4TQRAG4H/uJKyQZmavwGmQd91cuedFcqSUnB/hItEisfUljjBxRa7hmkgQhKJgFEEThCu3VmjoseAFEHWaPAFS0K4TmPLbf/+dO7yfz+eVf1aF8d77+Xzu8eXw9HQSZFRV1e4tPnlXllVVlWFGQb33KM/K/1OtFW7nrQvz6FariG4Z0bnH0Ue73gPYsYBDepeuvAdjYwFAAOfcMOCuBzFmgIhI1INyVHkw8eZrEdESw8ODsqogwrwkUfpfdhRRNt+EpBJBmoZsaKOtBYkRMTo2TEpQeGMGUaJU0NS5yRo3FiLaGGMUI3XDuA3xZTgzxmjNcC5uyBK2UiFqdPi8EGXiZcJrNII0IoAZmNZoGACTMPPGgviuIKqwhChI3xUAQkyS7vwkXm9gTEiyMFyx+r4iUG6UVgEBQrb942Y10UlrdCgLREIfbv6s7nczZTRRQDCpztff347vvWhENSp0gsCKj2v96/mJ6Q66RoNDZeeVaib5y4tLbQZJs072EkobyS78pWqyum2DUd42mrPx9OmhJJpMEp/J27ZJ7dAe2sSir+JKInm31Q/ghmcn2Xi83QIW5LJEWm37djwznWKvF5PYlsbScEB74yXXJvxPkNKUt73OR/5cn0MKCdeRt03S7etxhvProeQ5AFuoRtSR6TVNdn2agRPYNLWDAVF+xIUy55P+9FMB2A7AGmh1r5Ctq+nUWdiiZqr3u+m+0TXUw6s67f0FSIefgPwhtJEAAAAASUVORK5CYII=","color":6838376},"3":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEX///8oKCgdHR0RERECAgL5+fnv7+/g4OA4ODjNzc1RUVG6urpoaGiBgYGSkpKoqKgRsXeEAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB20lEQVR4nI2SMWgTURjH/8tLiJqW9+6oh0551yGLyF0PLK1YLnmTi7fchQOHLLlYpzqYeE1p6UXFRdGloi5qQEsHcVCjCOKgaAsBQdC1HQoORZzECoXy2uRsexn8T48f33v/7/++D9in1GUkdT7/PAlTr2/1Kc3S230g+5KE0/Or8Tm9tdL5uQD487n4eqZljDTpjc5GpGlOl5Gvgqksr+Ronh+PHyo0TSs/SqlJ2a/e5auGIujZdriha997hZeEMTwSrQPkQTt2bg6LgjKxv7ULJhdGdCDzB71ZEOPd7Fsvd22sgkXVVYAA/g9lrCzhoaIl6GkAg5vvPuumvpP9hakIMSQNNcY1zo/uPslG1Z2W7+du3p1lJ2VE1VaNY0ADIOEUyOOJCpARliieA1a69o/GN4EBmwnrFPC3DLSBQTa0DGRt01auYfJePQiWgTvmt09AtmjZ+ntML+qcPQvn+FjjKXB4aYkuroO4jbdvav6fzu+LTwC4bhC4CFzAc+A57tpDaehVXCCsB5OhA4JMJCMFILLKK1WrcjxX9gzeL1Vrco/SrRP//s+v1hdeyXHlpE9XKeKUK0A6MpJrM8DPJLfmiHk9CbP8YxKWWn0gmdljHsup9YFeb+n+T9unUHdO97kvNAAAAABJRU5ErkJggg==","color":16316664},"4":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEXp6enu7u7k5OQaGhrc3NyYmJikpKSxsbGKiorQ0NDAwMBmZmYpKSl7e3tPT086Ojr+KK/1AAAACXBIWXMAAAsTAAALEwEAmpwYAAACHElEQVR4nFWQsWvbQByFn7R1s9ZO5vDS+ZYOgoK4ofkDzogWb/XJtHN1xTSjisC4dMiibO1QE+0uKYftQUOXo14aELjKEgKFpMrQoRQcq5yUOM43CN13795POnQ8QghjhJA2QGAgIFsAtI2zCTxCTLYO3kDAPObZ22gNwQGrpanGjeuAMebdO006DPXgW2fbBDYhYPeHoJ5+JxxYrZ09x7GcWyzLMepOOI7TguW0TKx5bQCslnkYZ6PVBG2YpdmCTZqk1UTQhgWbtHdqcXtb92fBM9/pOI/CD6a1bm6BeQR4OFrS7+WPbYG5JfKg9+zM7X4yo+rS5IAxRmCfuR+3P49hajg6zOjXpIYlCbgQUkoZ6uxbmg7ToyRJUphYkiRPH7/9lySswUhz6PP1q7/pAdvblYeLcn6tXjBmwnuQUqbpoX+pVr9Xv4bpZDKRfXAz5/2KGtyLd2EoOEcg5WheLdyMUqqfzKJeIALIQFSV/uOuM6orXZbrcykhxP5SXWauptTVWaWzZVdC9J9fVhl1NXW11mtKlzwC90fK9NVkGaU6j8H91Xy9tZS6m9xHPFIXqizVVbUpy6oqL4oTjvFK5WOlCqXU8Xg+V7N82kdRFF2eR7FfnH7pXeV+FEcCcXEierNAvpn2uFhMuRhEHHE8Pt28fD2chKIvfh5HnPMYUTxShQiCQV9E3UHXuDH8qBsMRLDiYv9chlwI7uf/AaOfBHg4JBHAAAAAAElFTkSuQmCC","color":15263976},"5":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEUDGzYBEysGJEEzXH0sVXYLLkwBCyESN1c6YoIZP18kTW4eR2hBaIhOcY5rgJRCQ04rCWsVAAAACXBIWXMAAAsTAAALEwEAmpwYAAACmklEQVR4nC2Pv2vbQBTH3wnaWZfB0E0c6C84DYerdNENjpJCED2O0qVetHQriEPN0EEe1FSZmiDOGi0okQodkhBkj+rgQZ7awUPVv6Bk6tIpRXG/8Ib36/s+D9zZjGVnP7izpkfdZs0d1lFYtxllzG2zxO3omrWbpGUwponH6IazhLWTLN2mKT2C/mf6a0tdL+Utn3GWpl02hpZSlzr7Heu/e/s93W8n6xn02ytGGUue91vP7Xg7u04qcHv/C2tpt51ddx+LajEuSg7Vyuuz9HPFy9I/bOr5yvcy2Hxz28120qcF506zOtpy7kDiT6qWlqfNVcr8Feenz35zWC4Sn3tNXFDvrHed+vL6NINmVXibttbvqLtuKR9z6teQ1Eld5XLuTMaLJJtx7+DcgQMhlRLxp5+zXJ3T1K/zkwqccuF90+Xh7Ymvl6Xn68q/gfrK4TfxrS4WLLmV+lZdexyWy3rZ6HnV6CISJypect8DvVzWuvCq6uubqqpzETcXBciAyLjkl/OnT1bVhVLRy1UDQsi4aE50/uJDrrRSes5LKIpV1WhByPs/Z7/u7u76LqWQxyo+JoSQ+1esv9sJosC2ZSREdB8rJYVlEAsgAACTSBn/1eotATCIEIBNQohQca4COwhsIWwhwLBlrHWjFbHAECIAgxAQUshIyggQMgFhwGASGJaleoumo3CnoS5zpSJiGQCAMcIIYwygAkIAw06PMUYABI4NsACbGINlkCEswwZi4VGIp2E4NU00nH7g/O8f4nCKgVjkkRAACAZzjI1gmLKJLSMY7VnIBIyBCGITGCgIvLZ2h40BCWMTDbv2wDikCD/4DD8A2hsAdgI0CsPpKAQTTcMRNk2Ep9OhMcIhhh3Pw+MYo1FoojD8B9BiIP0ZxsA8AAAAAElFTkSuQmCC","color":534600},"6":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEUTEhUVFB8XGil1qZpkamxsc3ReYWAqLDJ0fHtJUlU1PkWQs6WXyL57k4xciotIa3LQe6SOAAAACXBIWXMAAAsTAAALEwEAmpwYAAACS0lEQVR4nEXQMUwTURgH8O+6NHbxfW8xMCjv09h4iZp4EwgTpdHoZg9O5/NISUyuiBKaiAuaByy1kSaFmABCCMS4dLyri5O2yoAmhNoFBhYMCUwmaMx718JbXvJ7//d9Xz7wPM9z02mvvBgfzz3PPWtalgWel9In68PE+LrfEaHbwlFjPllm+QenaNuZ4XGWNIfp2juN2uzMsBjNv8zx+BOFbmrAVjhiZjdWyl6xX2GqjRMr6VJpprQVoTI7k83fr067Qy8qGnXQyaTW7m1vz+4sRGjbtnScqTszq2m7+fqX1arpSCkHnR8TTafRVEEL1vLrrqNQVsMgrP7WCAaabxXaYVivVxt/FRqc2FUpB9OPZ+tBra9ejnCUXZFy0MuOBUGl+UkcK0TCMSnvrnUlGkHN2mc3NCKOyekcg8mBsFZZwtixbgSrsmAgfugLa5U3CJ17oM6q9BH5ybdGYO0i4mSEr3yOdPLdum3tC0SucW5KEKeD6pZl9SAiRjiNgtNBrefY6kZq4yND8GTv58J7q5sTJ2XG3MMI/fPWvvqj0R2KEZq9myKxt4RcaIy5hRgXZrhLN7tJ8CgZdxcRhVlbJrPISVCE2S5E6tgk4sip1T1eBES69JVI3byFPiDyi7eI1HpaGANAxMtHREy9tobX+HSZSGhkZ/iPiIgZar8A57K+xkMkEgzAMBDi/cGOQt6DnKJqDH6O7P1hYGBiF/C0WhGSwBmwzvmN3CkaAJA4ArheDQrtWXSJS18APpZLfjsIRwZeWNgEODxLxf4DEVnYokuxrcMAAAAASUVORK5CYII=","color":1579032},"7":{"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoBAMAAAB+0KVeAAAAMFBMVEUBAQIPEBEkOioeIhg8aDhAHzU7Sj5FoGpubzVPSF0p2XVran44eYGEmUePPkd8yW3W/MLYAAAACXBIWXMAAAsTAAALEwEAmpwYAAABj0lEQVR4nGNgIAcwYogEMjCwCqAKMQkeZGBgnYAqKsJ6gIGBebMgiqAThwIDA+M0SRQrLlsKMDAwespMQDZyoyZIKlPsAJIgW0MrSFDJqBlJUNb5IUjQyPgZkqB5CsgwZiXTDiRHhbsEglS6mHYoICw/5RTEIMzAmObamwAXZF6lLJnozCBseu2tI8LyVUECoWlCibGOczcinFm1vIjZQjWsjSEiEWGR2vRVjsKGJgYmDkhOEmD0LxI2FJBoRg1TIUFjQ+YdhoJCcIcyqiWltAowMJi4pWkawARNlrv1BhgxCBmXe/TAVDK6L1dSNlkeGrNIc20l3ED1IqbS7bW7t69KVtkKFxQpkv0d3KyktKpSBCHIVCn7iVGBQdh9t91DhN9Pc3xmEGAQTNtpF4AIpTMsn0C08BZThMsZvYW/gOlNCLczMKgbXANRrA/UkDwpnuAGUiIXoIgkyHnARQksiJxumA7oKAswMMihpCXGg1KgGAtDFmNgUOQBBS/ICGTABFKJiF8oMGBgYEZLtOQCAEL8UPrX4wPgAAAAAElFTkSuQmCC","color":526344}};
-  var deck = { rec: null, arm: null, arm0: 0, label: null, on: false, k: 0, sleeves: [], hover: -1, src: null };
+  var deck = { rec: null, arm: null, arm0: 0, label: null, on: false, k: 0, sleeves: [], hover: -1, src: null,
+    cur: -1, dwell: 0, up: -1, at: null };   // cur: the sleeve whose record is on; up: the sleeve held right out after a longer look, and where the pointer was
+  var hoverBox = new THREE.Box3(), hoverBoxOn = false;                 // where the hovered thing sat before it lifted, so lifting cannot shake the pointer off it
   var pol = { on: 0, pick: 0, mat: null };                             // the Polaroid on the desk, and the one the row is on
   // The card is in the camera unless it is in your hand or in the reader.
   function cardIn() { var c = items.SDCard; return !!c && !c.inserted && inspectId !== 'SDCard'; }
@@ -1133,6 +1135,8 @@
   // Taking a sleeve from the rack puts its record on: the label takes the cover's colour.
   function playSleeve(i) {
     var sl = deck.sleeves[i]; if (!sl) return;
+    if (deck.on && deck.cur === i) { playRecord(false); return; }           // the one that is playing: a second click takes the needle off
+    deck.cur = i;
     if (deck.label && sl.color) deck.label.color.copy(sl.color);
     playRecord(true);
   }
@@ -1141,11 +1145,15 @@
     deck.k = reduce ? (deck.on ? 1 : 0) : deck.k + clamp((deck.on ? 1 : 0) - deck.k, -dt / 0.9, dt / 0.9);
     if (deck.arm) deck.arm.rotation.y = deck.arm0 - rad(31) * ease(deck.k);
     if (!reduce) deck.rec.rotation.y -= dt * 3.49 * deck.k * deck.k;                 // 33 turns a minute once it is up to speed
+    // A pointer passing over only stirs a sleeve. Rest on one for a moment and it comes nearly all the way out.
+    if (deck.hover < 0) { deck.dwell = 0; deck.up = -1; }
+    else if (deck.up !== deck.hover) { deck.dwell += dt; if (deck.dwell > 0.32) { deck.up = deck.hover; deck.at = { x: deck.px, y: deck.py }; } }
     for (var i = 0; i < deck.sleeves.length; i++) {
       // the sleeve under the pointer stands up out of the rack, and its neighbours stir
-      var sl = deck.sleeves[i], d = deck.hover < 0 ? 9 : Math.abs(i - deck.hover), want = d === 0 ? 1 : d === 1 ? 0.22 : 0;
+      var sl = deck.sleeves[i], d = deck.hover < 0 ? 9 : Math.abs(i - deck.hover), want = d === 0 ? 1 : d === 1 ? 0.22 : 0, far = deck.up === i ? 1 : 0;
       sl.h = reduce ? want : sl.h + (want - sl.h) * Math.min(1, dt * 10);
-      sl.node.position.y = sl.y0 + 0.13 * sl.h;
+      sl.h2 = reduce ? far : (sl.h2 || 0) + (far - (sl.h2 || 0)) * Math.min(1, dt * 7);
+      sl.node.position.y = sl.y0 + 0.13 * sl.h + 0.33 * sl.h2;
     }
   }
 
@@ -1249,7 +1257,7 @@
     if (h.kind === 'item') return items[h.id].inserted ? ITEM_DEFS[h.id].out : items[h.id].label;
     if (h.kind === 'drawer') return drawer.open ? 'Close the drawer' : 'Open the drawer';
     if (h.kind === 'player') return deck.on ? 'Stop the record' : 'Play the record';
-    if (h.kind === 'sleeve') return 'Play this record';
+    if (h.kind === 'sleeve') return deck.on && deck.cur === h.id ? 'Stop this record' : 'Play this record';
     return '';                                                                // the computer speaks for itself
   }
   function showTag(text, e) {
@@ -1261,9 +1269,19 @@
   function hideTag() { tag.classList.remove('on'); }
   canvas.addEventListener('pointermove', function (e) {
     if (!glOK || e.pointerType === 'touch') return;
-    var h = (mode === 'desk' && !tween && !inspectId && !ret) ? pick(e) : null;
+    var h = (mode === 'desk' && !tween && !inspectId && !ret) ? pick(e) : null, was = hoverId, live = mode === 'desk' && !tween && !inspectId && !ret;
+    // A sleeve that is right out stays out until the pointer has really moved away, whatever is under the pointer now.
+    if (live && deck.up >= 0 && deck.at && Math.abs(e.clientX - deck.at.x) < 18 && Math.abs(e.clientY - deck.at.y) < 18) h = { kind: 'sleeve', id: deck.up };
+    // A hovered thing lifts off the desk, which can slide it out from under a still pointer. It stays hovered while the pointer is over where it sat.
+    if (live && !h && was && hoverBoxOn && items[was] && ray.ray.intersectsBox(hoverBox)) h = { kind: 'item', id: was };
+    if (h && h.kind === 'sleeve' && h.id !== deck.hover) { deck.dwell = 0; deck.up = -1; }
+    deck.px = e.clientX; deck.py = e.clientY;
     deck.hover = h && h.kind === 'sleeve' ? h.id : -1;
     hoverId = h && h.kind === 'item' && !items[h.id].inserted ? h.id : null;
+    if (hoverId && hoverId !== was) {
+      hoverBoxOn = items[hoverId].h < 0.05;                                   // only measured while it is still down
+      if (hoverBoxOn) { hoverBox.setFromObject(items[hoverId].pivot); hoverBox.expandByScalar(0.015); hoverBox.max.y += 0.07; }
+    }
     hoverDrawer = !!h && h.kind === 'drawer';
     if (mode === 'desk' && !inspectId) canvas.style.cursor = h ? 'pointer' : '';
     if (bubOn) ask(!!(h && (h.kind === 'screen' || h.kind === 'monitor')));
@@ -1290,7 +1308,7 @@
     var h = pick(e);
     if (!h) return;
     if (h.kind === 'player') { playRecord(!deck.on); showTag(tagFor(h), e); return; }
-    if (h.kind === 'sleeve') { playSleeve(h.id); return; }
+    if (h.kind === 'sleeve') { playSleeve(h.id); showTag(tagFor(h), e); return; }
     if (h.kind === 'item') { if (!items[h.id].inserted) inspect(h.id); else if (h.id === 'Floppy') eject(); else removeCard(); }
     else if (h.kind === 'drawer') { if (drawer.open) closeDrawer(); else openDrawer(); }
     else { var id = h.kind === 'screen' && h.uv ? iconAt(h.uv) : null; if (id) openApp(id); else openComputer(); }
